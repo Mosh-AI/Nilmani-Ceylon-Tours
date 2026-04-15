@@ -159,7 +159,7 @@ export async function sendBookingNotificationToAdmin(
 
 /* ── Booking Status Change Email ────────────────────────────────────────── */
 
-const STATUS_MESSAGES: Record<string, { subject: string; body: (ref: string, name: string) => string }> = {
+const STATUS_MESSAGES: Record<string, { subject: (ref: string) => string; body: (ref: string, name: string) => string }> = {
   quoted: {
     subject: (ref: string) => `Your quote is ready — Ref: ${ref}`,
     body: (ref, name) => `
@@ -200,7 +200,7 @@ export async function sendBookingStatusUpdateEmail(
   const template = STATUS_MESSAGES[newStatus];
   if (!template) return; // No email for intermediate statuses
 
-  const subject = (template.subject as (ref: string) => string)(referenceCode);
+  const subject = template.subject(referenceCode);
   const body = template.body(referenceCode, guestName);
 
   return resend.emails.send({
