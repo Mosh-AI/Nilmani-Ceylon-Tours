@@ -18,12 +18,14 @@ export async function register() {
 }
 
 export async function onRequestError(
-  ...args: Parameters<NonNullable<typeof onRequestError>>
+  err: Error,
+  request: { path: string; method: string },
+  context: { routerKind: string; routePath: string; routeType: string }
 ) {
   try {
     const Sentry = await import("@sentry/nextjs");
     if (typeof Sentry.captureRequestError === "function") {
-      Sentry.captureRequestError(...args);
+      Sentry.captureRequestError(err, request, context);
     }
   } catch {
     // @sentry/nextjs not installed — skip.
