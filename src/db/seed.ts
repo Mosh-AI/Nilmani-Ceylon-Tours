@@ -53,8 +53,6 @@ async function seedAdminUser() {
     email: "roshan@nilmaniceylontours.com",
     emailVerified: true,
     role: "admin",
-    createdAt: new Date(),
-    updatedAt: new Date(),
   });
 
   console.log("  Admin user created: roshan@nilmaniceylontours.com");
@@ -111,11 +109,7 @@ async function seedDestinations() {
   for (const dest of dests) {
     await db
       .insert(destinations)
-      .values({
-        id: crypto.randomUUID(),
-        ...dest,
-        createdAt: new Date(),
-      })
+      .values({ ...dest })
       .onConflictDoNothing();
   }
 
@@ -142,14 +136,14 @@ async function seedTours() {
       category: "Cultural & Nature",
       featured: true,
       available: true,
-      highlights: JSON.stringify([
+      highlights: [
         "Climb Sigiriya Rock Fortress at sunrise",
         "Temple of the Tooth Relic in Kandy",
         "Scenic train ride through tea country",
         "Nine Arches Bridge at Ella",
         "Galle Fort colonial walk",
         "Blue whale watching at Mirissa",
-      ]),
+      ],
       heroImage: "/images/sigiriya-hero.jpg",
       metaTitle: "8-Day Classic Sri Lanka Private Tour | Nilmani Ceylon Tours",
       metaDescription:
@@ -169,13 +163,13 @@ async function seedTours() {
       category: "Wildlife",
       featured: true,
       available: true,
-      highlights: JSON.stringify([
+      highlights: [
         "Yala National Park leopard safari",
         "Minneriya elephant gathering",
         "Blue whale watching boat trip",
         "Udawalawa elephant orphanage",
         "Bird watching in Bundala",
-      ]),
+      ],
       heroImage: "/images/yala.jpg",
       metaTitle: "5-Day Sri Lanka Wildlife Safari | Nilmani Ceylon Tours",
       metaDescription:
@@ -195,13 +189,13 @@ async function seedTours() {
       category: "Cultural & Heritage",
       featured: false,
       available: true,
-      highlights: JSON.stringify([
+      highlights: [
         "Sigiriya Rock Fortress (UNESCO)",
         "Dambulla Cave Temple (UNESCO)",
         "Ancient city of Anuradhapura (UNESCO)",
         "Polonnaruwa ruins (UNESCO)",
         "Traditional village experience",
-      ]),
+      ],
       heroImage: "/images/sigiriya.jpg",
       metaTitle: "4-Day Sri Lanka Cultural Triangle Tour | Nilmani Ceylon Tours",
       metaDescription:
@@ -213,16 +207,10 @@ async function seedTours() {
     await db
       .insert(tours)
       .values({
-        id: crypto.randomUUID(),
         ...tour,
-        itinerary: null,
-        whatsIncluded: JSON.stringify(["Private air-conditioned vehicle", "English-speaking driver-guide", "Hotel accommodation", "Breakfast daily"]),
-        whatsExcluded: JSON.stringify(["International flights", "Travel insurance", "Entrance fees", "Lunch and dinner"]),
-        images: JSON.stringify([tour.heroImage]),
-        faqs: null,
-        focusKeyword: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        whatsIncluded: ["Private air-conditioned vehicle", "English-speaking driver-guide", "Hotel accommodation", "Breakfast daily"],
+        whatsExcluded: ["International flights", "Travel insurance", "Entrance fees", "Lunch and dinner"],
+        images: [tour.heroImage],
       })
       .onConflictDoNothing();
   }
@@ -247,7 +235,7 @@ async function seedGallery() {
   for (const img of images) {
     await db
       .insert(galleryImages)
-      .values({ id: crypto.randomUUID(), ...img, createdAt: new Date() })
+      .values({ ...img })
       .onConflictDoNothing();
   }
 
@@ -286,7 +274,7 @@ async function seedTestimonials() {
   for (const item of items) {
     await db
       .insert(testimonials)
-      .values({ id: crypto.randomUUID(), ...item, tourId: null, createdAt: new Date() });
+      .values({ ...item, tourId: null });
   }
 
   console.log(`  ${items.length} testimonials seeded.`);
