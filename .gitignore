@@ -38,12 +38,12 @@ next-env.d.ts
 # Vercel
 .vercel
 
-# Local settings (not project config)
-.claude/settings.local.json
-
-# User-specific skills (not part of the template)
-.claude/skills/customize/
-.claude/skills/release/
-
-# Local temp files
+# Claude Code local files
+.claude/
+tmp/
 temp/
+temp-source.html
+Images/
+
+# Uploads (served locally, not tracked)
+public/uploads/
