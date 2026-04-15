@@ -1,7 +1,7 @@
 /* ── Better Auth Server Configuration ── */
 
 import { betterAuth } from "better-auth";
-import { drizzleAdapter } from "better-auth/adapters/drizzle-adapter";
+import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "@/db";
 
 export const auth = betterAuth({

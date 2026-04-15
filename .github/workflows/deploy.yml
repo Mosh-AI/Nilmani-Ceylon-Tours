@@ -1,0 +1,43 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_KEY }}
+          script: |
+            set -e
+
+            cd /var/www/nilmani
+
+            # Pull latest code
+            git pull origin master
+
+            # Install dependencies (ci for deterministic installs)
+            npm ci --omit=dev
+
+            # Run Drizzle migrations
+            npx drizzle-kit migrate
+
+            # Build Next.js
+            npm run build
+
+            # Restart app with PM2 (or start if not running)
+            pm2 restart nilmani || pm2 start npm --name nilmani -- start
+
+            # Save PM2 process list
+            pm2 save
+
+            # Reload Nginx to pick up any config changes
+            nginx -t && systemctl reload nginx
+
+            echo "✅ Deployment complete"

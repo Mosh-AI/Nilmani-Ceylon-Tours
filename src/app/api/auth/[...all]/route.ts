@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth";
-import { toNextJsHandler } from "better-auth/integrations/next-js";
+import { toNextJsHandler } from "better-auth/next-js";
 
 /**
  * Better Auth catch-all route handler.
