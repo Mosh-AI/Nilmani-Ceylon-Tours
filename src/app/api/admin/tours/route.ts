@@ -58,7 +58,6 @@ export async function POST(request: NextRequest) {
   const [tour] = await db
     .insert(tours)
     .values({
-      id: crypto.randomUUID(),
       slug: data.slug,
       title: sanitizeText(data.title),
       subtitle: data.subtitle ? sanitizeText(data.subtitle) : null,
