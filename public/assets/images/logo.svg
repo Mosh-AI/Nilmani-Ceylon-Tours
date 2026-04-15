@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 52" fill="none">
+  <defs>
+    <linearGradient id="gold-grad" x1="0" y1="0" x2="60" y2="52" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#E8C96A"/>
+      <stop offset="50%" stop-color="#C9A84C"/>
+      <stop offset="100%" stop-color="#B8973F"/>
+    </linearGradient>
+  </defs>
+  <!-- Lotus flower – 3 petals matching the Nilmani Ceylon Tours logo -->
+  <!-- Center petal -->
+  <path d="M30 4 C24 14, 20 24, 22 36 C26 32, 30 28, 30 28 C30 28, 34 32, 38 36 C40 24, 36 14, 30 4Z" stroke="url(#gold-grad)" stroke-width="1.8" fill="none" stroke-linejoin="round"/>
+  <!-- Left petal -->
+  <path d="M18 38 C12 28, 12 18, 18 10 C22 18, 24 26, 24 34 C22 36, 20 37, 18 38Z" stroke="url(#gold-grad)" stroke-width="1.8" fill="none" stroke-linejoin="round"/>
+  <!-- Right petal -->
+  <path d="M42 38 C48 28, 48 18, 42 10 C38 18, 36 26, 36 34 C38 36, 40 37, 42 38Z" stroke="url(#gold-grad)" stroke-width="1.8" fill="none" stroke-linejoin="round"/>
+  <!-- Inner diamond accents -->
+  <path d="M30 12 C27 20, 26 28, 28 34" stroke="url(#gold-grad)" stroke-width="0.8" fill="none" opacity="0.5"/>
+  <path d="M30 12 C33 20, 34 28, 32 34" stroke="url(#gold-grad)" stroke-width="0.8" fill="none" opacity="0.5"/>
+</svg>
