@@ -17,17 +17,5 @@ export async function register() {
   }
 }
 
-export async function onRequestError(
-  err: Error,
-  request: { path: string; method: string },
-  context: { routerKind: string; routePath: string; routeType: string }
-) {
-  try {
-    const Sentry = await import("@sentry/nextjs");
-    if (typeof Sentry.captureRequestError === "function") {
-      Sentry.captureRequestError(err, request, context);
-    }
-  } catch {
-    // @sentry/nextjs not installed — skip.
-  }
-}
+// onRequestError hook — extend this when Sentry DSN is configured.
+// export async function onRequestError(...) { ... }
