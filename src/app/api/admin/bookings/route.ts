@@ -19,7 +19,11 @@ export async function GET(request: NextRequest) {
 
   let query = db.select().from(bookings);
 
-  if (status) query = query.where(eq(bookings.status, status)) as typeof query;
+  const validStatuses = ["inquiry","quoted","deposit_paid","confirmed","in_progress","completed","cancelled"] as const;
+  type BookingStatus = typeof validStatuses[number];
+  if (status && (validStatuses as readonly string[]).includes(status)) {
+    query = query.where(eq(bookings.status, status as BookingStatus)) as typeof query;
+  }
   if (search) {
     query = query.where(
       or(

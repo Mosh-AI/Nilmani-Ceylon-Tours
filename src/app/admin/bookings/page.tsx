@@ -31,7 +31,11 @@ export default async function BookingsPage({
     .limit(50);
 
   if (status) {
-    query = query.where(eq(bookings.status, status)) as typeof query;
+    const validStatuses = ["inquiry","quoted","deposit_paid","confirmed","in_progress","completed","cancelled"] as const;
+    type BookingStatus = typeof validStatuses[number];
+    if ((validStatuses as readonly string[]).includes(status)) {
+      query = query.where(eq(bookings.status, status as BookingStatus)) as typeof query;
+    }
   }
 
   const rows = await query;
