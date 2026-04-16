@@ -52,12 +52,12 @@ export const bookingStep1Schema = z.object({
       return d > new Date();
     }, "Start date must be in the future"),
   duration: z
-    .number({ error: "Duration is required" })
+    .number({ invalid_type_error: "Duration is required" })
     .int()
     .min(1, "Minimum 1 day")
     .max(30, "Maximum 30 days"),
   guests: z
-    .number({ error: "Guest count is required" })
+    .number({ invalid_type_error: "Guest count is required" })
     .int()
     .min(1, "At least 1 guest")
     .max(20, "Maximum 20 guests"),
