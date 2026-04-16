@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
  * Floating WhatsApp contact button.
  * Replace the phone number below with the actual Nilmani Ceylon Tours WhatsApp number.
  */
-const WHATSAPP_NUMBER = "94XXXXXXXXXX"; // TODO: Replace with real WhatsApp number
+const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "94787829952";
 const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=Hi%20Nilmani%20Ceylon%20Tours%2C%20I%27m%20interested%20in%20booking%20a%20tour`;
 
 export function WhatsAppButton() {
@@ -27,7 +27,7 @@ export function WhatsAppButton() {
         transform: visible ? "translateY(0)" : "translateY(1rem)",
         opacity: visible ? 1 : 0,
       }}
-      className="whatsapp-btn fixed bottom-6 right-6 z-50 flex items-center justify-center w-14 h-14 rounded-full bg-[#25D366] text-white shadow-lg hover:scale-110 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#25D366] group"
+      className="whatsapp-btn fixed bottom-6 right-20 z-50 flex items-center justify-center w-14 h-14 rounded-full bg-[#25D366] text-white shadow-lg hover:scale-110 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#25D366] group"
     >
       {/* Tooltip */}
       <span
