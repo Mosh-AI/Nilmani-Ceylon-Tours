@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Cormorant, Montserrat } from "next/font/google";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { CookieConsent } from "@/components/CookieConsent";
+import { ChatWidget } from "@/components/ChatWidget";
 import "./globals.css";
 
 const cormorant = Cormorant({
@@ -129,6 +130,7 @@ export default function RootLayout({
       <body className="min-h-screen bg-brand-bg">
         {children}
         <WhatsAppButton />
+        <ChatWidget />
         <CookieConsent />
         <script
           type="application/ld+json"
