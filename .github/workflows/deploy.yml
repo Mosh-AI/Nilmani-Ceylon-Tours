@@ -32,7 +32,7 @@ jobs:
             pm2 stop nilmani || true
 
             # Build Next.js (output: standalone)
-            npx next build
+            node node_modules/next/dist/bin/next build
 
             # Copy static assets into standalone bundle
             cp -r .next/static .next/standalone/.next/static
