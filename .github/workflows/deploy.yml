@@ -22,22 +22,29 @@ jobs:
             # Pull latest code
             git pull origin master
 
-            # Install dependencies (ci for deterministic installs)
-            npm ci --omit=dev
+            # Install all dependencies (build requires tailwind, typescript, etc.)
+            npm install
 
             # Run Drizzle migrations
             npx drizzle-kit migrate
 
-            # Build Next.js
-            npm run build
+            # Stop PM2 before build to prevent restarts on incomplete .next
+            pm2 stop nilmani || true
 
-            # Restart app with PM2 (or start if not running)
-            pm2 restart nilmani || pm2 start npm --name nilmani -- start
+            # Build Next.js (output: standalone)
+            npx next build
+
+            # Copy static assets into standalone bundle
+            cp -r .next/static .next/standalone/.next/static
+            cp -r public .next/standalone/public
+
+            # Restart with correct standalone config
+            pm2 start ecosystem.config.js --only nilmani || pm2 restart nilmani
 
             # Save PM2 process list
             pm2 save
 
-            # Reload Nginx to pick up any config changes
+            # Reload Nginx
             nginx -t && systemctl reload nginx
 
             echo "✅ Deployment complete"
