@@ -16,6 +16,8 @@ import {
   X,
 } from "lucide-react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
 
 const nav = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
@@ -92,15 +94,7 @@ export function AdminSidebar({ adminName }: { adminName: string }) {
             <p className="text-[10px] text-[#6B5E4E]">Administrator</p>
           </div>
         </div>
-        <form action="/api/auth/sign-out" method="POST">
-          <button
-            type="submit"
-            className="mt-1 flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-[#BDB5A6] transition hover:bg-white/5 hover:text-white"
-          >
-            <LogOut className="h-4 w-4 shrink-0" />
-            Sign out
-          </button>
-        </form>
+        <SignOutButton />
       </div>
     </>
   );
@@ -140,5 +134,21 @@ export function AdminSidebar({ adminName }: { adminName: string }) {
         </div>
       )}
     </>
+  );
+}
+
+function SignOutButton() {
+  const router = useRouter();
+  return (
+    <button
+      onClick={async () => {
+        await authClient.signOut();
+        router.push("/login");
+      }}
+      className="mt-1 flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-[#BDB5A6] transition hover:bg-white/5 hover:text-white"
+    >
+      <LogOut className="h-4 w-4 shrink-0" />
+      Sign out
+    </button>
   );
 }

@@ -1,6 +1,7 @@
 import { requireUser } from "@/lib/user-auth";
 import Link from "next/link";
-import { LayoutDashboard, CalendarCheck, Heart, LogOut, Settings } from "lucide-react";
+import { LayoutDashboard, CalendarCheck, Heart, Settings } from "lucide-react";
+import { SignOutButton } from "./_components/SignOutButton";
 
 export const metadata = { title: "My Dashboard — Nilmani Ceylon Tours" };
 
@@ -24,15 +25,7 @@ export default async function DashboardLayout({
             <span className="hidden text-sm text-gray-500 sm:block">
               Welcome, {name}
             </span>
-            <form action="/api/auth/sign-out" method="POST">
-              <button
-                type="submit"
-                className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900"
-              >
-                <LogOut className="h-4 w-4" />
-                Sign out
-              </button>
-            </form>
+            <SignOutButton />
           </div>
         </div>
       </header>
