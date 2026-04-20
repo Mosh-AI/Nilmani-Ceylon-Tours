@@ -353,6 +353,7 @@
   transition: opacity 0.2s ease-out, transform 0.2s ease-out;
 }
 
+
 @media (prefers-reduced-motion: reduce) {
   .whatsapp-btn {
     transition: none;
