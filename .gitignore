@@ -47,3 +47,8 @@ Images/
 
 # Uploads (served locally, not tracked)
 public/uploads/
+
+# Large video files — upload directly to VPS via SCP, not tracked in git
+public/videos/*.mp4
+public/videos/*.mov
+public/videos/*.webm
