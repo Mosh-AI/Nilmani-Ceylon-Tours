@@ -27,14 +27,14 @@ export function WhatsAppButton() {
         transform: visible ? "translateY(0)" : "translateY(1rem)",
         opacity: visible ? 1 : 0,
       }}
-      className="whatsapp-btn fixed bottom-6 right-20 z-50 flex items-center justify-center w-14 h-14 rounded-full bg-[#25D366] text-white shadow-lg hover:scale-110 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#25D366] group"
+      className="whatsapp-btn fixed bottom-24 right-4 z-50 flex items-center justify-center w-14 h-14 rounded-full bg-[#25D366] text-white shadow-lg hover:scale-110 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#25D366] group"
     >
       {/* Tooltip */}
       <span
-        className="pointer-events-none absolute right-16 whitespace-nowrap rounded-lg bg-gray-900 px-3 py-1.5 text-sm font-medium text-white opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 whatsapp-tooltip"
+        className="pointer-events-none absolute right-16 whitespace-nowrap rounded-lg bg-[#1C1209] px-3 py-1.5 text-xs font-medium text-[#C9A84C] opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200"
         role="tooltip"
       >
-        Chat with us
+        Chat on WhatsApp
       </span>
 
       {/* Official WhatsApp SVG icon */}
