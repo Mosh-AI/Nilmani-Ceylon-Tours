@@ -198,49 +198,6 @@ export function HeroSection() {
           </div>
         </div>
 
-        <div
-          className="absolute top-1/2 right-12 hidden w-72 -translate-y-1/2 rounded-2xl border bg-white/95 p-6 shadow-2xl backdrop-blur-xl lg:block"
-          style={{ borderColor: "var(--brand-border-gold)" }}
-        >
-          <p className="mb-4 text-xs font-medium uppercase tracking-luxury text-gold">
-            Quick Inquiry
-          </p>
-          <div className="mb-4 flex flex-col gap-3">
-            <div className="flex items-center gap-3 rounded-xl bg-brand-surface px-4 py-3">
-              <span className="text-gold"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="inline-block"><path d="M12 2l2.09 6.26L20 12l-5.91 3.74L12 22l-2.09-6.26L4 12l5.91-3.74L12 2z" /></svg></span>
-              <div>
-                <p className="text-xs text-brand-faint">Tour Type</p>
-                <p className="text-sm font-medium text-brand-text">
-                  Luxury Getaway
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 rounded-xl bg-brand-surface px-4 py-3">
-              <span className="text-gold"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="inline-block"><path d="M12 2l10 10-10 10L2 12 12 2z" /><path d="M12 6l6 6-6 6-6-6 6-6z" /></svg></span>
-              <div>
-                <p className="text-xs text-brand-faint">Duration</p>
-                <p className="text-sm font-medium text-brand-text">
-                  7–14 Days
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 rounded-xl bg-brand-surface px-4 py-3">
-              <span className="text-gold"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="inline-block"><path d="M12 2l7 4v8l-7 4-7-4V6l7-4z" /><path d="M12 8v8" /><path d="M8.5 10l7 0" /></svg></span>
-              <div>
-                <p className="text-xs text-brand-faint">Includes</p>
-                <p className="text-sm font-medium text-brand-text">
-                  Private Chauffeur
-                </p>
-              </div>
-            </div>
-          </div>
-          <Link
-            href="/booking"
-            className="btn-gold flex w-full items-center justify-center rounded-full py-3 text-xs font-semibold tracking-luxury"
-          >
-            <span>Request a Quote</span>
-          </Link>
-        </div>
       </div>
 
       <div className="relative z-20 mt-auto w-full border-t border-brand-border bg-white/95 backdrop-blur-xl">

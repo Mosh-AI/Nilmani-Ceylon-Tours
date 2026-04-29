@@ -5,19 +5,17 @@ import { Footer } from "@/components/Footer";
 import { GuestTestimonialsSection } from "@/components/GuestTestimonialsSection";
 import { Header } from "@/components/Header";
 import { HeroSection } from "@/components/HeroSection";
-import ServicesSection from "@/components/ServicesSection";
-import { TripadvisorSection } from "@/components/TripadvisorSection";
+import { VideoSection } from "@/components/VideoSection";
 
 export default function Home() {
   return (
     <main className="min-h-screen bg-brand-bg">
       <Header />
       <HeroSection />
-      <ServicesSection />
+      <VideoSection />
       <DestinationsSection />
       <AboutSection />
       <GuestTestimonialsSection />
-      <TripadvisorSection />
       <CTASection />
       <Footer />
     </main>

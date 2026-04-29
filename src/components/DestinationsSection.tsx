@@ -303,13 +303,14 @@ export function DestinationsSection() {
             <div className="mb-4 flex items-center gap-3">
               <div className="gold-divider" />
               <span className="text-xs font-medium uppercase tracking-luxury text-gold">
-                Featured Destinations
+                Your Tour, Your Way
               </span>
             </div>
+            {/* NOTE: Top 3 featured tours will be provided by Mr. Roshan — update destinations array above when ready */}
             <h2 className="font-serif text-4xl leading-tight font-light text-brand-text md:text-5xl lg:text-6xl">
-              Explore the Isle of
+              Create Your
               <br />
-              <span className="text-gold-gradient italic">Sri Lanka</span>
+              <span className="text-gold-gradient italic">Own Tour</span>
             </h2>
           </div>
           <Link

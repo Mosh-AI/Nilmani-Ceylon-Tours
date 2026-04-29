@@ -161,7 +161,9 @@ export function Footer() {
                   +94 78 782 9952
                 </a>
                 <span className="text-sm text-brand-muted">
-                  196/4, Yagodamulla, 11390
+                  145/H/1, Arjunarama Road, Miriswatta,
+                  <br />
+                  Yagodamulla, Kotugoda
                 </span>
               </div>
             </div>
@@ -170,7 +172,8 @@ export function Footer() {
 
         <div className="flex flex-col items-center justify-between gap-4 border-t border-brand-border pt-6 sm:flex-row">
           <p className="text-sm text-brand-faint">
-            © 2026 Nilmani Ceylon Tours. All rights reserved.
+            © 2026 Nilmani Ceylon Tours. All rights reserved.{" "}
+            Government registered company.
           </p>
           <div className="flex items-center gap-6">
             <Link
