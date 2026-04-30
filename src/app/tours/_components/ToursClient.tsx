@@ -5,11 +5,29 @@ import Image from "next/image";
 import Link from "next/link";
 import { Clock, MapPin, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { Tour } from "@/data/tours";
 
-type FilterCategory = "All" | string;
+// Shape coming from the database
+export type DbTourCard = {
+  slug: string;
+  title: string;
+  subtitle: string | null;
+  description: string;
+  category: string | null;
+  duration: number;        // integer days
+  price: number;           // integer USD
+  heroImage: string | null;
+};
 
-function TourCard({ tour, index }: { tour: Tour; index: number }) {
+function formatPrice(usd: number) {
+  return `$${usd.toLocaleString("en-US")}`;
+}
+
+function formatDuration(days: number) {
+  const nights = days - 1;
+  return `${days} Day${days !== 1 ? "s" : ""} / ${nights} Night${nights !== 1 ? "s" : ""}`;
+}
+
+function TourCard({ tour, index }: { tour: DbTourCard; index: number }) {
   const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -28,6 +46,8 @@ function TourCard({ tour, index }: { tour: Tour; index: number }) {
     return () => observer.disconnect();
   }, []);
 
+  const heroSrc = tour.heroImage ?? "/images/sigiriya-hero.jpg";
+
   return (
     <div
       ref={cardRef}
@@ -37,23 +57,22 @@ function TourCard({ tour, index }: { tour: Tour; index: number }) {
       )}
       style={{ transitionDelay: `${index * 100}ms` }}
     >
-      <Link
-        href={`/tours/${tour.slug}`}
-        className="relative block h-56 overflow-hidden sm:h-64"
-      >
+      <Link href={`/tours/${tour.slug}`} className="relative block h-56 overflow-hidden sm:h-64">
         <Image
-          src={tour.heroImage}
-          alt={tour.heroAlt}
+          src={heroSrc}
+          alt={tour.title}
           fill
           className="object-cover transition-transform duration-700 group-hover:scale-105"
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-        <span className="absolute top-4 left-4 rounded-full bg-white/90 px-3 py-1 text-[10px] font-semibold uppercase tracking-luxury text-gold backdrop-blur-sm">
-          {tour.category}
-        </span>
+        {tour.category && (
+          <span className="absolute top-4 left-4 rounded-full bg-white/90 px-3 py-1 text-[10px] font-semibold uppercase tracking-luxury text-gold backdrop-blur-sm">
+            {tour.category}
+          </span>
+        )}
         <span className="absolute bottom-4 right-4 rounded-full bg-black/60 px-4 py-1.5 text-sm font-semibold text-white backdrop-blur-sm">
-          {tour.price}
+          {formatPrice(tour.price)}
         </span>
       </Link>
 
@@ -61,19 +80,21 @@ function TourCard({ tour, index }: { tour: Tour; index: number }) {
         <div className="mb-3 flex items-center gap-4 text-xs text-brand-muted">
           <span className="inline-flex items-center gap-1">
             <Clock size={13} className="text-gold" />
-            {tour.duration}
+            {formatDuration(tour.duration)}
           </span>
           <span className="inline-flex items-center gap-1">
             <MapPin size={13} className="text-gold" />
-            {tour.durationDays} destinations
+            {tour.duration} stops
           </span>
         </div>
 
         <h3 className="mb-2 font-serif text-xl font-light text-brand-text lg:text-2xl">
           {tour.title}
         </h3>
-        <p className="mb-1 text-xs text-gold">{tour.subtitle}</p>
-        <p className="mb-6 mt-2 flex-1 text-sm leading-relaxed text-brand-muted">
+        {tour.subtitle && (
+          <p className="mb-1 text-xs text-gold">{tour.subtitle}</p>
+        )}
+        <p className="mb-6 mt-2 flex-1 text-sm leading-relaxed text-brand-muted line-clamp-3">
           {tour.description}
         </p>
 
@@ -89,26 +110,22 @@ function TourCard({ tour, index }: { tour: Tour; index: number }) {
   );
 }
 
-export function ToursClient({ tours }: { tours: Tour[] }) {
-  const [activeFilter, setActiveFilter] = useState<FilterCategory>("All");
+export function ToursClient({ tours }: { tours: DbTourCard[] }) {
+  const [activeFilter, setActiveFilter] = useState("All");
 
   useEffect(() => {
     document.documentElement.classList.add("js-ready");
-    return () => {
-      document.documentElement.classList.remove("js-ready");
-    };
+    return () => document.documentElement.classList.remove("js-ready");
   }, []);
 
-  // Derive filter options from available tours only
-  const filterOptions: FilterCategory[] = [
+  // Build filter list from actual active tours only
+  const filterOptions = [
     "All",
-    ...Array.from(new Set(tours.map((t) => t.category))).sort(),
+    ...Array.from(new Set(tours.map((t) => t.category).filter(Boolean) as string[])).sort(),
   ];
 
-  const filteredTours =
-    activeFilter === "All"
-      ? tours
-      : tours.filter((t) => t.category === activeFilter);
+  const filtered =
+    activeFilter === "All" ? tours : tours.filter((t) => t.category === activeFilter);
 
   return (
     <section className="mx-auto max-w-7xl px-6 py-16 lg:px-12 lg:py-24">
@@ -131,18 +148,16 @@ export function ToursClient({ tours }: { tours: Tour[] }) {
         ))}
       </div>
 
-      {/* Tour grid */}
+      {/* Grid */}
       <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-        {filteredTours.map((tour, i) => (
+        {filtered.map((tour, i) => (
           <TourCard key={tour.slug} tour={tour} index={i} />
         ))}
       </div>
 
-      {filteredTours.length === 0 && (
+      {filtered.length === 0 && (
         <div className="py-20 text-center">
-          <p className="text-brand-muted">
-            No tours found in this category. Try a different filter.
-          </p>
+          <p className="text-brand-muted">No tours found in this category.</p>
         </div>
       )}
     </section>

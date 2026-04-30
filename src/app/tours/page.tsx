@@ -5,22 +5,26 @@ import { Footer } from "@/components/Footer";
 import { db } from "@/db";
 import { tours as toursTable } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { tours as staticTours } from "@/data/tours";
 import { ToursClient } from "./_components/ToursClient";
 
-export const revalidate = 60; // re-fetch from DB at most every 60 s
+export const revalidate = 30;
 
 export default async function ToursPage() {
-  // Fetch active slugs from the database
-  const activeRows = await db
-    .select({ slug: toursTable.slug })
+  // Fetch all active tours directly from database — no static data dependency
+  const rows = await db
+    .select({
+      slug: toursTable.slug,
+      title: toursTable.title,
+      subtitle: toursTable.subtitle,
+      description: toursTable.description,
+      category: toursTable.category,
+      duration: toursTable.duration,
+      price: toursTable.price,
+      heroImage: toursTable.heroImage,
+    })
     .from(toursTable)
-    .where(eq(toursTable.available, true));
-
-  const activeSlugSet = new Set(activeRows.map((r) => r.slug));
-
-  // Filter static tour data to only include DB-active tours
-  const availableTours = staticTours.filter((t) => activeSlugSet.has(t.slug));
+    .where(eq(toursTable.available, true))
+    .orderBy(toursTable.createdAt);
 
   return (
     <main className="min-h-screen bg-brand-bg">
@@ -55,8 +59,8 @@ export default async function ToursPage() {
         </div>
       </section>
 
-      {/* Filter + Grid (client component for interactivity) */}
-      <ToursClient tours={availableTours} />
+      {/* Filter + Grid — fully driven by DB */}
+      <ToursClient tours={rows} />
 
       {/* CTA strip */}
       <section className="bg-brand-surface px-6 py-16 lg:px-12">

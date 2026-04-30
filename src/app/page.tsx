@@ -1,6 +1,7 @@
 import { AboutSection } from "@/components/AboutSection";
 import { CTASection } from "@/components/CTASection";
 import { DestinationsSection } from "@/components/DestinationsSection";
+import { FeaturedToursSection } from "@/components/FeaturedToursSection";
 import { Footer } from "@/components/Footer";
 import { GuestTestimonialsSection } from "@/components/GuestTestimonialsSection";
 import { Header } from "@/components/Header";
@@ -13,6 +14,7 @@ export default function Home() {
       <Header />
       <HeroSection />
       <VideoSection />
+      <FeaturedToursSection />
       <DestinationsSection />
       <AboutSection />
       <GuestTestimonialsSection />
