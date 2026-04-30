@@ -161,29 +161,7 @@ export function HeroSection() {
         ))}
       </div>
 
-      <div className="relative z-20 mx-auto flex w-full max-w-7xl flex-1 flex-col px-6 pt-36 pb-0 lg:px-12">
-        <div className="flex max-w-3xl flex-1 flex-col justify-center">
-          <div className="mb-8 flex items-center gap-3">
-            <div className="gold-divider" />
-            <span className="text-xs font-medium uppercase tracking-luxury text-gold">
-              Premium Sri Lanka Travel
-            </span>
-          </div>
-          <h1 className="mb-8 font-serif text-4xl leading-[1.0] font-light tracking-tight text-white sm:text-5xl md:text-7xl lg:text-[84px]">
-            Experience
-            <br />
-            <span className="text-gold-gradient italic">Sri Lanka</span> in
-            <br />
-            Elegance
-          </h1>
-          <p className="mb-10 max-w-xl text-base font-light leading-relaxed text-white/80 sm:text-lg md:text-xl">
-            Tailored luxury journeys through ancient temples, misty highlands,
-            pristine beaches, and untamed wildlife. Every detail, perfected for
-            you.
-          </p>
-        </div>
-
-      </div>
+      <div className="relative z-20 mx-auto flex w-full max-w-7xl flex-1 flex-col px-6 pt-36 pb-0 lg:px-12" />
 
       <div className="relative z-20 mt-auto w-full border-t border-brand-border bg-white/95 backdrop-blur-xl">
         <div className="h-[2px] w-full bg-black/10">
