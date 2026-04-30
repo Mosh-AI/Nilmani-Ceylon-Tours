@@ -1,0 +1,32 @@
+name: Restart App
+
+on:
+  workflow_dispatch:
+
+jobs:
+  restart:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check and restart via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_KEY }}
+          script: |
+            echo "=== PM2 Status ==="
+            pm2 status
+
+            echo "=== PM2 Logs (last 30 lines) ==="
+            pm2 logs nilmani --lines 30 --nostream
+
+            echo "=== Restarting ==="
+            cd /var/www/nilmani
+            pm2 restart nilmani || pm2 start ecosystem.config.js --only nilmani
+            pm2 save
+
+            echo "=== Status after restart ==="
+            pm2 status
+
+            echo "=== Nginx test ==="
+            nginx -t && systemctl reload nginx
