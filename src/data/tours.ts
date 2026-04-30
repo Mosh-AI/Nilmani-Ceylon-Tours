@@ -51,6 +51,169 @@ export const TOUR_CATEGORIES: TourCategory[] = [
 ];
 
 export const tours: Tour[] = [
+  /* ── Tour 01 — Cultural Tour Package ───────────────────────────────────── */
+  {
+    slug: "cultural-tour-package-5-days",
+    title: "Sri Lanka Cultural Tour Package",
+    subtitle: "Sigiriya \u2192 Dambulla \u2192 Kandy \u2192 Ella \u2192 Yala \u2192 Colombo Airport",
+    description:
+      "Experience the rich heritage, scenic landscapes, and wildlife of Sri Lanka on this carefully designed 5-day cultural journey blending ancient history, hill country beauty, and thrilling wildlife encounters.",
+    longDescription:
+      "Experience the best of Sri Lanka with this 5 Days / 4 Nights Sri Lanka Cultural Tour Package, designed to showcase the island\u2019s most famous heritage sites, scenic hill country landscapes, and exciting wildlife adventures.\n\nThis carefully planned journey covers top destinations including Sigiriya, Dambulla, Kandy, Ella, and the wildlife paradise of Yala National Park, ending at Bandaranaike International Airport.\n\nThis Sri Lanka cultural holiday package is perfect for travelers who want to explore UNESCO World Heritage Sites, enjoy breathtaking mountain views, and experience authentic Sri Lankan traditions. Adventure lovers will enjoy an unforgettable wildlife safari at Yala National Park, one of the best places in Asia to spot leopards, elephants, crocodiles, and diverse bird species.",
+    category: "Cultural",
+    duration: "5 Days / 4 Nights",
+    durationDays: 5,
+    price: "$1,170",
+    priceNote: "per 2 persons (private tour)",
+    difficulty: "Easy",
+    groupSize: "2 guests (private)",
+    heroImage: "/images/sigiriya-hero.jpg",
+    heroAlt:
+      "Sigiriya Lion Rock fortress rising above lush green gardens, Sri Lanka — Nilmani Ceylon Tours",
+    galleryImages: [
+      {
+        src: "/images/sigiriya.jpg",
+        alt: "Sigiriya Rock Fortress \u2014 UNESCO World Heritage Site, Sri Lanka",
+      },
+      {
+        src: "/images/ella.jpg",
+        alt: "Nine Arches Bridge in Ella surrounded by lush green jungle, Sri Lanka",
+      },
+      {
+        src: "/images/yala.jpg",
+        alt: "Wildlife safari at Yala National Park, Sri Lanka",
+      },
+      {
+        src: "/images/sigiriya-hero.jpg",
+        alt: "Ancient frescoes and panoramic views from Sigiriya Rock Fortress",
+      },
+    ],
+    highlights: [
+      "Climb the iconic Sigiriya Rock Fortress (UNESCO World Heritage Site)",
+      "Enjoy an authentic Sigiriya village tour with local transport and cooking",
+      "Explore the Dambulla Cave Temple with golden Buddha statues and ancient murals",
+      "Visit the Temple of the Sacred Tooth Relic in the royal city of Kandy",
+      "Attend a vibrant Kandy Cultural Dance Show",
+      "Tour a tea factory and plantation in the misty Nuwara Eliya highlands",
+      "Discover the Buduruwagala rock-carved Buddha statues",
+      "Walk across the iconic Nine Arches Bridge in Ella",
+      "Hike to Little Adam\u2019s Peak for breathtaking valley panoramas",
+      "Marvel at the cascading Ravana Falls",
+      "Spot leopards, elephants, crocodiles, and exotic birds at Yala National Park",
+      "Seamless airport pick-up and drop-off",
+    ],
+    itinerary: [
+      {
+        day: 1,
+        title: "Airport Arrival \u2192 Sigiriya",
+        description:
+          "Your private chauffeur-guide will welcome you at Bandaranaike International Airport with a personalised greeting board. Enjoy a comfortable drive through Sri Lanka\u2019s lush countryside to Sigiriya (approximately 3.5\u20134 hours). En route, stop to enjoy fresh coconut water and experience the local flavours. In the afternoon, embark on a traditional Sigiriya village tour \u2014 ride a bullock cart through paddy fields, watch local cooking demonstrations, and enjoy warm Sri Lankan hospitality. Check in to your 3\u2605 hotel and relax.",
+        highlights: [
+          "Airport welcome and private transfer",
+          "Traditional Sigiriya village experience",
+          "Local cooking demonstration",
+          "Bullock cart ride through paddy fields",
+        ],
+      },
+      {
+        day: 2,
+        title: "Sigiriya Rock Fortress \u2192 Dambulla Cave Temple \u2192 Kandy",
+        description:
+          "Begin the day early with the iconic climb of Sigiriya Rock Fortress \u2014 a UNESCO World Heritage Site and one of Sri Lanka\u2019s greatest ancient wonders. Ascend the 1,200 steps, admire the 5th-century frescoes of the Sigiriya Maidens, and walk alongside the legendary Mirror Wall before reaching the breathtaking summit with panoramic views across the jungle. After descending, visit the magnificent Dambulla Cave Temple, featuring five sacred cave shrines adorned with over 150 golden Buddha statues and vivid ceiling murals dating back more than 2,000 years. Continue to Kandy, Sri Lanka\u2019s cultural capital. In the evening, attend an authentic Kandyan Cultural Dance Show and visit the revered Temple of the Sacred Tooth Relic (Sri Dalada Maligawa) for the evening puja ceremony.",
+        highlights: [
+          "Sigiriya Rock Fortress summit climb",
+          "Ancient frescoes and the Mirror Wall",
+          "Dambulla Cave Temple \u2014 150+ Buddha statues",
+          "Kandy Cultural Dance Show",
+          "Temple of the Sacred Tooth Relic evening puja",
+        ],
+      },
+      {
+        day: 3,
+        title: "Kandy \u2192 Nuwara Eliya Tea Country \u2192 Ella",
+        description:
+          "Depart Kandy and wind through the breathtaking hill country towards Nuwara Eliya, Sri Lanka\u2019s tea heartland. Visit a working tea factory to learn about Ceylon tea production from leaf to cup, and enjoy a guided plantation walk with scenic mountain views. En route to Ella, stop at the Buduruwagala Rock Carvings to marvel at the impressive ancient Buddha statues carved directly into a granite face. Arrive in Ella in the afternoon and explore the area\u2019s top highlights: walk across the iconic Nine Arches Bridge as the train passes overhead, hike up to Little Adam\u2019s Peak for sweeping views across the Ella Gap valley, and visit the spectacular Ravana Falls. Check in to your 3\u2605 hotel in Ella.",
+        highlights: [
+          "Tea factory tour and plantation walk",
+          "Buduruwagala rock-carved Buddha statues",
+          "Nine Arches Bridge",
+          "Little Adam\u2019s Peak hike with valley views",
+          "Ravana Falls",
+        ],
+      },
+      {
+        day: 4,
+        title: "Ella \u2192 Yala National Park Safari",
+        description:
+          "Depart Ella after breakfast and drive through the dramatic Ella Gap down to the dry zone lowlands, heading towards Yala National Park \u2014 one of the most wildlife-rich parks in Asia and the world\u2019s best place to spot wild leopards in their natural habitat. Check in to your lodge near the park entrance. In the afternoon, embark on a thrilling jeep safari into the heart of Yala Block 1, accompanied by your experienced naturalist driver-guide. Watch for Sri Lankan leopards lounging in the trees, herds of wild elephants at the water holes, mugger crocodiles basking in the sun, sloth bears, spotted deer, peacocks, painted storks, and over 200 bird species as the golden evening light illuminates the wilderness.",
+        highlights: [
+          "Scenic drive through the Ella Gap to the dry lowlands",
+          "Afternoon jeep safari in Yala Block 1",
+          "Spot leopards, elephants, and crocodiles",
+          "Over 200 bird species including painted storks and peacocks",
+          "Safari lodge stay near the park",
+        ],
+      },
+      {
+        day: 5,
+        title: "Yala \u2192 Colombo Airport (Departure)",
+        description:
+          "Rise early for an optional dawn safari \u2014 the most rewarding time to spot leopards and other wildlife as they emerge at first light. After breakfast, bid farewell to the wilderness and begin your drive north to Bandaranaike International Airport (approximately 5\u20136 hours). Your chauffeur-guide will ensure a comfortable, timely transfer for your departure. We hope your Sri Lanka journey has left you with memories to cherish for a lifetime.",
+        highlights: [
+          "Optional dawn wildlife safari",
+          "Comfortable private transfer to airport",
+          "Seamless departure experience",
+        ],
+      },
+    ],
+    included: [
+      "Private air-conditioned vehicle with professional chauffeur guide",
+      "4 nights\u2019 accommodation in 3\u2605 hotels",
+      "Daily breakfast (BB basis)",
+      "Airport pick-up and drop-off",
+      "Fuel, parking, and highway charges",
+      "Driver accommodation and meals",
+      "All government taxes",
+    ],
+    notIncluded: [
+      "Entrance fees to attractions (Sigiriya, Dambulla, Kandy, Yala, etc.)",
+      "Lunch and dinner",
+      "Personal expenses (beverages, laundry, shopping, etc.)",
+      "Tips and gratuities",
+      "Camera and video permits",
+      "Travel insurance",
+      "International air tickets",
+    ],
+    faqs: [
+      {
+        question: "How strenuous is the Sigiriya Rock Fortress climb?",
+        answer:
+          "The climb involves approximately 1,200 steps and takes 60\u201390 minutes. It is moderate in difficulty and recommended for reasonably fit travelers. We start early in the morning to avoid midday heat. Handrails are provided along most of the route. Those with vertigo should note there are exposed sections near the summit.",
+      },
+      {
+        question: "What are the chances of seeing a leopard at Yala?",
+        answer:
+          "Yala National Park has the highest density of wild leopards in the world. On average, around 60\u201370% of afternoon safaris result in at least one leopard sighting. Dawn safaris \u2014 the optional early morning session on Day 5 \u2014 significantly increase your chances. Our experienced tracker-guides know the prime territories.",
+      },
+      {
+        question: "What is the best time of year for this tour?",
+        answer:
+          "This tour operates year-round. The Cultural Triangle and Ella are best from January to April and August to September. The Yala safari season typically runs from February to July, with the park partially closed from September to October for maintenance. We will advise on optimal timing when you enquire.",
+      },
+      {
+        question: "Can this tour be customised for more people?",
+        answer:
+          "The listed price of $1,170 is for 2 persons traveling together in a private vehicle. We can accommodate additional guests at adjusted rates. The itinerary can also be extended with extra destinations or upgraded to 4\u20135\u2605 hotels. Contact us for a personalised quote.",
+      },
+      {
+        question: "Are entrance fees very expensive?",
+        answer:
+          "Foreign visitor entrance fees in Sri Lanka are set by the government. For reference: Sigiriya is approximately $30\u201335 USD per person, Dambulla $10\u201315, the Temple of the Sacred Tooth Relic around $10, and Yala National Park safari jeep hire with park fees around $50\u201370 per jeep. We will provide a full breakdown on request.",
+      },
+    ],
+  },
+
+  /* ── Existing tours below ───────────────────────────────────────────────── */
   {
     slug: "cultural-triangle-explorer",
     title: "Cultural Triangle Explorer",
