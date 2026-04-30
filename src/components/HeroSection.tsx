@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
-import Link from "next/link";
 
 const SLIDE_MS = 5000;
 
@@ -182,20 +181,6 @@ export function HeroSection() {
             pristine beaches, and untamed wildlife. Every detail, perfected for
             you.
           </p>
-          <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
-            <Link
-              href="/booking"
-              className="btn-gold inline-flex items-center justify-center gap-2 rounded-full px-8 py-4 text-sm font-semibold tracking-luxury"
-            >
-              <span>Book Your Tour</span>
-            </Link>
-            <Link
-              href="/#destinations"
-              className="btn-outline-gold inline-flex items-center justify-center gap-2 rounded-full px-8 py-4 text-sm font-semibold tracking-luxury"
-            >
-              Explore Destinations
-            </Link>
-          </div>
         </div>
 
       </div>
