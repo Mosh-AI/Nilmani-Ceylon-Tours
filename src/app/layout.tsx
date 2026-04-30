@@ -96,7 +96,8 @@ const localBusinessJsonLd = {
   email: "info@nilmaniceylontours.com", // TODO: Replace with real email
   address: {
     "@type": "PostalAddress",
-    addressLocality: "Seeduwa",
+    streetAddress: "145/H/1, Arjunarama Road, Miriswatta",
+    addressLocality: "Yagodamulla, Kotugoda",
     addressCountry: "LK",
   },
   areaServed: { "@type": "Country", name: "Sri Lanka" },

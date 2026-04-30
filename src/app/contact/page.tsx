@@ -82,7 +82,7 @@ export default function ContactPage() {
                 <div>
                   <p className="text-sm font-medium text-brand-text">Address</p>
                   <p className="mt-0.5 text-sm text-brand-muted">
-                    196/4, Yagodamulla, Seeduwa 11390<br />Sri Lanka
+                    145/H/1, Arjunarama Road, Miriswatta,<br />Yagodamulla, Kotugoda, Sri Lanka
                   </p>
                 </div>
               </li>
