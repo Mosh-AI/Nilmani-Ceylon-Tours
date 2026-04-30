@@ -1,5 +1,5 @@
 /**
- * One-time: set admin password for roshan@nilmaniceylontours.com
+ * One-time: set admin password using Better Auth's exact scrypt parameters.
  * Run with: npx tsx src/db/set-admin-password.ts
  */
 
@@ -7,17 +7,29 @@ import "dotenv/config";
 import { db } from "./index";
 import { user, account } from "./schema";
 import { eq } from "drizzle-orm";
+import { randomBytes, scrypt } from "node:crypto";
 import crypto from "crypto";
-import { scrypt, randomBytes } from "crypto";
-import { promisify } from "util";
 
-const scryptAsync = promisify(scrypt);
+// Exact parameters from @better-auth/utils/dist/password.node.mjs
+const SCRYPT_CONFIG = { N: 16384, r: 16, p: 1, dkLen: 64 };
 
-// Better Auth uses: <salt>:<hash> with scrypt
 async function hashPassword(password: string): Promise<string> {
   const salt = randomBytes(16).toString("hex");
-  const hash = (await scryptAsync(password, salt, 64)) as Buffer;
-  return `${salt}:${hash.toString("hex")}`;
+  const key = await new Promise<Buffer>((resolve, reject) => {
+    scrypt(
+      password.normalize("NFKC"),
+      salt,
+      SCRYPT_CONFIG.dkLen,
+      {
+        N: SCRYPT_CONFIG.N,
+        r: SCRYPT_CONFIG.r,
+        p: SCRYPT_CONFIG.p,
+        maxmem: 128 * SCRYPT_CONFIG.N * SCRYPT_CONFIG.r * 2,
+      },
+      (err, key) => (err ? reject(err) : resolve(key as Buffer))
+    );
+  });
+  return `${salt}:${key.toString("hex")}`;
 }
 
 const ADMIN_EMAIL = "roshan@nilmaniceylontours.com";
@@ -26,7 +38,6 @@ const ADMIN_PASSWORD = "NilmaniAdmin2024!";
 async function main() {
   console.log(`Setting password for ${ADMIN_EMAIL}...`);
 
-  // Find admin user
   const [adminUser] = await db
     .select({ id: user.id })
     .from(user)
@@ -40,7 +51,6 @@ async function main() {
 
   const hashed = await hashPassword(ADMIN_PASSWORD);
 
-  // Upsert credential account record
   const [existing] = await db
     .select({ id: account.id })
     .from(account)
@@ -52,7 +62,7 @@ async function main() {
       .update(account)
       .set({ password: hashed, updatedAt: new Date() })
       .where(eq(account.userId, adminUser.id));
-    console.log("  Password updated on existing account record.");
+    console.log("  Password updated.");
   } else {
     await db.insert(account).values({
       id: crypto.randomUUID(),
@@ -61,13 +71,12 @@ async function main() {
       providerId: "credential",
       password: hashed,
     });
-    console.log("  New credential account record created.");
+    console.log("  Credential account created.");
   }
 
-  console.log("\n✅ Admin credentials:");
+  console.log("\n✅ Done:");
   console.log(`   Email   : ${ADMIN_EMAIL}`);
   console.log(`   Password: ${ADMIN_PASSWORD}`);
-  console.log("\n  Login at: https://nilmaniceylontours.com/login");
   process.exit(0);
 }
 
