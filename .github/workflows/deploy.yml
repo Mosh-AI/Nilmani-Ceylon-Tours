@@ -28,9 +28,6 @@ jobs:
             # Run Drizzle migrations
             npx drizzle-kit migrate
 
-            # One-time: deactivate old sample tours, keep Tour 01 active
-            npx tsx src/db/set-tour-availability.ts
-
             # Stop PM2 before build to prevent restarts on incomplete .next
             pm2 stop nilmani || true
 
