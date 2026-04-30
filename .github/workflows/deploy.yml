@@ -28,6 +28,9 @@ jobs:
             # Run Drizzle migrations
             npx drizzle-kit migrate
 
+            # One-time: insert Tour 01 into DB and activate it
+            npx tsx src/db/insert-tour-01.ts
+
             # Stop PM2 before build to prevent restarts on incomplete .next
             pm2 stop nilmani || true
 
