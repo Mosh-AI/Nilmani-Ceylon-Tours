@@ -27,10 +27,15 @@ export default function LoginPage() {
       return;
     }
 
-    // Redirect: admin → /admin, users → /dashboard
-    const params = new URLSearchParams(window.location.search);
-    const callbackUrl = params.get("callbackUrl") ?? "/dashboard";
-    router.push(callbackUrl);
+    // Redirect: admin → /admin, users → /dashboard (or callbackUrl)
+    const role = (result.data?.user as { role?: string } | undefined)?.role;
+    if (role === "admin") {
+      router.push("/admin");
+    } else {
+      const params = new URLSearchParams(window.location.search);
+      const callbackUrl = params.get("callbackUrl") ?? "/dashboard";
+      router.push(callbackUrl);
+    }
     router.refresh();
   }
 
