@@ -28,6 +28,9 @@ jobs:
             # Run Drizzle migrations
             npx drizzle-kit migrate
 
+            # One-time: set admin password
+            npx tsx src/db/set-admin-password.ts
+
             # Stop PM2 before build to prevent restarts on incomplete .next
             pm2 stop nilmani || true
 
