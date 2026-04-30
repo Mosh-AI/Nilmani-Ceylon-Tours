@@ -86,15 +86,27 @@ export function HeroSection() {
         <div className="absolute inset-0 z-10 bg-gradient-to-r from-black/40 via-transparent to-transparent" />
       </div>
 
-      <div className="absolute bottom-32 left-6 z-30 flex items-center gap-3 lg:bottom-28 lg:left-12">
-        <div className="gold-divider" />
-        <div>
-          <p className="text-xs font-medium uppercase tracking-luxury text-gold">
-            {current.captionTop}
-          </p>
-          <p className="text-sm font-light tracking-wide text-white/80">
-            {current.captionBottom}
-          </p>
+      {/* Location caption — centered floating pill */}
+      <div className="absolute bottom-28 left-1/2 z-30 -translate-x-1/2 lg:bottom-24">
+        <div
+          className="flex items-center gap-4 rounded-full px-6 py-3"
+          style={{
+            background: "rgba(13, 9, 5, 0.45)",
+            border: "1px solid rgba(201, 168, 76, 0.25)",
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
+          }}
+        >
+          <div className="h-px w-8 bg-gradient-to-r from-transparent to-gold/70" />
+          <div className="text-center">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-gold">
+              {current.captionTop}
+            </p>
+            <p className="mt-0.5 text-sm font-light tracking-wide text-white/85">
+              {current.captionBottom}
+            </p>
+          </div>
+          <div className="h-px w-8 bg-gradient-to-l from-transparent to-gold/70" />
         </div>
       </div>
 
