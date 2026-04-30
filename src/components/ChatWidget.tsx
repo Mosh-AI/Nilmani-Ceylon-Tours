@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { MessageCircle, X, Send, Loader2 } from "lucide-react";
+import { X, Send, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 interface Message {
   role: "user" | "assistant";
@@ -135,8 +136,14 @@ export function ChatWidget() {
         >
           {/* Header */}
           <div className="flex items-center gap-3 bg-[#1C1209] px-4 py-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#C9A84C]">
-              <span className="font-serif text-sm font-bold text-[#1C1209]">N</span>
+            <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full border border-[#C9A84C]/40">
+              <Image
+                src="/images/roshan-avatar.png"
+                alt="Roshan — Nilmani Ceylon Tours"
+                fill
+                className="object-cover object-top"
+                sizes="36px"
+              />
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold text-white">Nilmani Ceylon Tours</p>
@@ -247,22 +254,28 @@ export function ChatWidget() {
         onClick={() => setOpen((v) => !v)}
         className={cn(
           "fixed bottom-6 right-4 z-50",
-          "flex h-14 w-14 items-center justify-center rounded-full shadow-lg",
-          "bg-[#1C1209] text-[#C9A84C] transition-all duration-300",
-          "hover:scale-110 hover:shadow-xl",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C9A84C] focus-visible:ring-offset-2"
+          "flex h-14 w-14 items-center justify-center rounded-full shadow-xl",
+          "transition-all duration-300 hover:scale-110 hover:shadow-2xl",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C9A84C] focus-visible:ring-offset-2",
+          open ? "bg-[#1C1209]" : "overflow-hidden border-2 border-[#C9A84C]/60"
         )}
         aria-label={open ? "Close chat" : "Open chat"}
       >
         {open ? (
-          <X className="h-6 w-6" />
+          <X className="h-6 w-6 text-[#C9A84C]" />
         ) : (
-          <MessageCircle className="h-6 w-6" />
+          <Image
+            src="/images/roshan-avatar.png"
+            alt="Chat with Roshan"
+            fill
+            className="object-cover object-top"
+            sizes="56px"
+          />
         )}
 
         {/* Pulse ring (only when closed) */}
         {!open && (
-          <span className="absolute inset-0 rounded-full animate-ping bg-[#C9A84C] opacity-20" />
+          <span className="absolute inset-0 rounded-full animate-ping border border-[#C9A84C]/50" />
         )}
       </button>
     </>
