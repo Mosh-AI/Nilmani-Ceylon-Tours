@@ -17,7 +17,12 @@ export type TourCategory =
   | "Beach"
   | "Wildlife"
   | "Adventure"
-  | "Comprehensive";
+  | "Comprehensive"
+  | "Heritage and Adventure"
+  | "Heritage, Nature and Adventure"
+  | "Heritage, Culture, Adventure and Leisure"
+  | "Premium East Coast Escape"
+  | "Spiritual Escape";
 
 export interface Tour {
   slug: string;

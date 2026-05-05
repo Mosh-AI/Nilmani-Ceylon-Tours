@@ -3,11 +3,45 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { db } from "@/db";
 import { tours as toursTable } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
-import { getTourBySlug, tours as staticTours } from "@/data/tours";
+import { eq, and, ne } from "drizzle-orm";
 import { TourDetailClient } from "./_components/TourDetailClient";
+import type { Tour } from "@/data/tours";
 
 export const revalidate = 60;
+
+function formatDuration(days: number): string {
+  const nights = days - 1;
+  return `${days} Day${days !== 1 ? "s" : ""} / ${nights} Night${nights !== 1 ? "s" : ""}`;
+}
+
+function formatPrice(usd: number): string {
+  return `$${usd.toLocaleString("en-US")}`;
+}
+
+function dbRowToTour(row: typeof toursTable.$inferSelect): Tour {
+  return {
+    slug: row.slug,
+    title: row.title,
+    subtitle: row.subtitle ?? "",
+    description: row.description,
+    longDescription: row.description,
+    category: (row.category as Tour["category"]) ?? "Cultural",
+    duration: formatDuration(row.duration),
+    durationDays: row.duration,
+    price: formatPrice(row.price),
+    priceNote: "per 2 persons (private tour)",
+    difficulty: row.difficulty ?? "Easy",
+    groupSize: row.maxGroup ? `Up to ${row.maxGroup} guests (private)` : "Private / Small Group",
+    heroImage: row.heroImage ?? "/images/sigiriya-hero.jpg",
+    heroAlt: `${row.title} — Sri Lanka Tour`,
+    galleryImages: [],
+    highlights: (row.highlights as string[]) ?? [],
+    itinerary: [],
+    included: (row.whatsIncluded as string[]) ?? [],
+    notIncluded: (row.whatsExcluded as string[]) ?? [],
+    faqs: [],
+  };
+}
 
 export default async function TourDetailPage({
   params,
@@ -16,37 +50,33 @@ export default async function TourDetailPage({
 }) {
   const { slug } = await params;
 
-  // Gate: check DB — is this tour active?
-  const [dbRow] = await db
-    .select({ available: toursTable.available })
+  // Fetch full tour data from DB
+  const [dbTour] = await db
+    .select()
     .from(toursTable)
     .where(and(eq(toursTable.slug, slug), eq(toursTable.available, true)))
     .limit(1);
 
-  // Load full tour content from static data
-  const tour = getTourBySlug(slug);
-
-  // Show 404 if inactive in DB OR not in static data at all
-  if (!dbRow || !tour) {
+  if (!dbTour) {
     notFound();
   }
 
-  // Build related tours: same category, also active in DB
-  const activeRows = await db
-    .select({ slug: toursTable.slug })
+  const tour = dbRowToTour(dbTour);
+
+  // Related tours: same category, available, different slug (up to 3)
+  const relatedRows = await db
+    .select()
     .from(toursTable)
-    .where(eq(toursTable.available, true));
-
-  const activeSlugSet = new Set(activeRows.map((r) => r.slug));
-
-  const relatedTours = staticTours
-    .filter(
-      (t) =>
-        t.slug !== slug &&
-        activeSlugSet.has(t.slug) &&
-        t.category === tour.category
+    .where(
+      and(
+        eq(toursTable.available, true),
+        eq(toursTable.category, dbTour.category ?? ""),
+        ne(toursTable.slug, slug)
+      )
     )
-    .slice(0, 3);
+    .limit(3);
+
+  const relatedTours = relatedRows.map(dbRowToTour);
 
   return (
     <main className="min-h-screen bg-brand-bg">
