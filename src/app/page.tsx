@@ -1,3 +1,6 @@
+// Revalidate homepage every 60 seconds so DB-driven sections (tours, testimonials) stay fresh
+export const revalidate = 60;
+
 import { AboutSection } from "@/components/AboutSection";
 import { CTASection } from "@/components/CTASection";
 import { DestinationsSection } from "@/components/DestinationsSection";
