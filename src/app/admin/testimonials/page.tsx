@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { requireAdmin } from "@/lib/admin-auth";
 import { db } from "@/db";
 import { testimonials } from "@/db/schema";
@@ -36,8 +37,21 @@ export default async function TestimonialsPage() {
               }`}
             >
               <div className="flex items-start justify-between gap-4">
+                {/* Avatar */}
+                {t.photoUrl && (
+                  <div className="relative size-12 shrink-0 overflow-hidden rounded-full ring-2 ring-gray-100">
+                    <Image
+                      src={t.photoUrl}
+                      alt={t.guestName}
+                      fill
+                      className="object-cover"
+                      sizes="48px"
+                    />
+                  </div>
+                )}
+
                 <div className="flex-1">
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <p className="font-semibold text-gray-900">{t.guestName}</p>
                     {t.country && (
                       <span className="text-sm text-gray-400">· {t.country}</span>
@@ -48,13 +62,14 @@ export default async function TestimonialsPage() {
                       ))}
                     </div>
                   </div>
-                  <p className="mt-2 text-sm leading-relaxed text-gray-600">
+                  <p className="mt-2 text-sm leading-relaxed text-gray-600 line-clamp-3">
                     &ldquo;{t.text}&rdquo;
                   </p>
                   <p className="mt-2 text-xs text-gray-400">
                     {new Date(t.createdAt).toLocaleDateString()}
                   </p>
                 </div>
+
                 <div className="shrink-0">
                   <TestimonialToggle id={t.id} approved={t.approved} />
                 </div>

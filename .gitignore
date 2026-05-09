@@ -44,6 +44,7 @@ tmp/
 temp/
 temp-source.html
 Images/
+!public/images/
 
 # Uploads (served locally, not tracked)
 public/uploads/

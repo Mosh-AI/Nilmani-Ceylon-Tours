@@ -218,6 +218,7 @@ export const testimonials = pgTable("testimonials", {
   country: text("country"),
   rating: integer("rating").notNull(),
   text: text("text").notNull(),
+  photoUrl: text("photo_url"),
   tourId: uuid("tour_id").references(() => tours.id, { onDelete: "set null" }),
   approved: boolean("approved").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
