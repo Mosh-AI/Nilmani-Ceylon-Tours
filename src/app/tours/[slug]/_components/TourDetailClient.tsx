@@ -535,7 +535,7 @@ export function TourDetailClient({
                 </div>
 
                 <Link
-                  href="/booking"
+                  href={`/booking?tourId=${encodeURIComponent(tour.id ?? "")}&tourName=${encodeURIComponent(tour.title)}&duration=${tour.durationDays}&guests=${tour.personsIncluded ?? 2}&price=${tour.price.replace(/[$,]/g, "")}`}
                   className="btn-gold flex w-full items-center justify-center gap-2 rounded-full py-3.5 text-sm font-semibold tracking-luxury"
                 >
                   <Calendar size={15} />

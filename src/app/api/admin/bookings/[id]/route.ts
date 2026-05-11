@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminSession } from "@/lib/admin-auth";
 import { db } from "@/db";
-import { bookings, bookingStatusHistory } from "@/db/schema";
+import { bookings, bookingStatusHistory, tours } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { apiHeaders } from "@/lib/api-headers";
 import { z } from "zod";
@@ -23,8 +23,24 @@ export async function GET(
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401, headers: apiHeaders() });
 
   const { id } = await params;
-  const [booking] = await db.select().from(bookings).where(eq(bookings.id, id)).limit(1);
-  if (!booking) return NextResponse.json({ error: "Not found" }, { status: 404, headers: apiHeaders() });
+
+  const [row] = await db
+    .select({
+      booking: bookings,
+      tour: {
+        id: tours.id,
+        title: tours.title,
+        slug: tours.slug,
+        duration: tours.duration,
+        price: tours.price,
+      },
+    })
+    .from(bookings)
+    .leftJoin(tours, eq(bookings.tourId, tours.id))
+    .where(eq(bookings.id, id))
+    .limit(1);
+
+  if (!row) return NextResponse.json({ error: "Not found" }, { status: 404, headers: apiHeaders() });
 
   const history = await db
     .select()
@@ -32,7 +48,7 @@ export async function GET(
     .where(eq(bookingStatusHistory.bookingId, id))
     .orderBy(bookingStatusHistory.createdAt);
 
-  return NextResponse.json({ booking, history }, { headers: apiHeaders() });
+  return NextResponse.json({ booking: row.booking, tour: row.tour, history }, { headers: apiHeaders() });
 }
 
 export async function PATCH(

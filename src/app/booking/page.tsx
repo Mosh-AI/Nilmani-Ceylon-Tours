@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -11,7 +12,7 @@ import {
 } from "@/lib/validations";
 import { submitBookingForm } from "@/app/actions/booking";
 import { Breadcrumb } from "@/components/Breadcrumb";
-import { CheckCircle2, AlertCircle, ChevronRight, ChevronLeft } from "lucide-react";
+import { CheckCircle2, AlertCircle, ChevronRight, ChevronLeft, MapPin, Clock, Users } from "lucide-react";
 
 /* ── Step indicator ─────────────────────────────────────────────────────── */
 
@@ -66,7 +67,16 @@ const inputClass =
 const errorClass = "mt-1 text-xs text-red-600";
 const labelClass = "mb-1.5 block text-sm font-medium text-brand-text";
 
-export default function BookingPage() {
+function BookingPageInner() {
+  const searchParams = useSearchParams();
+
+  const tourId   = searchParams.get("tourId") ?? "";
+  const tourName = searchParams.get("tourName") ?? "";
+  const duration = Math.max(1, Math.min(30, parseInt(searchParams.get("duration") ?? "7", 10) || 7));
+  const guests   = Math.max(1, Math.min(20, parseInt(searchParams.get("guests") ?? "2", 10) || 2));
+  const price    = parseInt(searchParams.get("price") ?? "0", 10) || 0;
+  const hasTour  = Boolean(tourName);
+
   const [step, setStep] = useState(1);
   const [step1Data, setStep1Data] = useState<BookingStep1Data | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -79,7 +89,12 @@ export default function BookingPage() {
   /* Step 1 form */
   const form1 = useForm<BookingStep1Data>({
     resolver: zodResolver(bookingStep1Schema),
-    defaultValues: { guests: 2, duration: 7 },
+    defaultValues: {
+      tourId: tourId || undefined,
+      tourName: tourName || undefined,
+      duration,
+      guests,
+    },
   });
 
   /* Step 2 form */
@@ -165,6 +180,37 @@ export default function BookingPage() {
       <HeroSection />
       <section className="bg-brand-bg py-16 md:py-24">
         <div className="mx-auto max-w-xl px-6">
+
+          {/* ── "You're Booking" tour card ── */}
+          {hasTour && (
+            <div className="mb-6 overflow-hidden rounded-xl border border-[#C9A84C]/30 bg-[#FDFAF5]">
+              <div className="border-b border-[#C9A84C]/20 bg-[#1C1209] px-5 py-2.5">
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-[#C9A84C]">
+                  You&apos;re booking
+                </p>
+              </div>
+              <div className="px-5 py-4">
+                <p className="font-serif text-xl font-light text-[#1C1209]">{tourName}</p>
+                <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2">
+                  <span className="inline-flex items-center gap-1.5 text-sm text-gray-500">
+                    <Clock className="h-3.5 w-3.5 text-[#C9A84C]" />
+                    {duration} days
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 text-sm text-gray-500">
+                    <Users className="h-3.5 w-3.5 text-[#C9A84C]" />
+                    {guests} {guests === 1 ? "guest" : "guests"} (default)
+                  </span>
+                  {price > 0 && (
+                    <span className="inline-flex items-center gap-1.5 text-sm text-gray-500">
+                      <MapPin className="h-3.5 w-3.5 text-[#C9A84C]" />
+                      From ${price.toLocaleString()}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
           <StepIndicator current={step} total={3} />
 
           {/* Error banner */}
@@ -188,21 +234,32 @@ export default function BookingPage() {
                     Trip Details
                   </h2>
                   <p className="mt-1 text-sm text-brand-muted">
-                    Tell us about the tour you have in mind.
+                    {hasTour
+                      ? "Confirm your trip details below."
+                      : "Tell us about the tour you have in mind."}
                   </p>
                 </div>
+
+                {/* Hidden tourId */}
+                <input type="hidden" {...form1.register("tourId")} />
 
                 <div>
                   <label htmlFor="tourName" className={labelClass}>
                     Tour / Trip Type <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    id="tourName"
-                    type="text"
-                    placeholder="e.g. Classic Sri Lanka, Custom 12-day tour..."
-                    className={inputClass}
-                    {...form1.register("tourName")}
-                  />
+                  {hasTour ? (
+                    <div className={`${inputClass} cursor-default bg-gray-50 text-gray-700`}>
+                      {tourName}
+                    </div>
+                  ) : (
+                    <input
+                      id="tourName"
+                      type="text"
+                      placeholder="e.g. Classic Sri Lanka, Custom 12-day tour..."
+                      className={inputClass}
+                      {...form1.register("tourName")}
+                    />
+                  )}
                   {form1.formState.errors.tourName && (
                     <p className={errorClass}>{form1.formState.errors.tourName.message}</p>
                   )}
@@ -425,6 +482,14 @@ export default function BookingPage() {
         </div>
       </section>
     </>
+  );
+}
+
+export default function BookingPage() {
+  return (
+    <Suspense fallback={<HeroSection />}>
+      <BookingPageInner />
+    </Suspense>
   );
 }
 

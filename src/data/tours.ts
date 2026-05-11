@@ -51,6 +51,8 @@ export interface Tour {
   included: string[];
   notIncluded: string[];
   faqs: FAQ[];
+  id?: string;
+  personsIncluded?: number;
 }
 
 export const TOUR_CATEGORIES: TourCategory[] = [

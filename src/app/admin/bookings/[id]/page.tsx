@@ -26,6 +26,14 @@ type Booking = {
   createdAt: string;
 };
 
+type BookedTour = {
+  id: string;
+  title: string;
+  slug: string;
+  duration: number;
+  price: number;
+} | null;
+
 export default function BookingDetailPage({
   params,
 }: {
@@ -33,6 +41,7 @@ export default function BookingDetailPage({
 }) {
   const router = useRouter();
   const [booking, setBooking] = useState<Booking | null>(null);
+  const [bookedTour, setBookedTour] = useState<BookedTour>(null);
   const [status, setStatus] = useState("");
   const [adminNotes, setAdminNotes] = useState("");
   const [totalPrice, setTotalPrice] = useState("");
@@ -47,6 +56,7 @@ export default function BookingDetailPage({
         .then((r) => r.json())
         .then((data) => {
           setBooking(data.booking);
+          setBookedTour(data.tour ?? null);
           setStatus(data.booking.status);
           setAdminNotes(data.booking.adminNotes ?? "");
           setTotalPrice(data.booking.totalPrice?.toString() ?? "");
@@ -161,6 +171,25 @@ export default function BookingDetailPage({
 
         {/* Status + price */}
         <div className="space-y-6">
+          {/* Booked Tour — only shown when booking has a linked tour */}
+          {bookedTour && (
+            <section className="rounded-xl border border-[#C9A84C]/30 bg-[#FDFAF5] p-6 shadow-sm">
+              <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                Booked Tour
+              </h2>
+              <p className="font-medium text-gray-900">{bookedTour.title}</p>
+              <p className="mt-1 text-sm text-gray-500">
+                {bookedTour.duration} days · From ${bookedTour.price.toLocaleString()}
+              </p>
+              <Link
+                href={`/admin/tours/${bookedTour.id}/edit`}
+                className="mt-3 inline-flex text-xs font-medium text-[#C9A84C] underline-offset-2 hover:underline"
+              >
+                Edit this tour →
+              </Link>
+            </section>
+          )}
+
           <section className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
             <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500">
               Status

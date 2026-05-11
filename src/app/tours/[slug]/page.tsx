@@ -20,6 +20,8 @@ function formatPrice(usd: number): string {
 
 function dbRowToTour(row: typeof toursTable.$inferSelect): Tour {
   return {
+    id: row.id,
+    personsIncluded: row.personsIncluded ?? 2,
     slug: row.slug,
     title: row.title,
     subtitle: row.subtitle ?? "",
