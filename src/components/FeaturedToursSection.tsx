@@ -48,7 +48,7 @@ export async function FeaturedToursSection() {
               </span>
             </div>
             <h2 className="font-serif text-4xl font-light leading-tight text-brand-text md:text-5xl">
-              Featured{" "}
+              Create Your Own{" "}
               <span
                 style={{
                   background:
@@ -59,7 +59,7 @@ export async function FeaturedToursSection() {
                 }}
                 className="italic"
               >
-                Tours
+                Tour
               </span>
             </h2>
           </div>
