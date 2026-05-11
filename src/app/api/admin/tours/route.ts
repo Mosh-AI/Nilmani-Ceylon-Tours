@@ -17,7 +17,7 @@ const tourSchema = z.object({
   difficulty: z.enum(["Easy", "Moderate", "Challenging"]).optional(),
   maxGroup: z.number().int().min(1).max(50).optional(),
   category: z.string().max(100).optional(),
-  highlights: z.array(z.string()).optional(),
+  highlights: z.array(z.object({ text: z.string(), featured: z.boolean() })).optional(),
   whatsIncluded: z.array(z.string()).optional(),
   whatsExcluded: z.array(z.string()).optional(),
   heroImage: z.string().max(500).optional().or(z.literal("")),

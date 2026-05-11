@@ -94,7 +94,7 @@ export const tours = pgTable("tours", {
   maxGroup: integer("max_group"),
   category: text("category"),
   itinerary: jsonb("itinerary"),
-  highlights: jsonb("highlights").$type<string[]>(),
+  highlights: jsonb("highlights").$type<{ text: string; featured: boolean }[]>(),
   whatsIncluded: jsonb("whats_included").$type<string[]>(),
   whatsExcluded: jsonb("whats_excluded").$type<string[]>(),
   faqs: jsonb("faqs"),

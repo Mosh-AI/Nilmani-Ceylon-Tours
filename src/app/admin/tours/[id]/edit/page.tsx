@@ -30,7 +30,7 @@ export default async function EditTourPage({
     difficulty: tour.difficulty ?? "Easy" as const,
     maxGroup: tour.maxGroup ?? 8,
     category: tour.category ?? "",
-    highlights: (tour.highlights as string[] | null) ?? [],
+    highlights: (tour.highlights as { text: string; featured: boolean }[] | null) ?? [],
     whatsIncluded: (tour.whatsIncluded as string[] | null) ?? [],
     whatsExcluded: (tour.whatsExcluded as string[] | null) ?? [],
     heroImage: tour.heroImage ?? "",

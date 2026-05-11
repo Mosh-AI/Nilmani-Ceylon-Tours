@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Star } from "lucide-react";
+
+type TourHighlight = { text: string; featured: boolean };
 
 type TourData = {
   id?: string;
@@ -15,7 +17,7 @@ type TourData = {
   difficulty?: "Easy" | "Moderate" | "Challenging";
   maxGroup?: number;
   category?: string;
-  highlights?: string[];
+  highlights?: TourHighlight[];
   whatsIncluded?: string[];
   whatsExcluded?: string[];
   heroImage?: string;
@@ -88,6 +90,107 @@ function ListEditor({
   );
 }
 
+const MAX_FEATURED = 6;
+
+function HighlightsEditor({
+  items,
+  onChange,
+}: {
+  items: TourHighlight[];
+  onChange: (items: TourHighlight[]) => void;
+}) {
+  const featuredCount = items.filter((h) => h.featured).length;
+
+  function updateText(i: number, text: string) {
+    const next = [...items];
+    next[i] = { ...next[i], text };
+    onChange(next);
+  }
+
+  function toggleFeatured(i: number) {
+    const next = [...items];
+    const current = next[i].featured;
+    if (!current && featuredCount >= MAX_FEATURED) return; // cap at 6
+    next[i] = { ...next[i], featured: !current };
+    onChange(next);
+  }
+
+  function remove(i: number) {
+    onChange(items.filter((_, idx) => idx !== i));
+  }
+
+  function addItem() {
+    onChange([...items, { text: "", featured: featuredCount < MAX_FEATURED }]);
+  }
+
+  return (
+    <div>
+      <div className="mb-1 flex items-center justify-between">
+        <label className={labelClass}>Highlights</label>
+        <span className="text-xs font-medium" style={{ color: featuredCount >= MAX_FEATURED ? "#C9A84C" : "#9ca3af" }}>
+          <Star className="mr-1 inline h-3 w-3" />
+          {featuredCount}/{MAX_FEATURED} featured (shown on tour page)
+        </span>
+      </div>
+      <p className={hintClass}>
+        Add all highlights. Star up to 6 to show by default — others appear under &ldquo;Show more&rdquo;.
+      </p>
+      <div className="mt-3 space-y-2">
+        {items.map((item, i) => (
+          <div
+            key={i}
+            className={`flex items-center gap-2 rounded-lg border px-3 py-2 transition-colors ${
+              item.featured
+                ? "border-[#C9A84C]/40 bg-[#C9A84C]/5"
+                : "border-gray-200 bg-white"
+            }`}
+          >
+            {/* Star toggle */}
+            <button
+              type="button"
+              title={item.featured ? "Remove from featured" : featuredCount >= MAX_FEATURED ? "Max 6 featured reached" : "Mark as featured"}
+              onClick={() => toggleFeatured(i)}
+              disabled={!item.featured && featuredCount >= MAX_FEATURED}
+              className={`shrink-0 rounded p-1 transition-colors ${
+                item.featured
+                  ? "text-[#C9A84C] hover:text-[#C9A84C]/70"
+                  : featuredCount >= MAX_FEATURED
+                  ? "cursor-not-allowed text-gray-200"
+                  : "text-gray-300 hover:text-[#C9A84C]"
+              }`}
+            >
+              <Star className="h-4 w-4" fill={item.featured ? "currentColor" : "none"} />
+            </button>
+            {/* Text input */}
+            <input
+              type="text"
+              value={item.text}
+              onChange={(e) => updateText(i, e.target.value)}
+              placeholder="e.g. Climb Sigiriya Rock Fortress — UNESCO World Heritage Site"
+              className="min-w-0 flex-1 bg-transparent text-sm text-gray-900 placeholder-gray-400 focus:outline-none"
+            />
+            {/* Delete */}
+            <button
+              type="button"
+              onClick={() => remove(i)}
+              className="shrink-0 rounded p-1 text-gray-300 hover:bg-red-50 hover:text-red-500"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          </div>
+        ))}
+        <button
+          type="button"
+          onClick={addItem}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-dashed border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-500 hover:border-[#C9A84C] hover:text-[#C9A84C]"
+        >
+          <Plus className="h-3.5 w-3.5" /> Add highlight
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function TourForm({ initial }: { initial?: TourData }) {
   const router = useRouter();
   const isEdit = !!initial?.id;
@@ -102,7 +205,7 @@ export function TourForm({ initial }: { initial?: TourData }) {
     difficulty: "Easy",
     maxGroup: 8,
     category: "",
-    highlights: [""],
+    highlights: [{ text: "", featured: true }],
     whatsIncluded: ["Private air-conditioned vehicle", "English-speaking driver-guide"],
     whatsExcluded: ["International flights", "Travel insurance", "Entrance fees"],
     heroImage: "",
@@ -142,7 +245,7 @@ export function TourForm({ initial }: { initial?: TourData }) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         ...form,
-        highlights: form.highlights?.filter(Boolean),
+        highlights: form.highlights?.filter((h) => h.text.trim() !== ""),
         whatsIncluded: form.whatsIncluded?.filter(Boolean),
         whatsExcluded: form.whatsExcluded?.filter(Boolean),
       }),
@@ -322,12 +425,9 @@ export function TourForm({ initial }: { initial?: TourData }) {
           Tour Content
         </h2>
         <div className="space-y-6">
-          <ListEditor
-            label="Highlights"
-            hint="Key selling points shown on the tour card."
+          <HighlightsEditor
             items={form.highlights ?? []}
             onChange={(v) => set("highlights", v)}
-            placeholder="e.g. Climb Sigiriya Rock Fortress at sunrise"
           />
           <ListEditor
             label="What's Included"

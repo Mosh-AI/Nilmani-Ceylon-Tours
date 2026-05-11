@@ -45,7 +45,7 @@ async function buildSystemPrompt(): Promise<string> {
 
   const toursText = allTours.map((t) => {
     const highlights = Array.isArray(t.highlights)
-      ? (t.highlights as string[]).slice(0, 4).join(", ")
+      ? (t.highlights as { text: string; featured: boolean }[]).slice(0, 4).map((h) => h.text).join(", ")
       : "";
     return `- ${t.title}${t.subtitle ? ` (${t.subtitle})` : ""}: ${t.duration} days, from $${t.price}/person. Category: ${t.category ?? "General"}. Difficulty: ${t.difficulty ?? "Easy"}. Max group: ${t.maxGroup ?? 8}. Highlights: ${highlights}`;
   }).join("\n");

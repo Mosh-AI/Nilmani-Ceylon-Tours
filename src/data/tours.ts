@@ -24,6 +24,11 @@ export type TourCategory =
   | "Premium East Coast Escape"
   | "Spiritual Escape";
 
+export interface TourHighlight {
+  text: string;
+  featured: boolean;
+}
+
 export interface Tour {
   slug: string;
   title: string;
@@ -41,6 +46,7 @@ export interface Tour {
   heroAlt: string;
   galleryImages: { src: string; alt: string }[];
   highlights: string[];
+  richHighlights?: TourHighlight[];
   itinerary: ItineraryDay[];
   included: string[];
   notIncluded: string[];

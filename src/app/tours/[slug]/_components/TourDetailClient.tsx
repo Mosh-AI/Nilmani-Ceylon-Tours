@@ -15,11 +15,12 @@ import {
   MessageCircle,
   Calendar,
   Phone,
+  Star,
 } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { cn } from "@/lib/utils";
-import type { Tour, ItineraryDay, FAQ } from "@/data/tours";
+import type { Tour, TourHighlight, ItineraryDay, FAQ } from "@/data/tours";
 
 /* ── Accordion Item ── */
 function AccordionItem({
@@ -214,6 +215,93 @@ function GalleryStrip({ images }: { images: { src: string; alt: string }[] }) {
   );
 }
 
+/* ── Highlights Section ── */
+function HighlightsSection({
+  richHighlights,
+  highlights,
+}: {
+  richHighlights?: TourHighlight[];
+  highlights: string[];
+}) {
+  const [showAll, setShowAll] = useState(false);
+
+  // Prefer richHighlights (DB-driven), fall back to plain strings
+  const allItems: TourHighlight[] = richHighlights && richHighlights.length > 0
+    ? richHighlights
+    : highlights.map((h) => ({ text: h, featured: true }));
+
+  const featured = allItems.filter((h) => h.featured);
+  const rest = allItems.filter((h) => !h.featured);
+  const hasMore = rest.length > 0;
+  const visibleItems = showAll ? allItems : featured;
+
+  return (
+    <div className="mb-16">
+      <div className="mb-6 flex items-center justify-between">
+        <h2 className="font-serif text-2xl font-light text-brand-text lg:text-3xl">
+          Tour Highlights
+        </h2>
+        {hasMore && (
+          <span className="hidden items-center gap-1 text-xs text-brand-muted sm:flex">
+            <Star size={11} className="text-gold" fill="currentColor" />
+            {featured.length} of {allItems.length} shown
+          </span>
+        )}
+      </div>
+
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        {visibleItems.map((h, i) => (
+          <div
+            key={i}
+            className={cn(
+              "flex items-start gap-3 rounded-xl border p-4 transition-all duration-300",
+              h.featured
+                ? "border-brand-border-gold bg-[#C9A84C]/5"
+                : "border-brand-border bg-brand-surface/60"
+            )}
+          >
+            <span
+              className={cn(
+                "mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full",
+                h.featured ? "bg-gold/15" : "bg-brand-surface"
+              )}
+            >
+              {h.featured ? (
+                <Star size={12} className="text-gold" fill="currentColor" />
+              ) : (
+                <Check size={12} className="text-brand-muted" />
+              )}
+            </span>
+            <span className="text-sm leading-relaxed text-brand-muted">{h.text}</span>
+          </div>
+        ))}
+      </div>
+
+      {hasMore && (
+        <div className="mt-5 text-center">
+          <button
+            type="button"
+            onClick={() => setShowAll((s) => !s)}
+            className="inline-flex items-center gap-2 rounded-full border border-brand-border px-6 py-2.5 text-xs font-semibold uppercase tracking-luxury text-brand-muted transition-all duration-300 hover:border-gold/50 hover:text-gold"
+          >
+            {showAll ? (
+              <>
+                <ChevronDown size={13} className="rotate-180 transition-transform duration-300" />
+                Show fewer highlights
+              </>
+            ) : (
+              <>
+                <ChevronDown size={13} className="transition-transform duration-300" />
+                Show all {allItems.length} highlights
+              </>
+            )}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ── Main Client Component ── */
 export function TourDetailClient({
   tour,
@@ -329,21 +417,7 @@ export function TourDetailClient({
             </div>
 
             {/* Highlights */}
-            <div className="mb-16">
-              <h2 className="mb-6 font-serif text-2xl font-light text-brand-text lg:text-3xl">
-                Tour Highlights
-              </h2>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                {tour.highlights.map((h) => (
-                  <div key={h} className="flex items-start gap-3">
-                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gold/10">
-                      <Check size={12} className="text-gold" />
-                    </span>
-                    <span className="text-sm text-brand-muted">{h}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <HighlightsSection richHighlights={tour.richHighlights} highlights={tour.highlights} />
 
             {/* Gallery */}
             <div className="mb-16">
