@@ -90,6 +90,7 @@ export const tours = pgTable("tours", {
   duration: integer("duration").notNull(),
   price: integer("price").notNull(),
   priceUnit: text("price_unit").notNull().default("USD"),
+  personsIncluded: integer("persons_included").default(2),
   difficulty: text("difficulty", { enum: ["Easy", "Moderate", "Challenging"] }),
   maxGroup: integer("max_group"),
   category: text("category"),

@@ -14,6 +14,7 @@ type TourData = {
   description?: string;
   duration?: number;
   price?: number;
+  personsIncluded?: number;
   difficulty?: "Easy" | "Moderate" | "Challenging";
   maxGroup?: number;
   category?: string;
@@ -21,6 +22,7 @@ type TourData = {
   whatsIncluded?: string[];
   whatsExcluded?: string[];
   heroImage?: string;
+  images?: string[];
   featured?: boolean;
   available?: boolean;
   metaTitle?: string;
@@ -202,6 +204,7 @@ export function TourForm({ initial }: { initial?: TourData }) {
     description: "",
     duration: 7,
     price: 0,
+    personsIncluded: 2,
     difficulty: "Easy",
     maxGroup: 8,
     category: "",
@@ -209,6 +212,7 @@ export function TourForm({ initial }: { initial?: TourData }) {
     whatsIncluded: ["Private air-conditioned vehicle", "English-speaking driver-guide"],
     whatsExcluded: ["International flights", "Travel insurance", "Entrance fees"],
     heroImage: "",
+    images: [],
     featured: false,
     available: true,
     metaTitle: "",
@@ -248,6 +252,7 @@ export function TourForm({ initial }: { initial?: TourData }) {
         highlights: form.highlights?.filter((h) => h.text.trim() !== ""),
         whatsIncluded: form.whatsIncluded?.filter(Boolean),
         whatsExcluded: form.whatsExcluded?.filter(Boolean),
+        images: form.images?.filter(Boolean),
       }),
     });
 
@@ -341,17 +346,42 @@ export function TourForm({ initial }: { initial?: TourData }) {
               className={inputClass}
             />
           </div>
-          <div>
+          <div className="sm:col-span-2">
             <label className={labelClass}>Price (USD) *</label>
-            <input
-              type="number"
-              required
-              min={0}
-              value={form.price}
-              onChange={(e) => set("price", parseInt(e.target.value, 10))}
-              className={inputClass}
-            />
-            <p className={hintClass}>Per person</p>
+            <div className="flex gap-2">
+              <div className="flex-1">
+                <input
+                  type="number"
+                  required
+                  min={0}
+                  value={form.price}
+                  onChange={(e) => set("price", parseInt(e.target.value, 10))}
+                  placeholder="1170"
+                  className={inputClass}
+                />
+              </div>
+              <div className="w-36 shrink-0">
+                <input
+                  type="number"
+                  required
+                  min={1}
+                  max={99}
+                  value={form.personsIncluded ?? 2}
+                  onChange={(e) => set("personsIncluded", parseInt(e.target.value, 10))}
+                  aria-label="Persons included in price"
+                  className={inputClass}
+                />
+              </div>
+            </div>
+            <div className="mt-1 flex items-baseline justify-between">
+              <p className={hintClass}>Total price · Persons included</p>
+              {(form.price ?? 0) > 0 && (form.personsIncluded ?? 0) > 0 && (
+                <p className="text-xs font-medium text-[#C9A84C]">
+                  ${(form.price ?? 0).toLocaleString()} for {form.personsIncluded ?? 2}{" "}
+                  {(form.personsIncluded ?? 2) === 1 ? "person" : "persons"}
+                </p>
+              )}
+            </div>
           </div>
           <div>
             <label className={labelClass}>Max Group</label>
@@ -386,14 +416,13 @@ export function TourForm({ initial }: { initial?: TourData }) {
               className={inputClass}
             />
           </div>
-          <div>
-            <label className={labelClass}>Hero Image URL</label>
-            <input
-              type="text"
-              value={form.heroImage}
-              onChange={(e) => set("heroImage", e.target.value)}
-              placeholder="/images/your-tour.jpg"
-              className={inputClass}
+          <div className="col-span-2 sm:col-span-4">
+            <ListEditor
+              label="Tour Images"
+              hint="First image is the hero/cover image. Add more for the tour gallery."
+              items={form.images ?? []}
+              onChange={(v) => set("images", v)}
+              placeholder="/images/your-tour-photo.jpg or https://..."
             />
           </div>
         </div>
