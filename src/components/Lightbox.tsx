@@ -1,13 +1,18 @@
 "use client";
 
 import { useEffect, useCallback, useRef } from "react";
-import Image from "next/image";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { GalleryImage } from "@/data/gallery";
+
+type LightboxImage = {
+  id: string;
+  url: string;
+  alt: string | null;
+  category: string | null;
+};
 
 interface LightboxProps {
-  images: GalleryImage[];
+  images: LightboxImage[];
   currentIndex: number;
   onClose: () => void;
   onPrevious: () => void;
@@ -81,7 +86,7 @@ export function Lightbox({
       ref={overlayRef}
       role="dialog"
       aria-modal="true"
-      aria-label={`Photo ${currentIndex + 1} of ${total}: ${image.alt}`}
+      aria-label={`Photo ${currentIndex + 1} of ${total}: ${image.alt ?? ""}`}
       className={cn(
         "fixed inset-0 z-[60] flex items-center justify-center",
         "bg-black/90 backdrop-blur-sm",
@@ -159,21 +164,18 @@ export function Lightbox({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="relative animate-in zoom-in-95 fade-in duration-300">
-          <Image
-            src={image.src}
-            alt={image.alt}
-            width={image.width}
-            height={image.height}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={image.url}
+            alt={image.alt ?? ""}
             className="max-h-[75vh] w-auto rounded-lg object-contain"
-            sizes="(max-width: 768px) 90vw, 80vw"
-            priority
           />
         </div>
 
         {/* Caption and counter */}
         <div className="flex w-full flex-col items-center gap-2 text-center">
           <p className="max-w-2xl text-sm leading-relaxed text-white/70">
-            {image.alt}
+            {image.alt ?? ""}
           </p>
           <p className="text-xs font-medium tracking-wider text-white/40">
             {currentIndex + 1} / {total}

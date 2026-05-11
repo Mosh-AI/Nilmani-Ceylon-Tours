@@ -1,35 +1,44 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
-import Image from "next/image";
 import { Camera } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Lightbox } from "@/components/Lightbox";
-import {
-  galleryImages,
-  GALLERY_CATEGORIES,
-  type GalleryCategory,
-  type GalleryImage,
-} from "@/data/gallery";
 
-type FilterCategory = "All" | GalleryCategory;
-
-const ALL_FILTERS: readonly FilterCategory[] = [
-  "All",
-  ...GALLERY_CATEGORIES,
-] as const;
+type DbGalleryImage = {
+  id: string;
+  url: string;
+  alt: string | null;
+  category: string | null;
+  sortOrder: number;
+};
 
 export function GalleryContent() {
-  const [activeFilter, setActiveFilter] = useState<FilterCategory>("All");
+  const [images, setImages] = useState<DbGalleryImage[]>([]);
+  const [activeFilter, setActiveFilter] = useState("All");
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const galleryRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    fetch("/api/gallery")
+      .then((r) => r.json())
+      .then((d) => setImages(d.images ?? []));
+  }, []);
+
+  // Build category list dynamically from DB images
+  const categories = [
+    "All",
+    ...Array.from(
+      new Set(images.map((img) => img.category).filter(Boolean) as string[])
+    ).sort(),
+  ];
+
   const filteredImages =
     activeFilter === "All"
-      ? galleryImages
-      : galleryImages.filter((img) => img.category === activeFilter);
+      ? images
+      : images.filter((img) => img.category === activeFilter);
 
   // Scroll-reveal observer
   useEffect(() => {
@@ -115,13 +124,12 @@ export function GalleryContent() {
         {/* Filter buttons */}
         <section className="sticky top-20 z-30 border-b border-brand-border bg-brand-bg/95 px-6 backdrop-blur-lg lg:px-12">
           <div className="scrollbar-hide mx-auto flex max-w-7xl items-center gap-2 overflow-x-auto py-4">
-            {ALL_FILTERS.map((filter) => {
+            {categories.map((filter) => {
               const isActive = filter === activeFilter;
               const count =
                 filter === "All"
-                  ? galleryImages.length
-                  : galleryImages.filter((img) => img.category === filter)
-                      .length;
+                  ? images.length
+                  : images.filter((img) => img.category === filter).length;
 
               return (
                 <button
@@ -197,7 +205,7 @@ export function GalleryContent() {
 }
 
 interface GalleryCardProps {
-  image: GalleryImage;
+  image: DbGalleryImage;
   index: number;
   onClick: () => void;
 }
@@ -214,19 +222,17 @@ function GalleryCard({ image, index, onClick }: GalleryCardProps) {
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2",
       )}
       style={{ transitionDelay: `${(index % 6) * 80}ms` }}
-      aria-label={`View photo: ${image.alt}`}
+      aria-label={`View photo: ${image.alt ?? "Gallery image"}`}
     >
       <div className="relative">
-        <Image
-          src={image.src}
-          alt={image.alt}
-          width={image.width}
-          height={image.height}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={image.url}
+          alt={image.alt ?? ""}
           className={cn(
-            "w-full object-cover transition-transform duration-500",
+            "w-full h-auto object-cover transition-transform duration-500",
             "group-hover:scale-[1.02]",
           )}
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           loading={index < 6 ? "eager" : "lazy"}
         />
 
@@ -239,16 +245,18 @@ function GalleryCard({ image, index, onClick }: GalleryCardProps) {
             "group-hover:opacity-100 group-focus-visible:opacity-100",
           )}
         >
-          <span
-            className={cn(
-              "mb-2 inline-flex items-center rounded-full px-3 py-1",
-              "bg-gold/90 text-xs font-semibold tracking-wide text-brand-text",
-            )}
-          >
-            {image.category}
-          </span>
+          {image.category && (
+            <span
+              className={cn(
+                "mb-2 inline-flex items-center rounded-full px-3 py-1",
+                "bg-gold/90 text-xs font-semibold tracking-wide text-brand-text",
+              )}
+            >
+              {image.category}
+            </span>
+          )}
           <p className="line-clamp-2 text-left text-sm leading-snug text-white/90">
-            {image.alt}
+            {image.alt ?? ""}
           </p>
         </div>
       </div>
