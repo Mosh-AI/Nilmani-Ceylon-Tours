@@ -38,7 +38,8 @@ jobs:
 
             # Copy static assets into standalone bundle
             cp -r .next/static .next/standalone/.next/static
-            cp -r public .next/standalone/public
+            # Use cp -rT (or cp -r public/.) to merge INTO existing dir, not nest inside it
+            cp -r public/. .next/standalone/public/
 
             # Restart with correct standalone config
             pm2 start ecosystem.config.js --only nilmani || pm2 restart nilmani
