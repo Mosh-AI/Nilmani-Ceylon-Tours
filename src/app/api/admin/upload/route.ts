@@ -63,7 +63,9 @@ export async function POST(request: NextRequest) {
   // Generate safe UUID filename
   const ext = file.type.split("/")[1].replace("jpeg", "jpg");
   const filename = `${crypto.randomUUID()}.${ext}`;
-  const uploadDir = path.join(process.cwd(), "public", "uploads");
+  // Use UPLOAD_DIR env var so files persist across deploys in standalone mode.
+  // In standalone, process.cwd() is .next/standalone/ which gets wiped on rebuild.
+  const uploadDir = process.env.UPLOAD_DIR ?? path.join(process.cwd(), "public", "uploads");
 
   await mkdir(uploadDir, { recursive: true });
   await writeFile(path.join(uploadDir, filename), Buffer.from(buffer));

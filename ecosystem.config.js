@@ -13,6 +13,7 @@ module.exports = {
         NODE_ENV: "production",
         PORT: 3002,
         HOSTNAME: "0.0.0.0",
+        UPLOAD_DIR: "/var/www/nilmani/public/uploads",
       },
     },
   ],
