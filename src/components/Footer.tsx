@@ -114,37 +114,6 @@ export function Footer() {
           <div className="flex flex-wrap gap-12">
             <div>
               <p className="mb-4 text-xs font-medium uppercase tracking-luxury text-gold">
-                Navigate
-              </p>
-              <div className="flex flex-col gap-3">
-                <Link
-                  href="/"
-                  className="text-sm text-brand-muted transition-colors hover:text-brand-text"
-                >
-                  Home
-                </Link>
-                <Link
-                  href="/#about"
-                  className="text-sm text-brand-muted transition-colors hover:text-brand-text"
-                >
-                  About
-                </Link>
-                <Link
-                  href="/booking"
-                  className="text-sm text-brand-muted transition-colors hover:text-brand-text"
-                >
-                  Booking
-                </Link>
-                <Link
-                  href="/contact"
-                  className="text-sm text-brand-muted transition-colors hover:text-brand-text"
-                >
-                  Contact
-                </Link>
-              </div>
-            </div>
-            <div>
-              <p className="mb-4 text-xs font-medium uppercase tracking-luxury text-gold">
                 Contact
               </p>
               <div className="flex flex-col gap-3">
@@ -175,19 +144,14 @@ export function Footer() {
             © 2026 Nilmani Ceylon Tours. All rights reserved.{" "}
             Government registered company.
           </p>
-          <div className="flex items-center gap-6">
-            <Link
-              href="/privacy"
-              className="text-sm text-brand-faint transition-colors hover:text-brand-muted"
-            >
-              Privacy Policy
-            </Link>
-            <Link
-              href="/terms"
-              className="text-sm text-brand-faint transition-colors hover:text-brand-muted"
-            >
-              Terms &amp; Conditions
-            </Link>
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+            <Link href="/" className="text-sm text-brand-faint transition-colors hover:text-brand-muted">Home</Link>
+            <Link href="/#about" className="text-sm text-brand-faint transition-colors hover:text-brand-muted">About</Link>
+            <Link href="/booking" className="text-sm text-brand-faint transition-colors hover:text-brand-muted">Booking</Link>
+            <Link href="/contact" className="text-sm text-brand-faint transition-colors hover:text-brand-muted">Contact</Link>
+            <span className="text-brand-border" aria-hidden="true">|</span>
+            <Link href="/privacy" className="text-sm text-brand-faint transition-colors hover:text-brand-muted">Privacy Policy</Link>
+            <Link href="/terms" className="text-sm text-brand-faint transition-colors hover:text-brand-muted">Terms &amp; Conditions</Link>
           </div>
         </div>
       </div>
