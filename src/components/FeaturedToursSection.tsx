@@ -22,6 +22,7 @@ export async function FeaturedToursSection() {
       slug: toursTable.slug,
       title: toursTable.title,
       subtitle: toursTable.subtitle,
+      summary: toursTable.summary,
       description: toursTable.description,
       category: toursTable.category,
       duration: toursTable.duration,
@@ -122,7 +123,7 @@ export async function FeaturedToursSection() {
                   )}
 
                   <p className="mb-6 mt-1 flex-1 text-sm leading-relaxed text-brand-muted line-clamp-3">
-                    {tour.description}
+                    {tour.summary ?? tour.description}
                   </p>
 
                   <span className="inline-flex items-center gap-2 text-xs font-medium uppercase tracking-luxury text-gold transition-all duration-300 group-hover:gap-3">

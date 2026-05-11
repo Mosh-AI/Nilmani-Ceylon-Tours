@@ -11,6 +11,7 @@ type TourData = {
   slug?: string;
   title?: string;
   subtitle?: string;
+  summary?: string;
   description?: string;
   duration?: number;
   price?: number;
@@ -201,6 +202,7 @@ export function TourForm({ initial }: { initial?: TourData }) {
     slug: "",
     title: "",
     subtitle: "",
+    summary: "",
     description: "",
     duration: 7,
     price: 0,
@@ -314,16 +316,27 @@ export function TourForm({ initial }: { initial?: TourData }) {
             />
           </div>
           <div className="sm:col-span-2">
-            <label className={labelClass}>Description *</label>
+            <label className={labelClass}>Tour Summary</label>
             <textarea
-              required
-              rows={4}
-              value={form.description}
-              onChange={(e) => set("description", e.target.value)}
-              placeholder="Describe the tour experience in detail..."
+              rows={2}
+              value={form.summary}
+              onChange={(e) => set("summary", e.target.value)}
+              placeholder="Short 1–2 sentence summary shown on tour listing cards..."
               className={`${inputClass} resize-none`}
             />
-            <p className={hintClass}>Aim for 150–300 words. This appears on the tour page.</p>
+            <p className={hintClass}>Shown on tour cards and search results. Keep under 200 characters.</p>
+          </div>
+          <div className="sm:col-span-2">
+            <label className={labelClass}>About this Tour *</label>
+            <textarea
+              required
+              rows={8}
+              value={form.description}
+              onChange={(e) => set("description", e.target.value)}
+              placeholder="Full tour description shown on the tour detail page. Include all destinations, experiences, and what makes this tour special..."
+              className={`${inputClass} resize-none`}
+            />
+            <p className={hintClass}>Full description shown on the tour detail page. Paste the complete "About this Tour" text from the client document.</p>
           </div>
         </div>
       </section>

@@ -23,7 +23,7 @@ function dbRowToTour(row: typeof toursTable.$inferSelect): Tour {
     slug: row.slug,
     title: row.title,
     subtitle: row.subtitle ?? "",
-    description: row.description,
+    description: row.summary ?? row.description.slice(0, 200),
     longDescription: row.description,
     category: (row.category as Tour["category"]) ?? "Cultural",
     duration: formatDuration(row.duration),

@@ -86,6 +86,7 @@ export const tours = pgTable("tours", {
   slug: text("slug").notNull(),
   title: text("title").notNull(),
   subtitle: text("subtitle"),
+  summary: text("summary"),
   description: text("description").notNull(),
   duration: integer("duration").notNull(),
   price: integer("price").notNull(),

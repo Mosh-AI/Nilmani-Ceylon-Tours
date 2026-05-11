@@ -10,6 +10,7 @@ import { sanitizeText } from "@/lib/sanitize";
 const updateSchema = z.object({
   title: z.string().min(2).max(150).optional(),
   subtitle: z.string().max(200).optional().or(z.literal("")),
+  summary: z.string().max(500).optional().or(z.literal("")),
   description: z.string().min(10).max(5000).optional(),
   duration: z.number().int().min(1).max(60).optional(),
   price: z.number().int().min(0).optional(),
@@ -65,6 +66,7 @@ export async function PATCH(
 
   if (data.title !== undefined) updateData.title = sanitizeText(data.title);
   if (data.subtitle !== undefined) updateData.subtitle = data.subtitle ? sanitizeText(data.subtitle) : null;
+  if (data.summary !== undefined) updateData.summary = data.summary ? sanitizeText(data.summary) : null;
   if (data.description !== undefined) updateData.description = sanitizeText(data.description);
   if (data.duration !== undefined) updateData.duration = data.duration;
   if (data.price !== undefined) updateData.price = data.price;
