@@ -7,6 +7,8 @@ import { contactSchema, type ContactFormData } from "@/lib/validations";
 import { submitContactForm } from "@/app/actions/contact";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { MapPin, Mail, Phone, MessageSquare, CheckCircle2, AlertCircle } from "lucide-react";
+import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
 
 export default function ContactPage() {
   const [serverResult, setServerResult] = useState<{
@@ -45,9 +47,14 @@ export default function ContactPage() {
 
   return (
     <>
+      <Header />
+      <main className="min-h-screen bg-brand-bg pt-20">
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
-      <section className="relative bg-[#1C1209] py-24 md:py-32">
-        <div className="mx-auto max-w-6xl px-6 text-center">
+      <section className="relative overflow-hidden bg-[#1C1209] py-24 md:py-32">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/images/galle.jpg" alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover opacity-20" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#1C1209]/60 via-[#1C1209]/70 to-[#1C1209]" />
+        <div className="relative mx-auto max-w-6xl px-6 text-center">
           <Breadcrumb
             items={[{ label: "Contact" }]}
             className="mb-6 justify-center"
@@ -273,6 +280,8 @@ export default function ContactPage() {
           </div>
         </div>
       </section>
+      </main>
+      <Footer />
     </>
   );
 }
