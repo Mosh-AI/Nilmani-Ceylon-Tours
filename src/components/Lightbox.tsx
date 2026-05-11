@@ -174,9 +174,11 @@ export function Lightbox({
 
         {/* Caption and counter */}
         <div className="flex w-full flex-col items-center gap-2 text-center">
-          <p className="max-w-2xl text-sm leading-relaxed text-white/70">
-            {image.alt ?? ""}
-          </p>
+          {image.alt && (
+            <p className="max-w-2xl text-sm leading-relaxed text-white/70">
+              {image.alt}
+            </p>
+          )}
           <p className="text-xs font-medium tracking-wider text-white/40">
             {currentIndex + 1} / {total}
           </p>

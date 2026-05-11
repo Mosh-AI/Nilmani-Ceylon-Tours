@@ -255,9 +255,11 @@ function GalleryCard({ image, index, onClick }: GalleryCardProps) {
               {image.category}
             </span>
           )}
-          <p className="line-clamp-2 text-left text-sm leading-snug text-white/90">
-            {image.alt ?? ""}
-          </p>
+          {image.alt && (
+            <p className="line-clamp-2 text-left text-sm leading-snug text-white/90">
+              {image.alt}
+            </p>
+          )}
         </div>
       </div>
     </button>
