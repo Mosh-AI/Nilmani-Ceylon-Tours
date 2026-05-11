@@ -33,6 +33,10 @@ jobs:
             # Stop PM2 before build to prevent restarts on incomplete .next
             pm2 stop nilmani || true
 
+            # Kill any stale next build processes and remove lock file
+            pkill -f "next build" || true
+            rm -f .next/cache/.build-lock
+
             # Build Next.js (output: standalone)
             node node_modules/next/dist/bin/next build
 
