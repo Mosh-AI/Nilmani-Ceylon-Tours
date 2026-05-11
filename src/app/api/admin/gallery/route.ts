@@ -7,7 +7,7 @@ import { apiHeaders } from "@/lib/api-headers";
 import { z } from "zod";
 
 const addSchema = z.object({
-  url: z.string().url().max(500),
+  url: z.string().min(1).max(500),
   alt: z.string().max(200).optional().or(z.literal("")),
   category: z.string().max(100).optional().or(z.literal("")),
   sortOrder: z.number().int().min(0).optional(),

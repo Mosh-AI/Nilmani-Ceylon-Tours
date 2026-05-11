@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { AdminPageHeader } from "../_components/AdminPageHeader";
-import { Images, Trash2, Upload, X } from "lucide-react";
+import { Images, Trash2, Upload, X, CheckCircle } from "lucide-react";
 
 type GalleryImage = {
   id: string;
@@ -17,7 +17,9 @@ const CATEGORIES = ["All", "Landmarks", "Landscapes", "Wildlife", "Beaches", "Cu
 export default function GalleryPage() {
   const [images, setImages] = useState<GalleryImage[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<{ done: number; total: number } | null>(null);
   const [uploadError, setUploadError] = useState("");
+  const [uploadSuccess, setUploadSuccess] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -29,22 +31,32 @@ export default function GalleryPage() {
 
   async function handleFileUpload(files: FileList | null) {
     if (!files?.length) return;
+    const fileArray = Array.from(files);
     setUploading(true);
     setUploadError("");
+    setUploadSuccess("");
+    setUploadProgress({ done: 0, total: fileArray.length });
 
-    for (const file of Array.from(files)) {
+    let successCount = 0;
+
+    for (let i = 0; i < fileArray.length; i++) {
+      const file = fileArray[i];
       const fd = new FormData();
       fd.append("file", file);
 
+      // Step 1: Upload file to storage
       const upRes = await fetch("/api/admin/upload", { method: "POST", body: fd });
       const upData = await upRes.json();
 
       if (!upRes.ok) {
-        setUploadError(upData.error ?? "Upload failed");
+        setUploadError(`${file.name}: ${upData.error ?? "Upload failed"}`);
         setUploading(false);
+        setUploadProgress(null);
+        if (fileRef.current) fileRef.current.value = "";
         return;
       }
 
+      // Step 2: Register image in gallery DB
       const addRes = await fetch("/api/admin/gallery", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -52,18 +64,35 @@ export default function GalleryPage() {
           url: upData.url,
           alt: file.name.replace(/\.[^.]+$/, ""),
           category: selectedCategory === "All" ? "" : selectedCategory,
-          sortOrder: images.length,
+          sortOrder: images.length + i,
         }),
       });
 
       const addData = await addRes.json();
+
+      if (!addRes.ok) {
+        setUploadError(`${file.name}: ${addData.error ?? "Failed to save to gallery"}`);
+        setUploading(false);
+        setUploadProgress(null);
+        if (fileRef.current) fileRef.current.value = "";
+        return;
+      }
+
       if (addData.image) {
         setImages((prev) => [...prev, addData.image]);
+        successCount++;
       }
+
+      setUploadProgress({ done: i + 1, total: fileArray.length });
     }
 
     setUploading(false);
+    setUploadProgress(null);
     if (fileRef.current) fileRef.current.value = "";
+    if (successCount > 0) {
+      setUploadSuccess(`${successCount} photo${successCount > 1 ? "s" : ""} uploaded successfully.`);
+      setTimeout(() => setUploadSuccess(""), 4000);
+    }
   }
 
   async function handleDelete(id: string) {
@@ -89,7 +118,11 @@ export default function GalleryPage() {
             className="inline-flex items-center gap-2 rounded-lg bg-[#1C1209] px-4 py-2 text-sm font-semibold text-[#C9A84C] hover:bg-[#2E1E0A] disabled:opacity-60"
           >
             <Upload className="h-4 w-4" />
-            {uploading ? "Uploading…" : "Upload Photos"}
+            {uploading
+            ? uploadProgress
+              ? `Uploading ${uploadProgress.done}/${uploadProgress.total}…`
+              : "Uploading…"
+            : "Upload Photos"}
           </button>
         }
       />
@@ -104,10 +137,32 @@ export default function GalleryPage() {
         onChange={(e) => handleFileUpload(e.target.files)}
       />
 
+      {uploadSuccess && (
+        <div className="mb-4 flex items-center gap-2 rounded-lg bg-green-50 px-4 py-3 text-sm text-green-800">
+          <CheckCircle className="h-4 w-4 shrink-0" />
+          {uploadSuccess}
+        </div>
+      )}
+
       {uploadError && (
         <div className="mb-4 flex items-center justify-between rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800">
           {uploadError}
           <button onClick={() => setUploadError("")}><X className="h-4 w-4" /></button>
+        </div>
+      )}
+
+      {uploading && uploadProgress && (
+        <div className="mb-4 rounded-lg bg-amber-50 px-4 py-3">
+          <div className="mb-1 flex justify-between text-xs font-medium text-amber-800">
+            <span>Uploading photos…</span>
+            <span>{uploadProgress.done}/{uploadProgress.total}</span>
+          </div>
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-amber-200">
+            <div
+              className="h-full rounded-full bg-[#C9A84C] transition-all duration-300"
+              style={{ width: `${(uploadProgress.done / uploadProgress.total) * 100}%` }}
+            />
+          </div>
         </div>
       )}
 
