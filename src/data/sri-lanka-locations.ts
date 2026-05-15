@@ -13,48 +13,50 @@ export interface SriLankaLocation {
 
 export const SRI_LANKA_LOCATIONS: SriLankaLocation[] = [
   // ── North ──
-  { slug: "jaffna",          name: "Jaffna",          region: "north",         mapX: 210, mapY: 45  },
-  { slug: "mannar",          name: "Mannar",          region: "north",         mapX: 130, mapY: 130 },
+  // Coordinates derived from affine transform (svgX = 175.383·lng − 13943.8, svgY = −183.888·lat + 1861.187)
+  // with IDW bias-correction anchored to 5 hand-verified reference pins from DestinationsSection.
+  { slug: "jaffna",          name: "Jaffna",          region: "north",         mapX:  91, mapY:  85 },
+  { slug: "mannar",          name: "Mannar",          region: "north",         mapX:  74, mapY: 211 },
 
   // ── North Central ──
-  { slug: "anuradhapura",    name: "Anuradhapura",    region: "north-central", mapX: 188, mapY: 195 },
-  { slug: "trincomalee",     name: "Trincomalee",     region: "north-central", mapX: 285, mapY: 200 },
-  { slug: "polonnaruwa",     name: "Polonnaruwa",     region: "north-central", mapX: 258, mapY: 275 },
-  { slug: "sigiriya",        name: "Sigiriya",        region: "north-central", mapX: 212, mapY: 295 },
-  { slug: "dambulla",        name: "Dambulla",        region: "north-central", mapX: 192, mapY: 315 },
-  { slug: "kurunegala",      name: "Kurunegala",      region: "north-central", mapX: 152, mapY: 355 },
+  { slug: "anuradhapura",    name: "Anuradhapura",    region: "north-central", mapX: 165, mapY: 335 },
+  { slug: "trincomalee",     name: "Trincomalee",     region: "north-central", mapX: 306, mapY: 284 },
+  { slug: "polonnaruwa",     name: "Polonnaruwa",     region: "north-central", mapX: 272, mapY: 405 },
+  { slug: "sigiriya",        name: "Sigiriya",        region: "north-central", mapX: 231, mapY: 403 }, // verified
+  { slug: "dambulla",        name: "Dambulla",        region: "north-central", mapX: 211, mapY: 418 },
+  { slug: "kurunegala",      name: "Kurunegala",      region: "north-central", mapX: 153, mapY: 482 },
 
   // ── East ──
-  { slug: "batticaloa",      name: "Batticaloa",      region: "east",          mapX: 318, mapY: 360 },
-  { slug: "arugam-bay",      name: "Arugam Bay",      region: "east",          mapX: 318, mapY: 430 },
-  { slug: "ampara",          name: "Ampara",          region: "east",          mapX: 292, mapY: 445 },
+  { slug: "batticaloa",      name: "Batticaloa",      region: "east",          mapX: 388, mapY: 443 },
+  { slug: "arugam-bay",      name: "Arugam Bay",      region: "east",          mapX: 407, mapY: 613 },
+  { slug: "ampara",          name: "Ampara",          region: "east",          mapX: 382, mapY: 519 },
 
   // ── Central / Hill Country ──
-  { slug: "matale",          name: "Matale",          region: "central",       mapX: 188, mapY: 368 },
-  { slug: "kandy",           name: "Kandy",           region: "central",       mapX: 188, mapY: 420 },
-  { slug: "nuwara-eliya",    name: "Nuwara Eliya",    region: "central",       mapX: 212, mapY: 490 },
-  { slug: "badulla",         name: "Badulla",         region: "central",       mapX: 255, mapY: 505 },
-  { slug: "haputale",        name: "Haputale",        region: "central",       mapX: 222, mapY: 545 },
-  { slug: "ella",            name: "Ella",            region: "central",       mapX: 238, mapY: 535 },
-  { slug: "ratnapura",       name: "Ratnapura",       region: "central",       mapX: 162, mapY: 535 },
+  { slug: "matale",          name: "Matale",          region: "central",       mapX: 198, mapY: 485 },
+  { slug: "kandy",           name: "Kandy",           region: "central",       mapX: 196, mapY: 514 },
+  { slug: "nuwara-eliya",    name: "Nuwara Eliya",    region: "central",       mapX: 212, mapY: 572 }, // verified
+  { slug: "badulla",         name: "Badulla",         region: "central",       mapX: 282, mapY: 565 },
+  { slug: "haputale",        name: "Haputale",        region: "central",       mapX: 263, mapY: 607 },
+  { slug: "ella",            name: "Ella",            region: "central",       mapX: 287, mapY: 587 }, // verified
+  { slug: "ratnapura",       name: "Ratnapura",       region: "central",       mapX: 154, mapY: 625 },
 
   // ── West ──
-  { slug: "negombo",         name: "Negombo",         region: "west",          mapX: 98,  mapY: 430 },
-  { slug: "colombo-airport", name: "Colombo Airport", region: "west",          mapX: 100, mapY: 445 },
-  { slug: "colombo",         name: "Colombo",         region: "west",          mapX: 108, mapY: 480 },
-  { slug: "kegalle",         name: "Kegalle",         region: "west",          mapX: 155, mapY: 455 },
+  { slug: "negombo",         name: "Negombo",         region: "west",          mapX:  58, mapY: 531 },
+  { slug: "colombo-airport", name: "Colombo Airport", region: "west",          mapX:  66, mapY: 536 },
+  { slug: "colombo",         name: "Colombo",         region: "west",          mapX:  61, mapY: 582 },
+  { slug: "kegalle",         name: "Kegalle",         region: "west",          mapX: 146, mapY: 522 },
 
   // ── South ──
-  { slug: "yala",            name: "Yala",            region: "south",         mapX: 268, mapY: 595 },
-  { slug: "tissamaharama",   name: "Tissamaharama",   region: "south",         mapX: 260, mapY: 615 },
-  { slug: "hambantota",      name: "Hambantota",      region: "south",         mapX: 248, mapY: 650 },
-  { slug: "tangalle",        name: "Tangalle",        region: "south",         mapX: 218, mapY: 645 },
-  { slug: "matara",          name: "Matara",          region: "south",         mapX: 198, mapY: 648 },
-  { slug: "mirissa",         name: "Mirissa",         region: "south",         mapX: 172, mapY: 648 },
-  { slug: "weligama",        name: "Weligama",        region: "south",         mapX: 160, mapY: 648 },
-  { slug: "galle",           name: "Galle",           region: "south",         mapX: 138, mapY: 638 },
-  { slug: "unawatuna",       name: "Unawatuna",       region: "south",         mapX: 143, mapY: 642 },
-  { slug: "hikkaduwa",       name: "Hikkaduwa",       region: "south",         mapX: 118, mapY: 628 },
+  { slug: "yala",            name: "Yala",            region: "south",         mapX: 344, mapY: 720 }, // verified
+  { slug: "tissamaharama",   name: "Tissamaharama",   region: "south",         mapX: 307, mapY: 725 },
+  { slug: "hambantota",      name: "Hambantota",      region: "south",         mapX: 279, mapY: 745 },
+  { slug: "tangalle",        name: "Tangalle",        region: "south",         mapX: 224, mapY: 751 },
+  { slug: "matara",          name: "Matara",          region: "south",         mapX: 180, mapY: 757 },
+  { slug: "mirissa",         name: "Mirissa",         region: "south",         mapX: 161, mapY: 757 },
+  { slug: "weligama",        name: "Weligama",        region: "south",         mapX: 157, mapY: 751 },
+  { slug: "galle",           name: "Galle",           region: "south",         mapX: 120, mapY: 735 }, // verified
+  { slug: "unawatuna",       name: "Unawatuna",       region: "south",         mapX: 125, mapY: 743 },
+  { slug: "hikkaduwa",       name: "Hikkaduwa",       region: "south",         mapX:  99, mapY: 720 },
 ];
 
 // O(1) lookup by slug

@@ -15,6 +15,7 @@ import {
   Menu,
   X,
   Route,
+  Crosshair,
 } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -25,6 +26,7 @@ const nav = [
   { href: "/admin/bookings", label: "Bookings", icon: CalendarCheck },
   { href: "/admin/tours", label: "Tours", icon: Map },
   { href: "/admin/routes", label: "Routes", icon: Route },
+  { href: "/admin/map-calibrate", label: "Map Calibrate", icon: Crosshair },
   { href: "/admin/gallery", label: "Gallery", icon: Images },
   { href: "/admin/blog", label: "Blog", icon: BookOpen },
   { href: "/admin/testimonials", label: "Testimonials", icon: Star },
