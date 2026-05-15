@@ -21,7 +21,8 @@ jobs:
 
             cd /var/www/nilmani
 
-            # Pull latest code
+            # Pull latest code (reset lock file changes from previous npm installs on VPS)
+            git checkout -- package-lock.json 2>/dev/null || true
             git pull origin master
 
             # Install all dependencies (build requires tailwind, typescript, etc.)
