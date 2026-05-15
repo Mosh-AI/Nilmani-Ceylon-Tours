@@ -5,7 +5,7 @@ import { db } from "@/db";
 import { routes, routeStops } from "@/db/schema";
 import { asc } from "drizzle-orm";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Customize Your Tour | Nilmani Ceylon Tours",

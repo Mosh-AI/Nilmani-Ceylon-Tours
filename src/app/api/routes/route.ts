@@ -4,7 +4,7 @@ import { routes, routeStops } from "@/db/schema";
 import { asc } from "drizzle-orm";
 import { apiHeaders } from "@/lib/api-headers";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 export async function GET() {
   const allRoutes = await db
