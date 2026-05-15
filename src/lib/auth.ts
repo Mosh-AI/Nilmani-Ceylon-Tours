@@ -18,14 +18,6 @@ export const auth = betterAuth({
     autoSignIn: true,
   },
 
-  /* ── Social Providers ── */
-  socialProviders: {
-    google: {
-      clientId: process.env.GOOGLE_CLIENT_ID ?? "",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
-    },
-  },
-
   /* ── Session ── */
   session: {
     expiresIn: 86400, // 24 hours in seconds
@@ -52,14 +44,6 @@ export const auth = betterAuth({
         defaultValue: "user",
         input: false, // cannot be set by the client
       },
-    },
-  },
-
-  /* ── Account Linking ── */
-  account: {
-    accountLinking: {
-      enabled: true,
-      trustedProviders: ["google"],
     },
   },
 
