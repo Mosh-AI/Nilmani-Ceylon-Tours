@@ -267,6 +267,26 @@ export const contactSubmissions = pgTable("contact_submissions", {
   index("contact_submissions_email_idx").on(table.email),
 ]);
 
+export const routes = pgTable("routes", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  description: text("description"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, (table) => [
+  index("routes_created_at_idx").on(table.createdAt),
+]);
+
+export const routeStops = pgTable("route_stops", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  routeId: uuid("route_id").notNull().references(() => routes.id, { onDelete: "cascade" }),
+  locationSlug: text("location_slug").notNull(),
+  stopOrder: integer("stop_order").notNull(),
+}, (table) => [
+  uniqueIndex("route_stops_route_location_idx").on(table.routeId, table.locationSlug),
+  index("route_stops_route_id_idx").on(table.routeId),
+]);
+
 /* ────────────────────────────────────────────────────
  * Relations
  * ──────────────────────────────────────────────────── */
@@ -332,4 +352,12 @@ export const messagesRelations = relations(messages, ({ one }) => ({
 export const favoritesRelations = relations(favorites, ({ one }) => ({
   user: one(user, { fields: [favorites.userId], references: [user.id] }),
   tour: one(tours, { fields: [favorites.tourId], references: [tours.id] }),
+}));
+
+export const routesRelations = relations(routes, ({ many }) => ({
+  stops: many(routeStops),
+}));
+
+export const routeStopsRelations = relations(routeStops, ({ one }) => ({
+  route: one(routes, { fields: [routeStops.routeId], references: [routes.id] }),
 }));

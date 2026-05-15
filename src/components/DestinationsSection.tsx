@@ -314,10 +314,10 @@ export function DestinationsSection() {
             </h2>
           </div>
           <Link
-            href="/booking"
+            href="/tours/customize"
             className="dest-header btn-outline-gold self-start rounded-full px-6 py-3 text-xs font-semibold tracking-luxury md:self-end"
           >
-            Plan Your Journey
+            Customize Your Tour
           </Link>
         </div>
 

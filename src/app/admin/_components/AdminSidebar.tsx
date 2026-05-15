@@ -14,6 +14,7 @@ import {
   LogOut,
   Menu,
   X,
+  Route,
 } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -23,6 +24,7 @@ const nav = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { href: "/admin/bookings", label: "Bookings", icon: CalendarCheck },
   { href: "/admin/tours", label: "Tours", icon: Map },
+  { href: "/admin/routes", label: "Routes", icon: Route },
   { href: "/admin/gallery", label: "Gallery", icon: Images },
   { href: "/admin/blog", label: "Blog", icon: BookOpen },
   { href: "/admin/testimonials", label: "Testimonials", icon: Star },
