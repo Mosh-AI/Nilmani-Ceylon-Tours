@@ -287,6 +287,12 @@ export const routeStops = pgTable("route_stops", {
   index("route_stops_route_id_idx").on(table.routeId),
 ]);
 
+export const mapUsageLogs = pgTable("map_usage_logs", {
+  date: date("date").primaryKey(),
+  pageViews: integer("page_views").notNull().default(0),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 /* ────────────────────────────────────────────────────
  * Relations
  * ──────────────────────────────────────────────────── */

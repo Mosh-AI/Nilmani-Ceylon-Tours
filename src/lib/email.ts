@@ -244,3 +244,95 @@ export async function sendBookingConfirmationToGuest(
     html: htmlWrapper("Booking Enquiry Received", body),
   });
 }
+
+/* ── Google Maps usage alerts ─────────────────────────────────────────────── */
+
+export function sendMapVisitorAlert(
+  currentCount: number,
+  threshold: number,
+  to: string
+) {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://nilmaniceylontours.skymaxsolution.com";
+  const body = `
+    <h2 style="color:#1C1209;font-size:20px;margin:0 0 16px;">Customize Tour Visitor Milestone</h2>
+    <p>Your <strong>Customize Your Tour</strong> page has reached
+       <strong style="color:#C9A84C;">${currentCount.toLocaleString()} visitors</strong> this month,
+       approaching your alert threshold of ${threshold.toLocaleString()}.</p>
+    <table style="width:100%;border-collapse:collapse;margin:20px 0;">
+      ${row("This Month", `${currentCount.toLocaleString()} visitors`)}
+      ${row("Alert Threshold", `${threshold.toLocaleString()} visitors`)}
+    </table>
+    <p>Monitor usage and adjust thresholds from your admin dashboard:</p>
+    <p>
+      <a href="${siteUrl}/admin/maps-monitor"
+         style="background:#C9A84C;color:#1C1209;padding:12px 24px;border-radius:4px;text-decoration:none;font-weight:bold;display:inline-block;">
+        View Maps Monitor
+      </a>
+    </p>`;
+  return resend.emails.send({
+    from: FROM,
+    to,
+    subject: `[Nilmani Maps] Customize Tour reached ${currentCount.toLocaleString()} visitors this month`,
+    html: htmlWrapper("Maps Visitor Alert", body),
+  });
+}
+
+export function sendMapFreeTierAlert(
+  currentCount: number,
+  autoDisableAt: number,
+  to: string
+) {
+  const freeTierLimit = 28500;
+  const pct = Math.round((currentCount / freeTierLimit) * 100);
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://nilmaniceylontours.skymaxsolution.com";
+  const body = `
+    <h2 style="color:#C9A84C;font-size:20px;margin:0 0 16px;">⚠ Approaching Google Maps Free Tier</h2>
+    <p>Your Google Maps usage this month is nearing the free-tier limit. If it exceeds
+       <strong>${autoDisableAt.toLocaleString()}</strong> map loads, Google Maps will be
+       <strong>automatically disabled</strong> and the page will switch to the built-in SVG map.</p>
+    <table style="width:100%;border-collapse:collapse;margin:20px 0;">
+      ${row("Current Usage", `${currentCount.toLocaleString()} map loads (${pct}% of free tier)`)}
+      ${row("Free Tier Limit", `~${freeTierLimit.toLocaleString()} map loads / month`)}
+      ${row("Auto-disable At", `${autoDisableAt.toLocaleString()} map loads`)}
+    </table>
+    <p>You can raise the auto-disable threshold or manually disable Google Maps now:</p>
+    <p>
+      <a href="${siteUrl}/admin/maps-monitor"
+         style="background:#C9A84C;color:#1C1209;padding:12px 24px;border-radius:4px;text-decoration:none;font-weight:bold;display:inline-block;">
+        Manage Maps Settings
+      </a>
+    </p>`;
+  return resend.emails.send({
+    from: FROM,
+    to,
+    subject: `[Nilmani Maps] ⚠ Approaching Google Maps free tier (${pct}% used)`,
+    html: htmlWrapper("Maps Free Tier Warning", body),
+  });
+}
+
+export function sendMapAutoDisabledEmail(to: string) {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://nilmaniceylontours.skymaxsolution.com";
+  const body = `
+    <h2 style="color:#c0392b;font-size:20px;margin:0 0 16px;">🔴 Google Maps Auto-Disabled</h2>
+    <p>To protect you from unexpected Google Maps billing charges, the Google Maps feature on
+       your <strong>Customize Your Tour</strong> page has been <strong>automatically disabled</strong>
+       for this month.</p>
+    <p>The page is now showing the <strong>built-in SVG map</strong> as a fallback — your visitors
+       can still use the full route-finding feature.</p>
+    <table style="width:100%;border-collapse:collapse;margin:20px 0;">
+      ${row("Action Taken", "Google Maps disabled, SVG map active")}
+      ${row("Resets", "At the start of next month you can re-enable from the admin panel")}
+    </table>
+    <p>
+      <a href="${siteUrl}/admin/maps-monitor"
+         style="background:#C9A84C;color:#1C1209;padding:12px 24px;border-radius:4px;text-decoration:none;font-weight:bold;display:inline-block;">
+        Go to Maps Monitor
+      </a>
+    </p>`;
+  return resend.emails.send({
+    from: FROM,
+    to,
+    subject: `[Nilmani Maps] 🔴 Google Maps auto-disabled — free tier protection`,
+    html: htmlWrapper("Google Maps Auto-Disabled", body),
+  });
+}

@@ -16,6 +16,7 @@ import {
   X,
   Route,
   Crosshair,
+  Activity,
 } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -27,6 +28,7 @@ const nav = [
   { href: "/admin/tours", label: "Tours", icon: Map },
   { href: "/admin/routes", label: "Routes", icon: Route },
   { href: "/admin/map-calibrate", label: "Map Calibrate", icon: Crosshair },
+  { href: "/admin/maps-monitor", label: "Maps Monitor", icon: Activity },
   { href: "/admin/gallery", label: "Gallery", icon: Images },
   { href: "/admin/blog", label: "Blog", icon: BookOpen },
   { href: "/admin/testimonials", label: "Testimonials", icon: Star },
