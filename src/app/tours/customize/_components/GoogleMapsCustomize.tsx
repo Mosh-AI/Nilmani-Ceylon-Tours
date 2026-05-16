@@ -110,7 +110,7 @@ export function GoogleMapsCustomize({ routes }: GoogleMapsCustomizeProps) {
         );
         for (const loc of routeLocs) {
           const marker = new google.maps.Marker({
-            position: { lat: loc.mapY, lng: loc.mapX },
+            position: { lat: loc.lat, lng: loc.lng },
             map,
             title: loc.name,
             optimized: false,
@@ -136,48 +136,13 @@ export function GoogleMapsCustomize({ routes }: GoogleMapsCustomizeProps) {
   useEffect(() => {
     if (!mapLoaded) return;
 
-    const geoCoords: Record<string, { lat: number; lng: number }> = {
-      "jaffna":          { lat: 9.6615,  lng: 80.0070 },
-      "mannar":          { lat: 8.9774,  lng: 79.9046 },
-      "anuradhapura":    { lat: 8.3114,  lng: 80.4037 },
-      "trincomalee":     { lat: 8.5874,  lng: 81.2152 },
-      "polonnaruwa":     { lat: 7.9403,  lng: 81.0003 },
-      "sigiriya":        { lat: 7.9572,  lng: 80.7603 },
-      "dambulla":        { lat: 7.8731,  lng: 80.6511 },
-      "kurunegala":      { lat: 7.4863,  lng: 80.3631 },
-      "batticaloa":      { lat: 7.7170,  lng: 81.7000 },
-      "arugam-bay":      { lat: 6.8406,  lng: 81.8356 },
-      "ampara":          { lat: 7.2984,  lng: 81.6724 },
-      "matale":          { lat: 7.4675,  lng: 80.6234 },
-      "kandy":           { lat: 7.2906,  lng: 80.6337 },
-      "nuwara-eliya":    { lat: 6.9497,  lng: 80.7891 },
-      "badulla":         { lat: 6.9934,  lng: 81.0550 },
-      "haputale":        { lat: 6.7668,  lng: 80.9535 },
-      "ella":            { lat: 6.8686,  lng: 81.0466 },
-      "ratnapura":       { lat: 6.6806,  lng: 80.4022 },
-      "negombo":         { lat: 7.2096,  lng: 79.8386 },
-      "colombo-airport": { lat: 7.1803,  lng: 79.8840 },
-      "colombo":         { lat: 6.9271,  lng: 79.8612 },
-      "kegalle":         { lat: 7.2513,  lng: 80.3464 },
-      "yala":            { lat: 6.3728,  lng: 81.5201 },
-      "tissamaharama":   { lat: 6.2931,  lng: 81.2923 },
-      "hambantota":      { lat: 6.1241,  lng: 81.1185 },
-      "tangalle":        { lat: 6.0241,  lng: 80.7997 },
-      "matara":          { lat: 5.9549,  lng: 80.5550 },
-      "mirissa":         { lat: 5.9477,  lng: 80.4538 },
-      "weligama":        { lat: 5.9739,  lng: 80.4283 },
-      "galle":           { lat: 6.0535,  lng: 80.2210 },
-      "unawatuna":       { lat: 6.0099,  lng: 80.2490 },
-      "hikkaduwa":       { lat: 6.1395,  lng: 80.0998 },
-    };
-
     for (const [slug, marker] of markersRef.current) {
-      const coords = geoCoords[slug];
+      const loc      = LOCATION_BY_SLUG[slug];
       const isSelected = selectedSlugs.includes(slug);
       const isActive   = activeSlugs.has(slug);
 
-      // Position (only needs to be set once but safe to repeat)
-      if (coords) marker.setPosition({ lat: coords.lat, lng: coords.lng });
+      // Position comes from the single source of truth in sri-lanka-locations.ts
+      if (loc) marker.setPosition({ lat: loc.lat, lng: loc.lng });
 
       if (!isActive && !isSelected) {
         // Impossible location — hide completely
