@@ -7,15 +7,24 @@ import { SRI_LANKA_DISTRICTS } from "@/components/sri-lanka-map-data";
 import type { RouteData } from "./CustomizeTourMap";
 
 /*
- * Overlay alignment:
- * SVG viewBox 0 0 450 793 uses the affine:
+ * Dynamic overlay alignment:
+ * The SVG uses the calibrated affine transform:
  *   svgX = 175.383·lng − 13943.8
  *   svgY = −183.888·lat + 1861.187
  *
- * Google Maps at zoom 7.8, center 7.87°N 80.77°E makes Sri Lanka fill
- * the 600 px tall container to ≈616 px, which matches the SVG at "meet"
- * scaling (600/793×450 = 340 px wide). Alignment is within ~5 px.
+ * On every `bounds_changed` event we read the Google Maps viewport bounds,
+ * convert them to SVG space with the same affine, and update the SVG viewBox.
+ * This keeps the district overlay and pins pixel-locked to the real map as
+ * the user zooms or pans — no re-render of the map itself needed.
  */
+
+/** Convert a lat/lng pair to SVG coordinate space */
+function toSvg(lat: number, lng: number) {
+  return {
+    x:  175.383 * lng - 13943.8,
+    y: -183.888 * lat + 1861.187,
+  };
+}
 
 // Minimal dark map style — terrain only, no labels cluttering the overlay
 const MAP_STYLES: google.maps.MapTypeStyle[] = [
@@ -83,6 +92,8 @@ export function GoogleMapsCustomize({ routes }: GoogleMapsCustomizeProps) {
   const [mapLoaded, setMapLoaded]     = useState(false);
   const [loadError, setLoadError]     = useState(false);
   const [selectedSlugs, setSelectedSlugs] = useState<string[]>([]);
+  // SVG viewBox tracks the Google Maps viewport in real time
+  const [svgViewBox, setSvgViewBox] = useState("0 0 450 793");
 
   // Only slugs that appear in at least one route
   const allRouteSlugs = useMemo(() => {
@@ -116,7 +127,7 @@ export function GoogleMapsCustomize({ routes }: GoogleMapsCustomizeProps) {
     [allRouteSlugs]
   );
 
-  // Init Google Maps — background only, no controls, locked view
+  // Init Google Maps — scroll-zoomable, SVG overlay tracks bounds in real time
   useEffect(() => {
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
     if (!apiKey || !mapRef.current) return;
@@ -128,21 +139,37 @@ export function GoogleMapsCustomize({ routes }: GoogleMapsCustomizeProps) {
       })
       .then(() => {
         if (!mapRef.current) return;
-        new google.maps.Map(mapRef.current, {
-          center:         { lat: 7.87, lng: 80.77 },
-          zoom:           7.8,
-          minZoom:        7.8,
-          maxZoom:        7.8,
-          mapTypeId:      "terrain",
-          styles:         MAP_STYLES,
+        const map = new google.maps.Map(mapRef.current, {
+          center:           { lat: 7.87, lng: 80.77 },
+          zoom:             7.8,
+          minZoom:          6,
+          maxZoom:          14,
+          mapTypeId:        "terrain",
+          styles:           MAP_STYLES,
           disableDefaultUI: true,
-          gestureHandling: "none",      // locked — SVG pins handle all interaction
-          draggable:       false,
+          zoomControl:      true,
+          zoomControlOptions: { position: google.maps.ControlPosition.RIGHT_CENTER },
+          gestureHandling:  "greedy",   // scroll wheel always zooms, no ctrl needed
+          draggable:        true,
+          clickableIcons:   false,
           keyboardShortcuts: false,
-          clickableIcons:  false,
         });
-        mapInstanceRef.current = null; // no need to track — purely decorative
-        setMapLoaded(true);
+        mapInstanceRef.current = map;
+
+        // Keep SVG viewBox in sync with Google Maps viewport
+        const syncViewBox = () => {
+          const bounds = map.getBounds();
+          if (!bounds) return;
+          const ne = bounds.getNorthEast();
+          const sw = bounds.getSouthWest();
+          const tl = toSvg(ne.lat(), sw.lng()); // top-left in SVG space
+          const br = toSvg(sw.lat(), ne.lng()); // bottom-right in SVG space
+          setSvgViewBox(`${tl.x} ${tl.y} ${br.x - tl.x} ${br.y - tl.y}`);
+        };
+
+        map.addListener("bounds_changed", syncViewBox);
+        // Fire once immediately after tiles load so the initial viewBox is set
+        map.addListener("tilesloaded", () => { syncViewBox(); setMapLoaded(true); });
       })
       .catch(() => setLoadError(true));
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -202,10 +229,10 @@ export function GoogleMapsCustomize({ routes }: GoogleMapsCustomizeProps) {
               </div>
             )}
 
-            {/* ── Layer 2: SVG island overlay ── */}
+            {/* ── Layer 2: SVG island overlay — viewBox tracks map viewport ── */}
             <svg
-              viewBox="0 0 450 793"
-              preserveAspectRatio="xMidYMid meet"
+              viewBox={svgViewBox}
+              preserveAspectRatio="none"
               className="absolute inset-0 h-full w-full pointer-events-none"
               xmlns="http://www.w3.org/2000/svg"
               aria-hidden="true"
