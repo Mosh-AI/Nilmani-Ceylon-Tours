@@ -2,6 +2,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { CustomizeTourMap, type RouteData } from "./_components/CustomizeTourMap";
 import { GoogleMapsCustomize } from "./_components/GoogleMapsCustomize";
+import { CustomizeMapExplorer } from "./_components/CustomizeMapExplorer";
 import { db } from "@/db";
 import { routes, routeStops, siteSettings } from "@/db/schema";
 import { asc, eq } from "drizzle-orm";
@@ -48,7 +49,7 @@ async function getMapsEnabled(): Promise<boolean> {
     .select({ value: siteSettings.value })
     .from(siteSettings)
     .where(eq(siteSettings.key, "google_maps_enabled"));
-  return rows[0]?.value !== "false"; // default true if not set
+  return rows[0]?.value !== "false";
 }
 
 export default async function CustomizeTourPage() {
@@ -56,53 +57,76 @@ export default async function CustomizeTourPage() {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? "";
   const useGoogleMaps = mapsEnabled && apiKey.length > 0;
 
-  // Fire-and-forget: track this page load, check thresholds, send alerts
   trackMapLoad();
 
   return (
-    <main className="min-h-screen bg-brand-bg">
+    <main className="min-h-screen bg-[#1C1209]">
       <Header />
 
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-[#1C1209] pb-16 pt-36">
-        <div className="pointer-events-none absolute inset-0 opacity-10"
+      {/* ── Page title hero — slim, dark ── */}
+      <section className="relative overflow-hidden bg-[#0C0804] pb-12 pt-32">
+        <div
+          className="pointer-events-none absolute inset-0 opacity-15"
           style={{
-            backgroundImage:
-              "radial-gradient(ellipse 80% 60% at 50% 0%, #C9A84C 0%, transparent 70%)",
+            backgroundImage: "radial-gradient(ellipse 70% 55% at 50% 0%, #C9A84C 0%, transparent 70%)",
           }}
         />
         <div className="relative mx-auto max-w-7xl px-6 lg:px-12">
           <div className="mb-4 flex items-center gap-3">
             <div className="h-px w-8 bg-[#C9A84C]" />
-            <span className="text-xs font-medium uppercase tracking-[0.18em] text-[#C9A84C]">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#C9A84C]">
               Build Your Journey
             </span>
           </div>
           <h1 className="font-serif text-4xl font-light leading-tight text-white md:text-5xl lg:text-6xl">
             Customize Your{" "}
             <span
+              className="italic"
               style={{
-                background:
-                  "linear-gradient(135deg, #C9A84C 0%, #E8C96A 50%, #C9A84C 100%)",
+                background: "linear-gradient(135deg, #C9A84C 0%, #E8C96A 50%, #C9A84C 100%)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",
               }}
-              className="italic"
             >
-              Tour
+              Sri Lanka Tour
             </span>
           </h1>
-          <p className="mt-5 max-w-xl text-sm leading-relaxed text-white/60">
-            Click the locations you want to visit on the map below. The routes
-            that include all your chosen stops will update in real time.
-            Select more stops to narrow down perfectly matched itineraries.
+          <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/50">
+            Explore the destinations below, then scroll to select your preferred stops and discover perfectly matched itineraries — or let us craft something entirely bespoke.
           </p>
         </div>
       </section>
 
-      {/* Map + Panel */}
-      <section className="py-16 px-6 lg:px-12">
+      {/* ── Interactive destination map explorer ── */}
+      <CustomizeMapExplorer />
+
+      {/* ── Divider between explorer and route builder ── */}
+      <div className="relative bg-[#1C1209] px-6 py-14 lg:px-12">
+        <div className="mx-auto max-w-7xl">
+          <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:text-left sm:gap-8">
+            <div className="flex items-center gap-3 shrink-0">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[#C9A84C]/30 bg-[#C9A84C]/10">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4 text-[#C9A84C]">
+                  <path fillRule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="h-px w-12 bg-gradient-to-r from-[#C9A84C]/50 to-transparent hidden sm:block" />
+            </div>
+            <div>
+              <h2 className="font-serif text-2xl font-light text-white">
+                Now Build Your Itinerary
+              </h2>
+              <p className="mt-1.5 text-sm text-white/40">
+                Click the pins below to select your preferred stops — matching routes update in real time.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Route builder map ── */}
+      <section className="bg-[#FAFAF9] px-6 py-16 lg:px-12 lg:py-20">
         <div className="mx-auto max-w-7xl">
           {useGoogleMaps ? (
             <GoogleMapsCustomize routes={allRoutes} />
@@ -112,26 +136,30 @@ export default async function CustomizeTourPage() {
         </div>
       </section>
 
-      {/* Bottom CTA strip */}
-      <section className="border-t border-brand-border bg-white py-12 px-6 lg:px-12">
+      {/* ── Bottom CTA ── */}
+      <section className="bg-[#1C1209] px-6 py-16 lg:px-12">
         <div className="mx-auto max-w-3xl text-center">
-          <p className="font-serif text-2xl font-light text-brand-text">
+          <div className="mb-5 flex items-center justify-center gap-3">
+            <div className="h-px w-8 bg-gradient-to-r from-transparent to-[#C9A84C]" />
+            <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#C9A84C]">Need Help?</span>
+            <div className="h-px w-8 bg-gradient-to-r from-[#C9A84C] to-transparent" />
+          </div>
+          <h2 className="font-serif text-3xl font-light text-white sm:text-4xl">
             Not sure where to start?
+          </h2>
+          <p className="mt-3 text-sm leading-relaxed text-white/45">
+            Browse our curated tour packages for inspiration, then come back to fine-tune your perfect itinerary.
           </p>
-          <p className="mt-3 text-sm text-brand-muted">
-            Browse our curated tour packages for inspiration, then come back to
-            fine-tune your perfect itinerary.
-          </p>
-          <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+          <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <a
               href="/tours"
-              className="btn-gold rounded-full px-8 py-3 text-sm font-semibold tracking-[0.1em]"
+              className="inline-flex items-center gap-2 rounded-full bg-[#C9A84C] px-8 py-3.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#1C1209] transition-all duration-300 hover:bg-[#E8C96A]"
             >
               View All Tours
             </a>
             <a
               href="/contact"
-              className="rounded-full border border-brand-border px-8 py-3 text-sm font-medium text-brand-text transition hover:border-[#C9A84C]/50 hover:text-[#C9A84C]"
+              className="inline-flex items-center gap-2 rounded-full border border-[#C9A84C]/30 px-8 py-3.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#C9A84C] transition-all duration-300 hover:border-[#C9A84C] hover:bg-[#C9A84C]/10"
             >
               Talk to Us
             </a>
