@@ -231,7 +231,7 @@
 
 .animate-hero-progress {
   transform-origin: left;
-  animation: hero-progress 5s linear forwards;
+  animation: hero-progress 7s linear forwards;
 }
 
 @keyframes dest-progress {

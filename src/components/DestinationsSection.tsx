@@ -26,20 +26,31 @@ const destinations: Destination[] = [
     name: "Sigiriya",
     subtitle: "Ancient Fortress",
     description:
-      "Ancient rock fortress rising above the jungle — a UNESCO World Heritage masterpiece with frescoes of celestial maidens.",
+      "Ancient rock fortress rising above the jungle — a UNESCO World Heritage masterpiece with frescoes of celestial maidens and water gardens at its base.",
     image: "/images/sigiriya.jpg",
-    alt: "Sigiriya Lion Rock fortress rising above lush green gardens, ancient steps leading to the rock, Sri Lanka",
+    alt: "Sigiriya Lion Rock fortress rising above lush green gardens",
     mapX: 231,
     mapY: 403,
+  },
+  {
+    name: "Kandy",
+    subtitle: "Temple City",
+    description:
+      "Home to the sacred Temple of the Tooth Relic and the grand Esala Perahera festival — Sri Lanka's cultural and spiritual heartland in the misty hills.",
+    image:
+      "https://images.unsplash.com/photo-1583087253076-6f6e15484de0?w=1200&q=85",
+    alt: "Temple of the Tooth Relic in Kandy Sri Lanka with golden rooftop",
+    mapX: 196,
+    mapY: 514,
   },
   {
     name: "Nuwara Eliya",
     subtitle: "Tea Country",
     description:
-      "Cool climate, rolling estates, and the timeless craft of Ceylon tea amid emerald slopes and misty mountains.",
+      "Cool climate, rolling emerald estates, and the timeless craft of Ceylon tea amid misty mountains. A hill station that feels like colonial England reimagined in green.",
     image:
       "https://images.unsplash.com/photo-1701916106564-77bfb662cc7e?w=1600&q=85",
-    alt: "Tea plantation workers in Nuwara Eliya Sri Lanka, green rolling hills, misty mountain backdrop, morning light",
+    alt: "Tea plantation workers in Nuwara Eliya Sri Lanka, green rolling hills",
     mapX: 212,
     mapY: 572,
   },
@@ -47,9 +58,9 @@ const destinations: Destination[] = [
     name: "Ella",
     subtitle: "Highland Escape",
     description:
-      "Mist-wrapped hills, the iconic Nine Arch Bridge, and some of the island's most scenic train journeys through tea country.",
+      "Mist-wrapped hills, the iconic Nine Arch Bridge, and some of the island's most scenic train journeys cutting through terraced tea country.",
     image: "/images/ella.jpg",
-    alt: "Blue train crossing the Nine Arch Bridge in Ella, Sri Lanka, surrounded by lush green jungle hills",
+    alt: "Blue train crossing the Nine Arch Bridge in Ella, Sri Lanka",
     mapX: 287,
     mapY: 587,
   },
@@ -57,9 +68,9 @@ const destinations: Destination[] = [
     name: "Yala",
     subtitle: "Wild Safari",
     description:
-      "Sri Lanka's premier wildlife sanctuary — the world's highest density of wild leopards, elephants, and sloth bears.",
+      "Sri Lanka's premier wildlife sanctuary — home to the world's highest density of wild leopards alongside elephants, sloth bears, and rare birds.",
     image: "/images/yala.jpg",
-    alt: "Scenic lake in Yala National Park Sri Lanka, lush green trees reflected in calm water, dramatic cloudy sky",
+    alt: "Scenic lake in Yala National Park Sri Lanka",
     mapX: 344,
     mapY: 720,
   },
@@ -67,27 +78,59 @@ const destinations: Destination[] = [
     name: "Galle",
     subtitle: "Coastal Heritage",
     description:
-      "Dutch colonial ramparts meeting the Indian Ocean. Cobblestone lanes wind past boutique hotels and a centuries-old lighthouse.",
+      "Dutch colonial ramparts meeting the Indian Ocean. Cobblestone lanes wind past boutique hotels, art galleries, and a centuries-old lighthouse at the southern tip.",
     image: "/images/galle.jpg",
-    alt: "Galle Fort lighthouse with palm trees on the southern coast of Sri Lanka, ocean waves crashing on rocks",
+    alt: "Galle Fort lighthouse with palm trees on the southern coast of Sri Lanka",
     mapX: 120,
     mapY: 735,
   },
+  {
+    name: "Anuradhapura",
+    subtitle: "Ancient Kingdom",
+    description:
+      "A UNESCO-listed ancient capital with towering white dagobas, sacred Bo trees over 2,300 years old, and vast stone temple complexes spanning millennia of civilization.",
+    image:
+      "https://images.unsplash.com/photo-1626099488972-f3f9e6a58ea5?w=1200&q=85",
+    alt: "Ancient white stupa in Anuradhapura Sri Lanka surrounded by jungle",
+    mapX: 165,
+    mapY: 335,
+  },
+  {
+    name: "Trincomalee",
+    subtitle: "Coastal Paradise",
+    description:
+      "Crystal-clear bays with powder-white beaches, whale watching off Swami Rock, and some of the finest coral diving in the Indian Ocean.",
+    image:
+      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&q=85",
+    alt: "Crystal clear turquoise ocean waters and white sand beach in Trincomalee",
+    mapX: 306,
+    mapY: 284,
+  },
+  {
+    name: "Bentota",
+    subtitle: "Beach Bliss",
+    description:
+      "Golden beaches lapped by the Indian Ocean, a tranquil river lagoon rich with wildlife, and lush boutique resorts on Sri Lanka's sun-soaked southwest coast.",
+    image: "/images/beach-cta.jpg",
+    alt: "Golden beach at sunset in Bentota Sri Lanka with calm ocean waters",
+    mapX: 86,
+    mapY: 677,
+  },
 ];
 
+// Route lines: [6→0→1→2→3→4] and [7→5→8]
 const ROUTES: [number, number][] = [
+  [6, 0],
   [0, 1],
   [1, 2],
   [2, 3],
   [3, 4],
-  [4, 1],
+  [7, 5],
+  [5, 8],
 ];
-
-/* District paths imported from sri-lanka-map-data.ts — viewBox 0 0 450 793 */
 
 export function DestinationsSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const detailRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const prevIndexRef = useRef(-1);
   const hasAnimated = useRef(false);
@@ -104,7 +147,7 @@ export function DestinationsSection() {
 
     if (prefersReducedMotion) return;
 
-    // Animate previous pin back
+    // Scale previous pin back to 1
     if (prev >= 0) {
       const prevPin = document.getElementById(`map-pin-${prev}`);
       if (prevPin) {
@@ -117,7 +160,7 @@ export function DestinationsSection() {
       }
     }
 
-    // Animate new pin — elastic bounce
+    // Elastic bounce new pin to scale 1.2
     const newPin = document.getElementById(`map-pin-${idx}`);
     if (newPin) {
       gsap.fromTo(
@@ -132,13 +175,13 @@ export function DestinationsSection() {
       );
     }
 
-    // Animate detail card
+    // Animate detail panel
     const detail = document.querySelector(".dest-detail-card");
     if (detail) {
       gsap.fromTo(
         detail,
-        { opacity: 0, x: 20 },
-        { opacity: 1, x: 0, duration: 0.45, ease: "power2.out" }
+        { opacity: 0, y: 16 },
+        { opacity: 1, y: 0, duration: 0.45, ease: "power2.out" }
       );
     }
   }, []);
@@ -158,21 +201,26 @@ export function DestinationsSection() {
     }
 
     const ctx = gsap.context(() => {
-      // Initial hidden states
       const headers = section.querySelectorAll<HTMLElement>(".dest-header");
-      const districts = section.querySelectorAll<SVGPathElement>(".sri-lanka-district");
-      const pinGroups = section.querySelectorAll<SVGGElement>(".map-pin-group");
-      const pinLabels = section.querySelectorAll<SVGTextElement>(".map-pin-label");
-      const routes = section.querySelectorAll<SVGLineElement>(".map-route");
-      const listItems = section.querySelectorAll<HTMLElement>(".dest-list-item");
-      const detailCard = section.querySelector<HTMLElement>(".dest-detail-card");
+      const districts =
+        section.querySelectorAll<SVGPathElement>(".sri-lanka-district");
+      const pinGroups =
+        section.querySelectorAll<SVGGElement>(".map-pin-group");
+      const pinLabels =
+        section.querySelectorAll<SVGTextElement>(".map-pin-label");
+      const routes =
+        section.querySelectorAll<SVGLineElement>(".map-route");
+      const thumbItems =
+        section.querySelectorAll<HTMLElement>(".dest-thumb-item");
+      const detailCard =
+        section.querySelector<HTMLElement>(".dest-detail-card");
 
       gsap.set(headers, { opacity: 0, y: 30 });
       gsap.set(districts, { opacity: 0 });
       gsap.set(pinGroups, { opacity: 0 });
       gsap.set(pinLabels, { opacity: 0 });
       gsap.set(routes, { opacity: 0 });
-      gsap.set(listItems, { opacity: 0, x: 30 });
+      gsap.set(thumbItems, { opacity: 0, y: 20 });
       if (detailCard) gsap.set(detailCard, { opacity: 0, y: 20 });
 
       const tl = gsap.timeline({
@@ -207,13 +255,13 @@ export function DestinationsSection() {
         "-=0.3"
       );
 
-      // 3. Pins fade in with stagger
+      // 3. Pin groups fade in with stagger
       tl.to(
         pinGroups,
         {
           opacity: 1,
           duration: 0.5,
-          stagger: 0.12,
+          stagger: 0.08,
           ease: "power2.out",
         },
         "-=0.3"
@@ -222,30 +270,36 @@ export function DestinationsSection() {
       // 4. Pin labels fade in
       tl.to(
         pinLabels,
-        { opacity: 1, duration: 0.4, stagger: 0.08, ease: "power2.out" },
+        { opacity: 1, duration: 0.4, stagger: 0.06, ease: "power2.out" },
         "-=0.3"
       );
 
-      // 5. Route lines fade in
+      // 5. Route lines fade in at 0.2 opacity
       tl.to(
         routes,
         {
           opacity: 0.2,
           duration: 0.5,
-          stagger: 0.1,
+          stagger: 0.08,
           ease: "power2.out",
         },
         "-=0.3"
       );
 
-      // 6. List items slide in
+      // 6. Thumbnail cards slide up with stagger
       tl.to(
-        listItems,
-        { opacity: 1, x: 0, duration: 0.5, stagger: 0.08, ease: "power2.out" },
+        thumbItems,
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.5,
+          stagger: 0.06,
+          ease: "power2.out",
+        },
         "-=0.4"
       );
 
-      // 7. Detail card
+      // 7. Detail panel fades in
       if (detailCard) {
         tl.to(
           detailCard,
@@ -280,7 +334,7 @@ export function DestinationsSection() {
           duration: 2,
           ease: "power1.out",
           repeat: -1,
-          delay: i * 0.4,
+          delay: i * 0.35,
         }
       );
       tweens.push(tween);
@@ -297,8 +351,9 @@ export function DestinationsSection() {
       className="bg-brand-surface px-6 py-24 lg:px-12 lg:py-32"
     >
       <div className="mx-auto max-w-7xl">
-        {/* Section Header */}
-        <div className="dest-header mb-16 flex flex-col justify-between gap-8 md:flex-row md:items-end">
+
+        {/* Zone 1: Section Header */}
+        <div className="dest-header mb-12 flex flex-col justify-between gap-6 md:flex-row md:items-end">
           <div>
             <div className="mb-4 flex items-center gap-3">
               <div className="gold-divider" />
@@ -306,8 +361,7 @@ export function DestinationsSection() {
                 Your Tour, Your Way
               </span>
             </div>
-            {/* NOTE: Top 3 featured tours will be provided by Mr. Roshan — update destinations array above when ready */}
-            <h2 className="font-serif text-4xl leading-tight font-light text-brand-text md:text-5xl lg:text-6xl">
+            <h2 className="font-serif text-4xl font-light leading-tight text-brand-text md:text-5xl lg:text-6xl">
               Create Your
               <br />
               <span className="text-gold-gradient italic">Own Tour</span>
@@ -317,22 +371,29 @@ export function DestinationsSection() {
             href="/tours/customize"
             className="dest-header btn-outline-gold self-start rounded-full px-6 py-3 text-xs font-semibold tracking-luxury md:self-end"
           >
-            Customize Your Tour
+            Customize Your Tour →
           </Link>
         </div>
 
-        {/* Map + Details Grid */}
-        <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2 lg:gap-10">
-          {/* LEFT: SVG Map */}
-          <div className="relative flex items-start justify-center">
+        {/* Zone 2: Map + Thumbnail Grid */}
+        <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-5 lg:gap-8">
+
+          {/* Left col (lg:col-span-3): SVG Map */}
+          <div className="relative flex items-start justify-center lg:col-span-3">
             <svg
               viewBox="0 0 450 793"
-              className="mx-auto h-auto w-full max-w-xs sm:max-w-sm lg:max-w-[380px]"
-              aria-label="Interactive map of Sri Lanka showing five featured destinations"
+              className="mx-auto h-auto w-full max-w-xs sm:max-w-sm lg:max-w-full"
+              aria-label="Interactive map of Sri Lanka showing nine featured destinations"
               role="img"
             >
               <defs>
-                <filter id="map-shadow" x="-10%" y="-10%" width="120%" height="120%">
+                <filter
+                  id="map-shadow"
+                  x="-10%"
+                  y="-10%"
+                  width="120%"
+                  height="120%"
+                >
                   <feDropShadow
                     dx="0"
                     dy="6"
@@ -341,7 +402,13 @@ export function DestinationsSection() {
                     floodOpacity="0.1"
                   />
                 </filter>
-                <linearGradient id="map-gold-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <linearGradient
+                  id="map-gold-grad"
+                  x1="0%"
+                  y1="0%"
+                  x2="100%"
+                  y2="100%"
+                >
                   <stop offset="0%" stopColor="#C9A84C" />
                   <stop offset="100%" stopColor="#A8891A" />
                 </linearGradient>
@@ -351,7 +418,7 @@ export function DestinationsSection() {
                 </radialGradient>
               </defs>
 
-              {/* Sri Lanka district paths — real geographic data */}
+              {/* Sri Lanka district paths */}
               <g filter="url(#map-shadow)">
                 {SRI_LANKA_DISTRICTS.map((d, i) => (
                   <path
@@ -382,7 +449,7 @@ export function DestinationsSection() {
                 />
               ))}
 
-              {/* Destination Pins */}
+              {/* Destination pins */}
               {destinations.map((dest, i) => (
                 <g
                   key={dest.name}
@@ -400,7 +467,7 @@ export function DestinationsSection() {
                     }
                   }}
                 >
-                  {/* Focus ring (visible on keyboard focus only) */}
+                  {/* Focus ring */}
                   <circle
                     r="18"
                     fill="none"
@@ -428,7 +495,7 @@ export function DestinationsSection() {
 
                   {/* Pin body */}
                   <circle
-                    r={i === activeIndex ? 8 : 6}
+                    r={i === activeIndex ? 8 : 5.5}
                     fill={i === activeIndex ? "#C9A84C" : "#A8891A"}
                     stroke="#FFFFFF"
                     strokeWidth="2.5"
@@ -438,7 +505,7 @@ export function DestinationsSection() {
                   {/* Center dot */}
                   <circle r="2.5" fill="#FFFFFF" opacity={0.9} />
 
-                  {/* Name label */}
+                  {/* Name label below pin */}
                   <text
                     className="map-pin-label"
                     y="24"
@@ -451,7 +518,7 @@ export function DestinationsSection() {
                     {dest.name}
                   </text>
 
-                  {/* Number badge */}
+                  {/* Number badge above pin */}
                   <text
                     className="map-pin-label"
                     y="-16"
@@ -468,95 +535,112 @@ export function DestinationsSection() {
             </svg>
           </div>
 
-          {/* RIGHT: List + Detail */}
-          <div className="flex flex-col gap-5">
-            {/* Destination list */}
-            <div className="flex flex-col gap-1">
+          {/* Right col (lg:col-span-2): 3×3 Thumbnail Grid */}
+          <div className="lg:col-span-2">
+            <div className="grid grid-cols-3 gap-2">
               {destinations.map((dest, i) => (
                 <button
                   key={dest.name}
                   type="button"
                   onClick={() => selectDestination(i)}
-                  className={`dest-list-item group relative flex cursor-pointer items-center gap-4 rounded-xl border px-5 py-4 text-left transition-all duration-300 focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 ${
+                  aria-label={`View ${dest.name}`}
+                  className={`dest-thumb-item relative aspect-square cursor-pointer overflow-hidden rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C9A84C] focus-visible:ring-offset-1 ${
                     i === activeIndex
-                      ? "border-gold/40 bg-white shadow-sm"
-                      : "border-transparent bg-transparent hover:bg-white/60"
+                      ? "ring-2 ring-[#C9A84C] ring-offset-1"
+                      : ""
                   }`}
                 >
-                  {/* Left accent bar */}
-                  <span
-                    className={`absolute left-0 top-2 bottom-2 w-0.5 rounded-full bg-gold transition-all duration-300 ${
-                      i === activeIndex ? "opacity-100" : "opacity-0"
-                    }`}
-                  />
-                  <span
-                    className={`font-serif text-xl font-light transition-colors duration-300 ${
-                      i === activeIndex ? "text-gold" : "text-brand-faint"
-                    }`}
-                  >
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                  <div className="flex-1">
-                    <p
-                      className={`text-sm font-medium transition-colors duration-300 ${
+                  {/* Thumbnail image */}
+                  <div className="group relative h-full w-full overflow-hidden">
+                    <Image
+                      src={dest.image}
+                      alt={dest.alt}
+                      fill
+                      className={`object-cover transition-transform duration-500 ${
                         i === activeIndex
-                          ? "text-brand-text"
-                          : "text-brand-muted group-hover:text-brand-text"
+                          ? "scale-105"
+                          : "group-hover:scale-105"
                       }`}
-                    >
-                      {dest.name}
-                    </p>
-                    <p className="text-xs text-brand-faint">{dest.subtitle}</p>
+                      sizes="(max-width: 1024px) 33vw, 15vw"
+                    />
+
+                    {/* Dark gradient overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent transition-opacity duration-300 group-hover:from-black/60" />
+
+                    {/* Number badge top-right */}
+                    <div className="absolute right-1.5 top-1.5 rounded-full bg-black/40 px-1.5 py-0.5 text-[9px] font-bold leading-none text-[#C9A84C] backdrop-blur-sm">
+                      {String(i + 1).padStart(2, "0")}
+                    </div>
+
+                    {/* Name + subtitle bottom-left */}
+                    <div className="absolute bottom-2 left-2">
+                      <p className="text-[10px] font-semibold uppercase leading-none tracking-wider text-white">
+                        {dest.name}
+                      </p>
+                      <p className="mt-0.5 text-[9px] uppercase tracking-widest text-white/60">
+                        {dest.subtitle}
+                      </p>
+                    </div>
                   </div>
-                  <span
-                    className={`text-xs transition-all duration-300 ${
-                      i === activeIndex
-                        ? "translate-x-0 text-gold opacity-100"
-                        : "-translate-x-1 text-brand-faint opacity-0 group-hover:translate-x-0 group-hover:opacity-60 group-focus-visible:translate-x-0 group-focus-visible:opacity-60"
-                    }`}
-                  >
-                    →
-                  </span>
                 </button>
               ))}
             </div>
+          </div>
+        </div>
 
-            {/* Detail Card */}
-            <div
-              ref={detailRef}
-              className="dest-detail-card overflow-hidden rounded-2xl border border-brand-border bg-white shadow-lg"
-            >
-              <div className="relative h-44 overflow-hidden sm:h-52 md:h-64">
-                <Image
-                  src={current.image}
-                  alt={current.alt}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 1024px) 100vw, 40vw"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent" />
+        {/* Zone 3: Detail Panel */}
+        <div className="dest-detail-card mt-6 overflow-hidden rounded-2xl border border-brand-border bg-white shadow-xl">
+          <div className="grid grid-cols-1 lg:grid-cols-5">
+
+            {/* Image side (lg:col-span-3) */}
+            <div className="relative min-h-[260px] lg:col-span-3 lg:min-h-[320px]">
+              <Image
+                src={current.image}
+                alt={current.alt}
+                fill
+                className="object-cover"
+                sizes="(max-width: 1024px) 100vw, 60vw"
+              />
+              {/* Bottom gradient */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+              {/* Subtitle badge top-left */}
+              <div className="absolute left-4 top-4 rounded-full bg-black/40 px-3 py-1.5 text-[10px] uppercase tracking-[0.15em] text-[#C9A84C] backdrop-blur-sm">
+                {current.subtitle}
               </div>
-              <div className="p-6">
-                <span className="mb-2 block text-xs font-medium uppercase tracking-luxury text-gold">
-                  {current.subtitle}
-                </span>
-                <h3 className="mb-3 font-serif text-2xl font-light text-brand-text lg:text-3xl">
-                  {current.name}
-                </h3>
-                <p className="mb-5 text-sm leading-relaxed text-brand-muted">
-                  {current.description}
-                </p>
+            </div>
+
+            {/* Text side (lg:col-span-2) */}
+            <div className="flex flex-col justify-center p-7 lg:col-span-2 lg:p-8">
+              {/* Gold micro-divider */}
+              <div className="mb-5 h-px w-10 bg-gradient-to-r from-[#C9A84C] to-transparent" />
+
+              <h3 className="font-serif text-3xl font-light text-brand-text lg:text-4xl">
+                {current.name}
+              </h3>
+
+              <p className="mb-6 mt-3 text-sm leading-relaxed text-brand-muted">
+                {current.description}
+              </p>
+
+              {/* Two buttons row */}
+              <div className="flex flex-wrap items-center gap-4">
                 <Link
                   href="/booking"
-                  className="inline-flex items-center gap-2 text-xs font-medium uppercase tracking-luxury text-gold transition-all duration-300 hover:gap-3"
+                  className="inline-flex items-center gap-1.5 text-xs font-medium uppercase tracking-luxury text-gold transition-all duration-300 hover:gap-2.5"
                 >
-                  Enquire Now
-                  <span className="text-base">→</span>
+                  Enquire Now →
+                </Link>
+                <Link
+                  href="/tours"
+                  className="btn-outline-gold rounded-full px-5 py-2 text-xs font-semibold tracking-luxury"
+                >
+                  View Itinerary
                 </Link>
               </div>
             </div>
           </div>
         </div>
+
       </div>
     </section>
   );

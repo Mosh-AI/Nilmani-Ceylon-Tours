@@ -3,26 +3,40 @@
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 
-const SLIDE_MS = 5000;
+const SLIDE_MS = 7000;
 
 const slides = [
   {
-    src: "/images/sigiriya-hero.jpg",
-    alt: "Sigiriya Lion Rock fortress with lush green gardens and pathways leading to the ancient rock, Sri Lanka",
-    captionTop: "Ancient Majesty",
-    captionBottom: "Sigiriya",
+    src: "/images/slider-ella-bridge.jpg",
+    alt: "Blue passenger train crossing the iconic Nine Arch Bridge through misty emerald jungle in Ella, Sri Lanka",
+    captionTop: "HIGHLAND RAILWAY",
+    captionBottom: "Ella, Hill Country",
+    gradient:
+      "linear-gradient(135deg, rgba(28,18,9,0.65) 0%, rgba(28,18,9,0.15) 60%, rgba(28,18,9,0.05) 100%)",
   },
   {
-    src: "https://images.unsplash.com/photo-1648905742802-95668285192a?w=1920&q=85",
-    alt: "Nine Arch Bridge in Ella Sri Lanka surrounded by lush green tea plantations, misty mountains, blue sky",
-    captionTop: "Scenic Highlands",
-    captionBottom: "Ella",
+    src: "/images/slider-beach.jpg",
+    alt: "Aerial drone view of pristine turquoise ocean meeting golden sand beach with palm trees, Sri Lanka coastline",
+    captionTop: "PRISTINE SHORES",
+    captionBottom: "Southern Coastline",
+    gradient:
+      "linear-gradient(to top, rgba(28,18,9,0.72) 0%, rgba(28,18,9,0.30) 45%, rgba(28,18,9,0.08) 100%)",
   },
-{
-    src: "https://images.unsplash.com/photo-1701916106564-77bfb662cc7e?w=1920&q=85",
-    alt: "Tea plantation workers in Nuwara Eliya Sri Lanka, green rolling hills, misty mountain backdrop, morning light",
-    captionTop: "Misty Tea Country",
-    captionBottom: "Ella Highlands",
+  {
+    src: "/images/slider-sigiriya.jpg",
+    alt: "Ancient stone pathway through ruins leading to Sigiriya Lion Rock Fortress under vivid blue sky, Sri Lanka",
+    captionTop: "ANCIENT MAJESTY",
+    captionBottom: "Sigiriya Rock Fortress",
+    gradient:
+      "linear-gradient(160deg, rgba(28,18,9,0.10) 0%, rgba(28,18,9,0.20) 40%, rgba(28,18,9,0.62) 100%)",
+  },
+  {
+    src: "/images/slider-waterfall.jpg",
+    alt: "Adventurer standing with arms raised in triumph before a massive cascading waterfall in lush Sri Lanka jungle",
+    captionTop: "WILD DISCOVERY",
+    captionBottom: "Sri Lanka's Hidden Cascades",
+    gradient:
+      "linear-gradient(to bottom, rgba(28,18,9,0.48) 0%, rgba(28,18,9,0.15) 42%, rgba(28,18,9,0.55) 100%)",
   },
 ];
 
@@ -58,6 +72,7 @@ export function HeroSection() {
       style={{ minHeight: "100svh" }}
       className="relative flex min-h-screen flex-col overflow-hidden"
     >
+      {/* ── Background slides ── */}
       <div className="absolute inset-0">
         {slides.map((slide, i) => (
           <div
@@ -69,47 +84,46 @@ export function HeroSection() {
             }}
             aria-hidden={i !== activeSlide}
           >
-            <div className="relative h-full w-full">
-              <Image
-                src={slide.src}
-                alt={slide.alt}
-                fill
-                className="object-cover"
-                sizes="100vw"
-                priority={i === 0}
-                loading={i === 0 ? "eager" : "lazy"}
-              />
-            </div>
+            <Image
+              src={slide.src}
+              alt={slide.alt}
+              fill
+              className="object-cover"
+              sizes="100vw"
+              priority={i === 0}
+              loading={i === 0 ? "eager" : "lazy"}
+            />
+            {/* Per-slide directional gradient — tuned per image brightness */}
+            <div
+              className="absolute inset-0"
+              style={{ background: slide.gradient }}
+            />
           </div>
         ))}
-        <div className="absolute inset-0 z-10 bg-gradient-to-b from-black/50 via-black/25 to-black/60" />
-        <div className="absolute inset-0 z-10 bg-gradient-to-r from-black/40 via-transparent to-transparent" />
+        {/* Base overlay — ensures headline text is always legible */}
+        <div className="absolute inset-0 z-10 bg-gradient-to-b from-black/45 via-black/20 to-black/55" />
       </div>
 
-      {/* Location caption — centered floating pill */}
-      <div className="absolute bottom-28 left-1/2 z-30 -translate-x-1/2 lg:bottom-24">
-        <div
-          className="flex items-center gap-4 rounded-full px-6 py-3"
-          style={{
-            background: "rgba(13, 9, 5, 0.45)",
-            border: "1px solid rgba(201, 168, 76, 0.25)",
-            backdropFilter: "blur(12px)",
-            WebkitBackdropFilter: "blur(12px)",
-          }}
+      {/* Spacer — keeps the section full height between slides and stats bar */}
+      <div className="relative z-20 flex-1" />
+
+      {/* ── Slide caption — bottom-left, fades in on each slide change ── */}
+      <div
+        key={`caption-${activeSlide}`}
+        className="animate-in fade-in duration-700 absolute bottom-[242px] left-8 z-30 md:bottom-[137px] md:left-12 lg:bottom-[132px] lg:left-16"
+      >
+        <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.26em] text-gold">
+          {current.captionTop}
+        </p>
+        <p
+          className="font-serif text-xl font-light italic text-white/90 sm:text-2xl"
+          style={{ textShadow: "0 1px 16px rgba(28,18,9,0.7)" }}
         >
-          <div className="h-px w-8 bg-gradient-to-r from-transparent to-gold/70" />
-          <div className="text-center">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-gold">
-              {current.captionTop}
-            </p>
-            <p className="mt-0.5 text-sm font-light tracking-wide text-white/85">
-              {current.captionBottom}
-            </p>
-          </div>
-          <div className="h-px w-8 bg-gradient-to-l from-transparent to-gold/70" />
-        </div>
+          {current.captionBottom}
+        </p>
       </div>
 
+      {/* ── Prev arrow ── */}
       <button
         type="button"
         onClick={goPrev}
@@ -124,13 +138,11 @@ export function HeroSection() {
           className="h-4 w-4"
           aria-hidden
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M15 19l-7-7 7-7"
-          />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
         </svg>
       </button>
+
+      {/* ── Next arrow ── */}
       <button
         type="button"
         onClick={goNext}
@@ -145,27 +157,24 @@ export function HeroSection() {
           className="h-4 w-4"
           aria-hidden
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M9 5l7 7-7 7"
-          />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
         </svg>
       </button>
 
-      <div className="absolute right-6 bottom-28 z-30 flex flex-col gap-2 lg:right-12">
+      {/* ── Dot indicators — right side, vertical ── */}
+      <div className="absolute right-6 bottom-[242px] z-30 flex flex-col gap-2 md:bottom-[137px] lg:bottom-[132px] lg:right-12">
         {slides.map((_, i) => (
           <button
             key={i}
             type="button"
             onClick={() => goTo(i)}
             aria-label={`Go to slide ${i + 1}`}
-            className="relative flex h-11 w-11 cursor-pointer items-center justify-center group focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2"
+            className="group relative flex h-11 w-11 cursor-pointer items-center justify-center focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2"
           >
             <span
               className={`block rounded-full transition-all duration-500 ${
                 i === activeSlide
-                  ? "h-6 w-2.5 bg-gold"
+                  ? "h-7 w-2.5 bg-gold"
                   : "h-2.5 w-2.5 bg-white/60 group-hover:bg-white"
               }`}
             />
@@ -173,8 +182,7 @@ export function HeroSection() {
         ))}
       </div>
 
-      <div className="relative z-20 mx-auto flex w-full max-w-7xl flex-1 flex-col px-6 pt-36 pb-0 lg:px-12" />
-
+      {/* ── Stats bar with progress indicator ── */}
       <div className="relative z-20 mt-auto w-full border-t border-brand-border bg-white/95 backdrop-blur-xl">
         <div className="h-[2px] w-full bg-black/10">
           <div
@@ -185,11 +193,28 @@ export function HeroSection() {
         <div className="mx-auto max-w-7xl px-6 lg:px-12">
           <div className="grid grid-cols-2 divide-x divide-brand-border md:grid-cols-4">
             {[
-                { value: "500+", label: "Happy Travelers" },
-                { value: "15+", label: "Curated Tours" },
-                { value: <span className="inline-flex items-baseline gap-1">5<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none" className="inline-block translate-y-[2px]"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg></span>, label: "Rated Experience" },
-                { value: "24/7", label: "Concierge Support" },
-              ].map((stat) => (
+              { value: "500+", label: "Happy Travelers" },
+              { value: "15+", label: "Curated Tours" },
+              {
+                value: (
+                  <span className="inline-flex items-baseline gap-1">
+                    5
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      stroke="none"
+                      className="inline-block translate-y-[2px]"
+                    >
+                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                    </svg>
+                  </span>
+                ),
+                label: "Rated Experience",
+              },
+              { value: "24/7", label: "Concierge Support" },
+            ].map((stat) => (
               <div
                 key={stat.label}
                 className="px-6 py-6 text-center md:px-10 md:text-left"
