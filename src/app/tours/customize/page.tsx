@@ -3,7 +3,7 @@ import { Footer } from "@/components/Footer";
 import { CustomizeTourMap, type RouteData } from "./_components/CustomizeTourMap";
 import { GoogleMapsCustomize } from "./_components/GoogleMapsCustomize";
 import { db } from "@/db";
-import { routes, routeStops, siteSettings } from "@/db/schema";
+import { routes, routeStops, siteSettings, locations } from "@/db/schema";
 import { asc, eq } from "drizzle-orm";
 import { trackMapLoad } from "@/lib/map-usage";
 
@@ -43,6 +43,10 @@ async function getRoutes(): Promise<RouteData[]> {
   }));
 }
 
+async function getLocations() {
+  return db.select().from(locations).orderBy(asc(locations.region), asc(locations.name));
+}
+
 async function getMapsEnabled(): Promise<boolean> {
   const rows = await db
     .select({ value: siteSettings.value })
@@ -52,7 +56,11 @@ async function getMapsEnabled(): Promise<boolean> {
 }
 
 export default async function CustomizeTourPage() {
-  const [allRoutes, mapsEnabled] = await Promise.all([getRoutes(), getMapsEnabled()]);
+  const [allRoutes, allLocations, mapsEnabled] = await Promise.all([
+    getRoutes(),
+    getLocations(),
+    getMapsEnabled(),
+  ]);
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? "";
   const useGoogleMaps = mapsEnabled && apiKey.length > 0;
 
@@ -116,7 +124,7 @@ export default async function CustomizeTourPage() {
       <section className="px-6 pb-16 lg:px-12">
         <div className="mx-auto max-w-7xl">
           {useGoogleMaps ? (
-            <GoogleMapsCustomize routes={allRoutes} />
+            <GoogleMapsCustomize routes={allRoutes} locations={allLocations} />
           ) : (
             /* SVG-only fallback when no Google Maps API key */
             <div className="overflow-hidden rounded-2xl border border-[#C9A84C]/15">

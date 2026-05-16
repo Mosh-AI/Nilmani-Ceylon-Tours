@@ -287,6 +287,21 @@ export const routeStops = pgTable("route_stops", {
   index("route_stops_route_id_idx").on(table.routeId),
 ]);
 
+export const locations = pgTable("locations", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  slug: text("slug").notNull(),
+  name: text("name").notNull(),
+  region: text("region", { enum: ["north", "north-central", "east", "central", "west", "south"] }).notNull(),
+  mapX: real("map_x").notNull(),
+  mapY: real("map_y").notNull(),
+  lat: real("lat").notNull(),
+  lng: real("lng").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (table) => [
+  uniqueIndex("locations_slug_idx").on(table.slug),
+  index("locations_region_idx").on(table.region),
+]);
+
 export const mapUsageLogs = pgTable("map_usage_logs", {
   date: date("date").primaryKey(),
   pageViews: integer("page_views").notNull().default(0),

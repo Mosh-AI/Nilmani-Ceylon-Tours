@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { X, MapPin, Loader2, ArrowRight, Navigation } from "lucide-react";
-import { SRI_LANKA_LOCATIONS, LOCATION_BY_SLUG } from "@/data/sri-lanka-locations";
 import type { RouteData } from "./CustomizeTourMap";
 
 const MAP_STYLES: google.maps.MapTypeStyle[] = [
@@ -45,11 +44,22 @@ function makeSvgIcon(state: PinState): string {
   )}`;
 }
 
-interface GoogleMapsCustomizeProps {
-  routes: RouteData[];
+interface LocationRow {
+  slug: string;
+  name: string;
+  region: string;
+  mapX: number;
+  mapY: number;
+  lat: number;
+  lng: number;
 }
 
-export function GoogleMapsCustomize({ routes }: GoogleMapsCustomizeProps) {
+interface GoogleMapsCustomizeProps {
+  routes: RouteData[];
+  locations: LocationRow[];
+}
+
+export function GoogleMapsCustomize({ routes, locations }: GoogleMapsCustomizeProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
   const markersRef = useRef<Map<string, google.maps.Marker>>(new Map());
@@ -62,6 +72,11 @@ export function GoogleMapsCustomize({ routes }: GoogleMapsCustomizeProps) {
     for (const r of routes) for (const s of r.locationSlugs) set.add(s);
     return set;
   }, [routes]);
+
+  const locBySlug = useMemo(
+    () => Object.fromEntries(locations.map((l) => [l.slug, l])),
+    [locations]
+  );
 
   const { validRoutes, activeSlugs } = useMemo(() => {
     if (selectedSlugs.length === 0) {
@@ -105,7 +120,7 @@ export function GoogleMapsCustomize({ routes }: GoogleMapsCustomizeProps) {
         });
         mapInstanceRef.current = map;
 
-        const routeLocs = SRI_LANKA_LOCATIONS.filter((loc) =>
+        const routeLocs = locations.filter((loc) =>
           allRouteSlugs.has(loc.slug)
         );
         for (const loc of routeLocs) {
@@ -137,7 +152,7 @@ export function GoogleMapsCustomize({ routes }: GoogleMapsCustomizeProps) {
     if (!mapLoaded) return;
 
     for (const [slug, marker] of markersRef.current) {
-      const loc      = LOCATION_BY_SLUG[slug];
+      const loc      = locBySlug[slug];
       const isSelected = selectedSlugs.includes(slug);
       const isActive   = activeSlugs.has(slug);
 
@@ -248,7 +263,7 @@ export function GoogleMapsCustomize({ routes }: GoogleMapsCustomizeProps) {
                   onClick={() => toggleLocation(slug)}
                   className="inline-flex items-center gap-1.5 rounded-full border border-[#C9A84C]/30 bg-[#C9A84C]/10 px-3 py-1.5 text-[11px] font-medium text-[#C9A84C] transition-all duration-200 hover:border-[#C9A84C]/60 hover:bg-[#C9A84C]/20"
                 >
-                  {LOCATION_BY_SLUG[slug]?.name ?? slug}
+                  {locBySlug[slug]?.name ?? slug}
                   <X className="h-3 w-3 opacity-60" />
                 </button>
               ))}
@@ -316,7 +331,7 @@ export function GoogleMapsCustomize({ routes }: GoogleMapsCustomizeProps) {
                               : "text-white/35"
                           }`}
                         >
-                          {LOCATION_BY_SLUG[s]?.name ?? s}
+                          {locBySlug[s]?.name ?? s}
                         </span>
                         {idx < route.locationSlugs.length - 1 && (
                           <ArrowRight size={8} className="shrink-0 text-white/15" />

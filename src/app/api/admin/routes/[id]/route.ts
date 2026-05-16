@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminSession } from "@/lib/admin-auth";
 import { db } from "@/db";
-import { routes, routeStops } from "@/db/schema";
+import { routes, routeStops, locations } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { apiHeaders } from "@/lib/api-headers";
 import { z } from "zod";
 import { sanitizeText } from "@/lib/sanitize";
-import { LOCATION_BY_SLUG } from "@/data/sri-lanka-locations";
 
 const routeSchema = z.object({
   name: z.string({ required_error: "Name is required" }).min(2).max(150),
@@ -90,7 +89,9 @@ export async function PATCH(
 
   const { name, description, stops } = parsed.data;
 
-  const unknown = stops.filter((s) => !LOCATION_BY_SLUG[s]);
+  const validSlugs = await db.select({ slug: locations.slug }).from(locations);
+  const validSlugSet = new Set(validSlugs.map((r) => r.slug));
+  const unknown = stops.filter((s) => !validSlugSet.has(s));
   if (unknown.length > 0) {
     return NextResponse.json(
       { error: `Unknown location slugs: ${unknown.join(", ")}` },

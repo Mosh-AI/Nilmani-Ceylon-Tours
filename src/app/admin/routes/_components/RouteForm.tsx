@@ -1,13 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronUp, ChevronDown, X, Plus, Search } from "lucide-react";
-import {
-  SRI_LANKA_LOCATIONS,
-  LOCATION_BY_SLUG,
-  REGION_LABELS,
-} from "@/data/sri-lanka-locations";
+import { ChevronUp, ChevronDown, X, Plus, Search, Loader2 } from "lucide-react";
+import { REGION_LABELS } from "@/data/sri-lanka-locations";
+
+interface LocationRow {
+  id: string;
+  slug: string;
+  name: string;
+  region: string;
+  mapX: number;
+  mapY: number;
+  lat: number;
+  lng: number;
+}
 
 interface RouteFormInitial {
   id: string;
@@ -24,9 +31,21 @@ const inputClass =
   "w-full rounded-lg border border-gray-200 px-4 py-3 text-sm text-gray-900 focus:border-[#C9A84C] focus:outline-none focus:ring-1 focus:ring-[#C9A84C]";
 const labelClass = "mb-1.5 block text-sm font-medium text-gray-700";
 
+const REGION_ORDER = [
+  "north",
+  "north-central",
+  "east",
+  "central",
+  "west",
+  "south",
+] as const;
+
 export function RouteForm({ initial }: RouteFormProps) {
   const router = useRouter();
   const isEdit = !!initial?.id;
+
+  const [locs, setLocs] = useState<LocationRow[]>([]);
+  const [locsLoading, setLocsLoading] = useState(true);
 
   const [name, setName] = useState(initial?.name ?? "");
   const [description, setDescription] = useState(initial?.description ?? "");
@@ -35,27 +54,43 @@ export function RouteForm({ initial }: RouteFormProps) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
+  useEffect(() => {
+    fetch("/api/admin/locations")
+      .then((r) => r.json())
+      .then((data: { locations: LocationRow[] }) => {
+        setLocs(data.locations ?? []);
+      })
+      .catch(() => setLocs([]))
+      .finally(() => setLocsLoading(false));
+  }, []);
+
+  const locBySlug = useMemo(
+    () => Object.fromEntries(locs.map((l) => [l.slug, l])),
+    [locs]
+  );
+
   // Locations not yet added, filtered by search query
-  const filteredLocations = SRI_LANKA_LOCATIONS.filter((loc) => {
+  const filteredLocations = locs.filter((loc) => {
     if (stops.includes(loc.slug)) return false;
     if (!search.trim()) return true;
     const q = search.toLowerCase();
     return (
       loc.name.toLowerCase().includes(q) ||
       loc.region.toLowerCase().includes(q) ||
-      REGION_LABELS[loc.region].toLowerCase().includes(q)
+      (REGION_LABELS[loc.region as keyof typeof REGION_LABELS] ?? "").toLowerCase().includes(q)
     );
   });
 
   // Group filtered locations by region for display
-  const byRegion = filteredLocations.reduce<
-    Record<string, typeof filteredLocations>
-  >((acc, loc) => {
-    const list = acc[loc.region] ?? [];
-    list.push(loc);
-    acc[loc.region] = list;
-    return acc;
-  }, {});
+  const byRegion = filteredLocations.reduce<Record<string, LocationRow[]>>(
+    (acc, loc) => {
+      const list = acc[loc.region] ?? [];
+      list.push(loc);
+      acc[loc.region] = list;
+      return acc;
+    },
+    {}
+  );
 
   function addStop(slug: string) {
     if (!stops.includes(slug)) setStops((p) => [...p, slug]);
@@ -188,24 +223,19 @@ export function RouteForm({ initial }: RouteFormProps) {
 
         {/* Location chips grouped by region */}
         <div className="max-h-72 overflow-y-auto rounded-lg border border-gray-100 bg-gray-50 p-3">
-          {filteredLocations.length === 0 ? (
+          {locsLoading ? (
+            <div className="flex items-center justify-center gap-2 py-6 text-sm text-gray-400">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Loading locations…
+            </div>
+          ) : filteredLocations.length === 0 ? (
             <p className="py-4 text-center text-sm text-gray-400">
               {search ? "No locations match your search." : "All locations have been added."}
             </p>
           ) : (
             <div className="space-y-4">
-              {(
-                [
-                  "north",
-                  "north-central",
-                  "east",
-                  "central",
-                  "west",
-                  "south",
-                ] as const
-              )
-                .filter((region) => byRegion[region]?.length)
-                .map((region) => (
+              {REGION_ORDER.filter((region) => byRegion[region]?.length).map(
+                (region) => (
                   <div key={region}>
                     <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-gray-400">
                       {REGION_LABELS[region]}
@@ -224,7 +254,8 @@ export function RouteForm({ initial }: RouteFormProps) {
                       ))}
                     </div>
                   </div>
-                ))}
+                )
+              )}
             </div>
           )}
         </div>
@@ -251,7 +282,7 @@ export function RouteForm({ initial }: RouteFormProps) {
         ) : (
           <ol className="space-y-2">
             {stops.map((slug, idx) => {
-              const loc = LOCATION_BY_SLUG[slug];
+              const loc = locBySlug[slug];
               return (
                 <li
                   key={slug}
@@ -266,7 +297,7 @@ export function RouteForm({ initial }: RouteFormProps) {
                   <span className="flex-1 text-sm font-medium text-gray-900">
                     {loc?.name ?? slug}
                     <span className="ml-2 text-xs font-normal text-gray-400">
-                      {loc ? REGION_LABELS[loc.region] : ""}
+                      {loc ? (REGION_LABELS[loc.region as keyof typeof REGION_LABELS] ?? loc.region) : ""}
                     </span>
                   </span>
 
