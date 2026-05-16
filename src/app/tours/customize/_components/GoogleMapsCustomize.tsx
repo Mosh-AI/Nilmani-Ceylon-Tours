@@ -3,81 +3,105 @@
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { X, MapPin, Loader2 } from "lucide-react";
 import { SRI_LANKA_LOCATIONS, LOCATION_BY_SLUG } from "@/data/sri-lanka-locations";
+import { SRI_LANKA_DISTRICTS } from "@/components/sri-lanka-map-data";
 import type { RouteData } from "./CustomizeTourMap";
 
-// Dark map style matching brand aesthetic
+/*
+ * Overlay alignment:
+ * SVG viewBox 0 0 450 793 uses the affine:
+ *   svgX = 175.383·lng − 13943.8
+ *   svgY = −183.888·lat + 1861.187
+ *
+ * Google Maps at zoom 7.8, center 7.87°N 80.77°E makes Sri Lanka fill
+ * the 600 px tall container to ≈616 px, which matches the SVG at "meet"
+ * scaling (600/793×450 = 340 px wide). Alignment is within ~5 px.
+ */
+
+// Minimal dark map style — terrain only, no labels cluttering the overlay
 const MAP_STYLES: google.maps.MapTypeStyle[] = [
-  { elementType: "geometry", stylers: [{ color: "#1c1c1c" }] },
-  { elementType: "labels.text.stroke", stylers: [{ color: "#1c1c1c" }] },
-  { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
-  { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#d59563" }] },
-  { featureType: "water", elementType: "geometry", stylers: [{ color: "#17263c" }] },
-  { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#515c6d" }] },
-  { featureType: "road", elementType: "geometry", stylers: [{ color: "#38414e" }] },
-  { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#212a37" }] },
-  { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#746855" }] },
-  { featureType: "landscape", elementType: "geometry", stylers: [{ color: "#2a2a2a" }] },
-  { featureType: "poi", elementType: "geometry", stylers: [{ color: "#283d6a" }] },
-  { featureType: "poi.park", elementType: "geometry", stylers: [{ color: "#263c3f" }] },
-  { featureType: "transit", elementType: "geometry", stylers: [{ color: "#2f3948" }] },
+  { elementType: "all",             stylers: [{ visibility: "simplified" }] },
+  { elementType: "geometry",        stylers: [{ color: "#0f0a05" }] },
+  { elementType: "labels",          stylers: [{ visibility: "off" }] },
+  { featureType: "water",           elementType: "geometry", stylers: [{ color: "#0d1b2e" }] },
+  { featureType: "landscape",       elementType: "geometry", stylers: [{ color: "#1a1208" }] },
+  { featureType: "landscape.natural.terrain", elementType: "geometry", stylers: [{ color: "#1f1409" }] },
+  { featureType: "road",            stylers: [{ visibility: "off" }] },
+  { featureType: "poi",             stylers: [{ visibility: "off" }] },
+  { featureType: "transit",         stylers: [{ visibility: "off" }] },
+  { featureType: "administrative",  elementType: "geometry.stroke", stylers: [{ color: "#C9A84C" }, { opacity: 0.15 }] },
 ];
 
 type PinState = "selected" | "normal" | "faded";
 
-function makeSvgIcon(state: PinState): string {
-  if (state === "selected") {
-    return `data:image/svg+xml,${encodeURIComponent(
-      `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24">
-        <circle cx="12" cy="12" r="10" fill="#C9A84C" stroke="white" stroke-width="2"/>
-        <circle cx="12" cy="12" r="4" fill="white"/>
-      </svg>`
-    )}`;
-  }
-  if (state === "faded") {
-    return `data:image/svg+xml,${encodeURIComponent(
-      `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14">
-        <circle cx="7" cy="7" r="5" fill="#888888" opacity="0.25"/>
-      </svg>`
-    )}`;
-  }
-  return `data:image/svg+xml,${encodeURIComponent(
-    `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16">
-      <circle cx="8" cy="8" r="6" fill="#A8891A" stroke="white" stroke-width="1.5"/>
-    </svg>`
-  )}`;
-}
+// Real GPS coords for every slug that may appear in routes
+const GEO_COORDS: Record<string, { lat: number; lng: number }> = {
+  "jaffna":          { lat: 9.6615,  lng: 80.0070 },
+  "mannar":          { lat: 8.9774,  lng: 79.9046 },
+  "anuradhapura":    { lat: 8.3114,  lng: 80.4037 },
+  "trincomalee":     { lat: 8.5874,  lng: 81.2152 },
+  "polonnaruwa":     { lat: 7.9403,  lng: 81.0003 },
+  "sigiriya":        { lat: 7.9572,  lng: 80.7603 },
+  "dambulla":        { lat: 7.8731,  lng: 80.6511 },
+  "kurunegala":      { lat: 7.4863,  lng: 80.3631 },
+  "batticaloa":      { lat: 7.7170,  lng: 81.7000 },
+  "arugam-bay":      { lat: 6.8406,  lng: 81.8356 },
+  "ampara":          { lat: 7.2984,  lng: 81.6724 },
+  "matale":          { lat: 7.4675,  lng: 80.6234 },
+  "kandy":           { lat: 7.2906,  lng: 80.6337 },
+  "nuwara-eliya":    { lat: 6.9497,  lng: 80.7891 },
+  "badulla":         { lat: 6.9934,  lng: 81.0550 },
+  "haputale":        { lat: 6.7668,  lng: 80.9535 },
+  "ella":            { lat: 6.8686,  lng: 81.0466 },
+  "ratnapura":       { lat: 6.6806,  lng: 80.4022 },
+  "negombo":         { lat: 7.2096,  lng: 79.8386 },
+  "colombo-airport": { lat: 7.1803,  lng: 79.8840 },
+  "colombo":         { lat: 6.9271,  lng: 79.8612 },
+  "kegalle":         { lat: 7.2513,  lng: 80.3464 },
+  "yala":            { lat: 6.3728,  lng: 81.5201 },
+  "tissamaharama":   { lat: 6.2931,  lng: 81.2923 },
+  "hambantota":      { lat: 6.1241,  lng: 81.1185 },
+  "tangalle":        { lat: 6.0241,  lng: 80.7997 },
+  "matara":          { lat: 5.9549,  lng: 80.5550 },
+  "mirissa":         { lat: 5.9477,  lng: 80.4538 },
+  "weligama":        { lat: 5.9739,  lng: 80.4283 },
+  "galle":           { lat: 6.0535,  lng: 80.2210 },
+  "unawatuna":       { lat: 6.0099,  lng: 80.2490 },
+  "hikkaduwa":       { lat: 6.1395,  lng: 80.0998 },
+  "bentota":         { lat: 6.4212,  lng: 80.0020 },
+};
 
 interface GoogleMapsCustomizeProps {
   routes: RouteData[];
 }
 
 export function GoogleMapsCustomize({ routes }: GoogleMapsCustomizeProps) {
-  const mapRef = useRef<HTMLDivElement>(null);
+  const mapRef         = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
-  const markersRef = useRef<Map<string, google.maps.Marker>>(new Map());
-  const [mapLoaded, setMapLoaded] = useState(false);
-  const [loadError, setLoadError] = useState(false);
+  const pinRefs        = useRef<(SVGGElement | null)[]>([]);
+  const hasAnimated    = useRef(false);
+
+  const [mapLoaded, setMapLoaded]     = useState(false);
+  const [loadError, setLoadError]     = useState(false);
   const [selectedSlugs, setSelectedSlugs] = useState<string[]>([]);
 
-  // All slugs present in any route
+  // Only slugs that appear in at least one route
   const allRouteSlugs = useMemo(() => {
     const set = new Set<string>();
     for (const r of routes) for (const s of r.locationSlugs) set.add(s);
     return set;
   }, [routes]);
 
-  // Core filtering
+  // Filter logic
   const { validRoutes, activeSlugs } = useMemo(() => {
     if (selectedSlugs.length === 0) {
       return { validRoutes: routes, activeSlugs: new Set(allRouteSlugs) };
     }
-    const validRoutes = routes.filter((route) =>
-      selectedSlugs.every((slug) => route.locationSlugs.includes(slug))
+    const valid = routes.filter((r) =>
+      selectedSlugs.every((s) => r.locationSlugs.includes(s))
     );
-    const activeSlugs = new Set<string>(selectedSlugs);
-    for (const route of validRoutes)
-      for (const slug of route.locationSlugs) activeSlugs.add(slug);
-    return { validRoutes, activeSlugs };
+    const active = new Set<string>(selectedSlugs);
+    for (const r of valid) for (const s of r.locationSlugs) active.add(s);
+    return { validRoutes: valid, activeSlugs: active };
   }, [selectedSlugs, routes, allRouteSlugs]);
 
   const toggleLocation = useCallback((slug: string) => {
@@ -86,7 +110,13 @@ export function GoogleMapsCustomize({ routes }: GoogleMapsCustomizeProps) {
     );
   }, []);
 
-  // Init Google Maps
+  // SVG pin data — only locations that exist in at least one route
+  const svgPins = useMemo(
+    () => SRI_LANKA_LOCATIONS.filter((loc) => allRouteSlugs.has(loc.slug)),
+    [allRouteSlugs]
+  );
+
+  // Init Google Maps — background only, no controls, locked view
   useEffect(() => {
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
     if (!apiKey || !mapRef.current) return;
@@ -98,153 +128,263 @@ export function GoogleMapsCustomize({ routes }: GoogleMapsCustomizeProps) {
       })
       .then(() => {
         if (!mapRef.current) return;
-        const map = new google.maps.Map(mapRef.current, {
-          center: { lat: 7.87, lng: 80.77 },
-          zoom: 8,
-          mapTypeId: "terrain",
-          styles: MAP_STYLES,
+        new google.maps.Map(mapRef.current, {
+          center:         { lat: 7.87, lng: 80.77 },
+          zoom:           7.8,
+          minZoom:        7.8,
+          maxZoom:        7.8,
+          mapTypeId:      "terrain",
+          styles:         MAP_STYLES,
           disableDefaultUI: true,
-          zoomControl: true,
-          zoomControlOptions: { position: google.maps.ControlPosition.RIGHT_CENTER },
-          gestureHandling: "cooperative",
+          gestureHandling: "none",      // locked — SVG pins handle all interaction
+          draggable:       false,
+          keyboardShortcuts: false,
+          clickableIcons:  false,
         });
-        mapInstanceRef.current = map;
-
-        // Create markers for all route locations
-        const routeLocs = SRI_LANKA_LOCATIONS.filter((loc) =>
-          allRouteSlugs.has(loc.slug)
-        );
-        for (const loc of routeLocs) {
-          const marker = new google.maps.Marker({
-            position: { lat: loc.mapY, lng: loc.mapX }, // will be overridden below
-            map,
-            title: loc.name,
-            optimized: false,
-          });
-          marker.addListener("click", () => toggleLocation(loc.slug));
-          markersRef.current.set(loc.slug, marker);
-        }
+        mapInstanceRef.current = null; // no need to track — purely decorative
         setMapLoaded(true);
       })
       .catch(() => setLoadError(true));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Set accurate lat/lng from our geographic data and update marker icons
+  // Idle ripple pulse on SVG pins
   useEffect(() => {
-    if (!mapLoaded) return;
+    if (!mapLoaded || hasAnimated.current) return;
+    hasAnimated.current = true;
 
-    // Real lat/lng for each location (used for Google Maps placement)
-    const geoCoords: Record<string, { lat: number; lng: number }> = {
-      "jaffna":          { lat: 9.6615,  lng: 80.0070 },
-      "mannar":          { lat: 8.9774,  lng: 79.9046 },
-      "anuradhapura":    { lat: 8.3114,  lng: 80.4037 },
-      "trincomalee":     { lat: 8.5874,  lng: 81.2152 },
-      "polonnaruwa":     { lat: 7.9403,  lng: 81.0003 },
-      "sigiriya":        { lat: 7.9572,  lng: 80.7603 },
-      "dambulla":        { lat: 7.8731,  lng: 80.6511 },
-      "kurunegala":      { lat: 7.4863,  lng: 80.3631 },
-      "batticaloa":      { lat: 7.7170,  lng: 81.7000 },
-      "arugam-bay":      { lat: 6.8406,  lng: 81.8356 },
-      "ampara":          { lat: 7.2984,  lng: 81.6724 },
-      "matale":          { lat: 7.4675,  lng: 80.6234 },
-      "kandy":           { lat: 7.2906,  lng: 80.6337 },
-      "nuwara-eliya":    { lat: 6.9497,  lng: 80.7891 },
-      "badulla":         { lat: 6.9934,  lng: 81.0550 },
-      "haputale":        { lat: 6.7668,  lng: 80.9535 },
-      "ella":            { lat: 6.8686,  lng: 81.0466 },
-      "ratnapura":       { lat: 6.6806,  lng: 80.4022 },
-      "negombo":         { lat: 7.2096,  lng: 79.8386 },
-      "colombo-airport": { lat: 7.1803,  lng: 79.8840 },
-      "colombo":         { lat: 6.9271,  lng: 79.8612 },
-      "kegalle":         { lat: 7.2513,  lng: 80.3464 },
-      "yala":            { lat: 6.3728,  lng: 81.5201 },
-      "tissamaharama":   { lat: 6.2931,  lng: 81.2923 },
-      "hambantota":      { lat: 6.1241,  lng: 81.1185 },
-      "tangalle":        { lat: 6.0241,  lng: 80.7997 },
-      "matara":          { lat: 5.9549,  lng: 80.5550 },
-      "mirissa":         { lat: 5.9477,  lng: 80.4538 },
-      "weligama":        { lat: 5.9739,  lng: 80.4283 },
-      "galle":           { lat: 6.0535,  lng: 80.2210 },
-      "unawatuna":       { lat: 6.0099,  lng: 80.2490 },
-      "hikkaduwa":       { lat: 6.1395,  lng: 80.0998 },
-    };
-
-    for (const [slug, marker] of markersRef.current) {
-      const coords = geoCoords[slug];
-      const state: PinState = selectedSlugs.includes(slug)
-        ? "selected"
-        : activeSlugs.has(slug)
-        ? "normal"
-        : "faded";
-
-      if (coords) {
-        marker.setPosition({ lat: coords.lat, lng: coords.lng });
-      }
-      const iconUrl = makeSvgIcon(state);
-      const size = state === "selected" ? 24 : state === "faded" ? 14 : 16;
-      marker.setIcon({
-        url: iconUrl,
-        scaledSize: new google.maps.Size(size, size),
-        anchor: new google.maps.Point(size / 2, size / 2),
+    import("gsap").then(({ gsap }) => {
+      pinRefs.current.forEach((pin, i) => {
+        const ripple = pin?.querySelector(".gmc-ripple");
+        if (!ripple) return;
+        gsap.to(ripple, {
+          scale: 2.4, opacity: 0, duration: 1.9,
+          repeat: -1, delay: i * 0.3, ease: "power2.out",
+          transformOrigin: "center center",
+        });
       });
-      marker.setZIndex(state === "selected" ? 10 : state === "normal" ? 5 : 1);
-      (marker as google.maps.Marker & { setClickable?: (v: boolean) => void }).setClickable?.(state !== "faded");
-    }
-  }, [mapLoaded, selectedSlugs, activeSlugs]);
+    });
+  }, [mapLoaded]);
 
   const hasNoRoutes = routes.length === 0;
 
   return (
-    <div className="grid grid-cols-1 gap-8 lg:grid-cols-5 lg:gap-12">
-      {/* ── Map (3 cols) ── */}
+    <div className="grid grid-cols-1 gap-0 lg:grid-cols-5">
+
+      {/* ── Map: 3 cols — Google Maps base + SVG overlay ── */}
       <div className="lg:col-span-3">
         {hasNoRoutes ? (
-          <div className="flex min-h-[420px] items-center justify-center rounded-2xl border-2 border-dashed border-brand-border">
+          <div className="flex min-h-[500px] items-center justify-center rounded-2xl border border-[#C9A84C]/20 bg-[#0C0804]">
             <div className="text-center">
-              <MapPin className="mx-auto mb-3 h-10 w-10 text-brand-border" />
-              <p className="text-sm text-brand-muted">No routes have been set up yet.</p>
+              <MapPin className="mx-auto mb-3 h-10 w-10 text-[#C9A84C]/30" />
+              <p className="text-sm text-white/40">No routes have been configured yet.</p>
             </div>
           </div>
         ) : (
-          <div className="relative overflow-hidden rounded-2xl" style={{ height: 520 }}>
+          /* Outer frame — dark border, rounded */
+          <div className="relative overflow-hidden rounded-2xl border border-[#C9A84C]/15 shadow-2xl shadow-black/60" style={{ height: 600 }}>
+
+            {/* ── Layer 1: Google Maps (base) ── */}
             <div ref={mapRef} className="absolute inset-0" />
+
+            {/* Loading / error states */}
             {!mapLoaded && !loadError && (
-              <div className="absolute inset-0 flex items-center justify-center bg-[#1c1c1c]">
-                <Loader2 className="h-8 w-8 animate-spin text-[#C9A84C]" />
+              <div className="absolute inset-0 z-10 flex items-center justify-center bg-[#0C0804]">
+                <div className="flex flex-col items-center gap-3">
+                  <Loader2 className="h-8 w-8 animate-spin text-[#C9A84C]" />
+                  <p className="text-xs uppercase tracking-[0.18em] text-[#C9A84C]/50">Loading map…</p>
+                </div>
               </div>
             )}
             {loadError && (
-              <div className="absolute inset-0 flex items-center justify-center bg-[#1c1c1c]">
-                <p className="text-sm text-brand-muted">Map failed to load.</p>
+              <div className="absolute inset-0 z-10 flex items-center justify-center bg-[#0C0804]">
+                <p className="text-sm text-white/30">Map unavailable</p>
+              </div>
+            )}
+
+            {/* ── Layer 2: SVG island overlay ── */}
+            <svg
+              viewBox="0 0 450 793"
+              preserveAspectRatio="xMidYMid meet"
+              className="absolute inset-0 h-full w-full pointer-events-none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <defs>
+                <radialGradient id="gmc-pin-glow" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%"   stopColor="#C9A84C" stopOpacity="0.8" />
+                  <stop offset="100%" stopColor="#C9A84C" stopOpacity="0" />
+                </radialGradient>
+                <filter id="gmc-glow">
+                  <feGaussianBlur stdDeviation="3" result="blur" />
+                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                </filter>
+              </defs>
+
+              {/* District paths — near-transparent so Google Map shows through */}
+              {SRI_LANKA_DISTRICTS.map((d, i) => (
+                <path
+                  key={i} d={d}
+                  fill="#C9A84C" fillOpacity={0.04}
+                  stroke="#C9A84C" strokeWidth="0.55" strokeOpacity={0.22}
+                  strokeLinejoin="round"
+                />
+              ))}
+
+              {/* Route connector lines */}
+              {svgPins.length > 1 && validRoutes.slice(0, 1).flatMap((route) =>
+                route.locationSlugs.slice(0, -1).map((slug, si) => {
+                  const a = SRI_LANKA_LOCATIONS.find((l) => l.slug === slug);
+                  const b = SRI_LANKA_LOCATIONS.find((l) => l.slug === route.locationSlugs[si + 1]);
+                  if (!a || !b) return null;
+                  return (
+                    <line key={`${slug}-${si}`}
+                      x1={a.mapX} y1={a.mapY} x2={b.mapX} y2={b.mapY}
+                      stroke="#C9A84C" strokeWidth="1" strokeDasharray="4 6" strokeOpacity="0.18"
+                    />
+                  );
+                })
+              )}
+
+              {/* ── Pins — pointer-events-auto so they're clickable ── */}
+              {svgPins.map((loc, i) => {
+                const state: PinState = selectedSlugs.includes(loc.slug)
+                  ? "selected"
+                  : activeSlugs.has(loc.slug)
+                  ? "normal"
+                  : "faded";
+                const isSelected = state === "selected";
+                const isFaded    = state === "faded";
+
+                return (
+                  <g
+                    key={loc.slug}
+                    ref={(el) => { pinRefs.current[i] = el; }}
+                    transform={`translate(${loc.mapX}, ${loc.mapY})`}
+                    style={{ cursor: isFaded ? "default" : "pointer", pointerEvents: isFaded ? "none" : "auto" }}
+                    role="button"
+                    tabIndex={isFaded ? -1 : 0}
+                    aria-label={`${isSelected ? "Deselect" : "Select"} ${loc.name}`}
+                    aria-pressed={isSelected}
+                    onClick={() => !isFaded && toggleLocation(loc.slug)}
+                    onKeyDown={(e) => {
+                      if (!isFaded && (e.key === "Enter" || e.key === " ")) {
+                        e.preventDefault(); toggleLocation(loc.slug);
+                      }
+                    }}
+                  >
+                    {/* Outer glow for selected */}
+                    {isSelected && (
+                      <circle r="22" fill="url(#gmc-pin-glow)" opacity="0.7" />
+                    )}
+
+                    {/* Idle ripple (animated by GSAP) */}
+                    <circle
+                      className="gmc-ripple"
+                      r={isSelected ? 10 : 7}
+                      fill="none"
+                      stroke="#C9A84C"
+                      strokeWidth="1.2"
+                      opacity={isFaded ? 0 : isSelected ? 0.6 : 0.25}
+                    />
+
+                    {/* Pin body */}
+                    <circle
+                      r={isSelected ? 8 : isFaded ? 4 : 5.5}
+                      fill={isSelected ? "#C9A84C" : isFaded ? "#333" : "#1C1209"}
+                      stroke="#C9A84C"
+                      strokeWidth={isSelected ? 0 : isFaded ? 0.5 : 1.5}
+                      strokeOpacity={isFaded ? 0.2 : 1}
+                      style={{ transition: "r 0.3s ease, fill 0.3s ease" }}
+                    />
+
+                    {/* Center dot */}
+                    <circle
+                      r="2.5"
+                      fill={isSelected ? "#1C1209" : "#C9A84C"}
+                      opacity={isFaded ? 0.2 : isSelected ? 1 : 0.85}
+                    />
+
+                    {/* Name label */}
+                    <text
+                      y={22}
+                      textAnchor="middle"
+                      fontSize="10"
+                      fontWeight={isSelected ? "600" : "400"}
+                      fill={isSelected ? "#E8C96A" : "#C9A84C"}
+                      fillOpacity={isFaded ? 0.15 : isSelected ? 1 : 0.7}
+                      fontFamily="Cormorant, serif"
+                      style={{ userSelect: "none" }}
+                    >
+                      {loc.name}
+                    </text>
+                  </g>
+                );
+              })}
+            </svg>
+
+            {/* ── Layer 3: UI chrome ── */}
+
+            {/* Top-left eyebrow label */}
+            <div className="pointer-events-none absolute left-5 top-5 flex items-center gap-2.5 z-20">
+              <div className="h-px w-5 bg-[#C9A84C]" />
+              <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#C9A84C]">
+                Sri Lanka
+              </span>
+            </div>
+
+            {/* Bottom-right: compass */}
+            <div className="pointer-events-none absolute bottom-4 right-4 z-20 opacity-40">
+              <svg viewBox="0 0 32 32" width="28" height="28">
+                <circle cx="16" cy="16" r="14" fill="none" stroke="#C9A84C" strokeWidth="0.8" />
+                <line x1="16" y1="4"  x2="16" y2="28" stroke="#C9A84C" strokeWidth="0.7" />
+                <line x1="4"  y1="16" x2="28" y2="16" stroke="#C9A84C" strokeWidth="0.7" />
+                <text x="16" y="10" textAnchor="middle" fontSize="6" fill="#C9A84C" fontFamily="Montserrat,sans-serif" fontWeight="700">N</text>
+              </svg>
+            </div>
+
+            {/* Hint */}
+            <div className="pointer-events-none absolute bottom-4 left-5 z-20">
+              <p className="text-[10px] uppercase tracking-[0.16em] text-white/25">
+                Tap a pin to filter routes
+              </p>
+            </div>
+
+            {/* Selected count badge */}
+            {selectedSlugs.length > 0 && (
+              <div className="absolute left-5 bottom-10 z-20">
+                <span className="rounded-full border border-[#C9A84C]/40 bg-[#C9A84C]/15 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#C9A84C] backdrop-blur-sm">
+                  {selectedSlugs.length} selected
+                </span>
               </div>
             )}
           </div>
         )}
       </div>
 
-      {/* ── Side Panel (2 cols) — identical to CustomizeTourMap ── */}
-      <div className="flex flex-col gap-6 lg:col-span-2 lg:pt-4">
-        {/* Selected locations */}
+      {/* ── Side panel: 2 cols ── */}
+      <div className="flex flex-col gap-6 rounded-r-2xl border border-l-0 border-[#C9A84C]/12 bg-[#0F0A05] p-6 lg:col-span-2 lg:p-8">
+
+        {/* Header */}
         <div>
-          <div className="mb-3 flex items-center gap-3">
-            <div className="h-px w-6 bg-[#C9A84C]" />
-            <h2 className="text-xs font-semibold uppercase tracking-[0.15em] text-[#C9A84C]">
+          <div className="mb-1 flex items-center gap-2.5">
+            <div className="h-px w-5 bg-[#C9A84C]" />
+            <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#C9A84C]">
               Your Selections
-            </h2>
+            </span>
           </div>
+
           {selectedSlugs.length === 0 ? (
-            <p className="text-sm leading-relaxed text-brand-muted">
-              Click any location pin on the map to start filtering compatible
-              routes. Incompatible stops will fade automatically.
+            <p className="mt-3 text-sm leading-relaxed text-white/35">
+              Tap any pin on the map to begin. Incompatible stops will dim automatically.
             </p>
           ) : (
-            <div className="flex flex-wrap gap-2">
+            <div className="mt-3 flex flex-wrap gap-2">
               {selectedSlugs.map((slug) => (
                 <button
                   key={slug}
                   onClick={() => toggleLocation(slug)}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-[#C9A84C]/40 bg-[#C9A84C]/10 px-3 py-1.5 text-xs font-medium text-[#C9A84C] transition hover:bg-[#C9A84C]/20"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-[#C9A84C]/35 bg-[#C9A84C]/10 px-3 py-1.5 text-xs font-medium text-[#C9A84C] transition-all duration-200 hover:bg-[#C9A84C]/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C9A84C]/40"
                 >
                   {LOCATION_BY_SLUG[slug]?.name ?? slug}
                   <X className="h-3 w-3" />
@@ -252,7 +392,7 @@ export function GoogleMapsCustomize({ routes }: GoogleMapsCustomizeProps) {
               ))}
               <button
                 onClick={() => setSelectedSlugs([])}
-                className="text-xs text-brand-faint underline underline-offset-2 hover:text-brand-muted"
+                className="text-[11px] text-white/25 underline underline-offset-2 hover:text-white/50 transition-colors"
               >
                 Clear all
               </button>
@@ -260,35 +400,46 @@ export function GoogleMapsCustomize({ routes }: GoogleMapsCustomizeProps) {
           )}
         </div>
 
+        {/* Divider */}
+        <div className="h-px bg-[#C9A84C]/10" />
+
         {/* Compatible routes */}
-        <div>
-          <div className="mb-3 flex items-center gap-3">
-            <div className="h-px w-6 bg-[#C9A84C]" />
-            <h2 className="text-xs font-semibold uppercase tracking-[0.15em] text-[#C9A84C]">
+        <div className="flex-1">
+          <div className="mb-4 flex items-center gap-2.5">
+            <div className="h-px w-5 bg-[#C9A84C]" />
+            <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#C9A84C]">
               Compatible Routes
-              {!hasNoRoutes && (
-                <span className="ml-2 rounded-full bg-[#C9A84C]/15 px-2 py-0.5 text-xs font-medium text-[#C9A84C]">
-                  {validRoutes.length}
-                </span>
-              )}
-            </h2>
+            </span>
+            {!hasNoRoutes && (
+              <span className="ml-auto rounded-full border border-[#C9A84C]/30 bg-[#C9A84C]/10 px-2.5 py-0.5 text-[11px] font-semibold text-[#C9A84C]">
+                {validRoutes.length}
+              </span>
+            )}
           </div>
+
           {hasNoRoutes ? (
-            <p className="text-sm text-brand-muted">Routes will appear here once configured.</p>
+            <p className="text-sm text-white/30">Routes will appear here once configured.</p>
           ) : validRoutes.length === 0 ? (
-            <div className="rounded-xl border border-brand-border bg-white p-4 text-center">
-              <p className="text-sm font-medium text-gray-700">No routes match your selection</p>
-              <p className="mt-1 text-xs text-brand-muted">Try removing one of your selected locations.</p>
+            <div className="rounded-xl border border-white/8 bg-white/5 p-5 text-center">
+              <p className="text-sm font-medium text-white/60">No routes match</p>
+              <p className="mt-1 text-xs text-white/30">Try removing a selected stop.</p>
             </div>
           ) : (
-            <ul className="space-y-2">
+            <ul className="space-y-2.5">
               {validRoutes.map((route) => (
-                <li key={route.id} className="rounded-xl border border-brand-border bg-white p-4 shadow-sm">
-                  <p className="font-serif text-base font-light text-brand-text">{route.name}</p>
-                  <p className="mt-1 text-xs text-brand-muted">
+                <li
+                  key={route.id}
+                  className="group rounded-xl border border-[#C9A84C]/12 bg-white/[0.04] p-4 transition-all duration-200 hover:border-[#C9A84C]/25 hover:bg-white/[0.07]"
+                >
+                  <p className="font-serif text-base font-light text-white">
+                    {route.name}
+                  </p>
+                  <p className="mt-1.5 text-[11px] leading-relaxed text-white/35">
                     {route.locationSlugs.length} stop{route.locationSlugs.length !== 1 ? "s" : ""}
                     {" · "}
-                    {route.locationSlugs.map((s) => LOCATION_BY_SLUG[s]?.name ?? s).join(" → ")}
+                    {route.locationSlugs
+                      .map((s) => LOCATION_BY_SLUG[s]?.name ?? s)
+                      .join(" → ")}
                   </p>
                 </li>
               ))}
@@ -297,22 +448,27 @@ export function GoogleMapsCustomize({ routes }: GoogleMapsCustomizeProps) {
         </div>
 
         {/* CTA */}
-        {selectedSlugs.length > 0 && (
+        {selectedSlugs.length > 0 ? (
           <a
             href={`/booking?locations=${selectedSlugs.join(",")}`}
-            className="btn-gold inline-flex w-full items-center justify-center rounded-full px-6 py-3.5 text-sm font-semibold tracking-[0.1em]"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#C9A84C] px-6 py-3.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#1C1209] transition-all duration-300 hover:bg-[#E8C96A]"
           >
             Request This Itinerary
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
+              <path fillRule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z" clipRule="evenodd" />
+            </svg>
           </a>
-        )}
-        {selectedSlugs.length === 0 && !hasNoRoutes && (
-          <p className="text-xs leading-relaxed text-brand-faint">
-            After selecting your preferred locations, use the{" "}
-            <strong className="font-medium text-brand-muted">Request This Itinerary</strong>{" "}
-            button to send us your custom tour request.
-          </p>
+        ) : (
+          !hasNoRoutes && (
+            <p className="text-[11px] leading-relaxed text-white/20">
+              Select locations above, then tap{" "}
+              <span className="font-semibold text-white/35">Request This Itinerary</span>{" "}
+              to send us your custom tour request.
+            </p>
+          )
         )}
       </div>
+
     </div>
   );
 }

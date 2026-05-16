@@ -2,7 +2,6 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { CustomizeTourMap, type RouteData } from "./_components/CustomizeTourMap";
 import { GoogleMapsCustomize } from "./_components/GoogleMapsCustomize";
-import { CustomizeMapExplorer } from "./_components/CustomizeMapExplorer";
 import { db } from "@/db";
 import { routes, routeStops, siteSettings } from "@/db/schema";
 import { asc, eq } from "drizzle-orm";
@@ -60,95 +59,86 @@ export default async function CustomizeTourPage() {
   trackMapLoad();
 
   return (
-    <main className="min-h-screen bg-[#1C1209]">
+    <main className="min-h-screen bg-[#0C0804]">
       <Header />
 
-      {/* ── Page title hero — slim, dark ── */}
-      <section className="relative overflow-hidden bg-[#0C0804] pb-12 pt-32">
+      {/* ── Hero ── */}
+      <section className="relative overflow-hidden pb-0 pt-32">
         <div
-          className="pointer-events-none absolute inset-0 opacity-15"
+          className="pointer-events-none absolute inset-0 opacity-20"
+          style={{ backgroundImage: "radial-gradient(ellipse 70% 55% at 50% 0%, #C9A84C 0%, transparent 70%)" }}
+        />
+        {/* Decorative grid */}
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.03]"
           style={{
-            backgroundImage: "radial-gradient(ellipse 70% 55% at 50% 0%, #C9A84C 0%, transparent 70%)",
+            backgroundImage: `linear-gradient(rgba(201,168,76,1) 1px, transparent 1px), linear-gradient(90deg, rgba(201,168,76,1) 1px, transparent 1px)`,
+            backgroundSize: "80px 80px",
           }}
         />
-        <div className="relative mx-auto max-w-7xl px-6 lg:px-12">
+        <div className="relative mx-auto max-w-7xl px-6 pb-10 lg:px-12">
           <div className="mb-4 flex items-center gap-3">
             <div className="h-px w-8 bg-[#C9A84C]" />
             <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#C9A84C]">
               Build Your Journey
             </span>
           </div>
-          <h1 className="font-serif text-4xl font-light leading-tight text-white md:text-5xl lg:text-6xl">
-            Customize Your{" "}
-            <span
-              className="italic"
-              style={{
-                background: "linear-gradient(135deg, #C9A84C 0%, #E8C96A 50%, #C9A84C 100%)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-              }}
-            >
-              Sri Lanka Tour
-            </span>
-          </h1>
-          <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/50">
-            Explore the destinations below, then scroll to select your preferred stops and discover perfectly matched itineraries — or let us craft something entirely bespoke.
-          </p>
-        </div>
-      </section>
-
-      {/* ── Interactive destination map explorer ── */}
-      <CustomizeMapExplorer />
-
-      {/* ── Divider between explorer and route builder ── */}
-      <div className="relative bg-[#1C1209] px-6 py-14 lg:px-12">
-        <div className="mx-auto max-w-7xl">
-          <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:text-left sm:gap-8">
-            <div className="flex items-center gap-3 shrink-0">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[#C9A84C]/30 bg-[#C9A84C]/10">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4 text-[#C9A84C]">
-                  <path fillRule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <div className="h-px w-12 bg-gradient-to-r from-[#C9A84C]/50 to-transparent hidden sm:block" />
-            </div>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h2 className="font-serif text-2xl font-light text-white">
-                Now Build Your Itinerary
-              </h2>
-              <p className="mt-1.5 text-sm text-white/40">
-                Click the pins below to select your preferred stops — matching routes update in real time.
+              <h1 className="font-serif text-4xl font-light leading-tight text-white md:text-5xl lg:text-6xl">
+                Customize Your{" "}
+                <span
+                  className="italic"
+                  style={{
+                    background: "linear-gradient(135deg, #C9A84C 0%, #E8C96A 50%, #C9A84C 100%)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    backgroundClip: "text",
+                  }}
+                >
+                  Tour
+                </span>
+              </h1>
+              <p className="mt-4 max-w-xl text-sm leading-relaxed text-white/45">
+                Tap any location pin on the map to select your stops. Matching itineraries filter in real time — then request your custom tour.
               </p>
+            </div>
+            {/* Decorative coordinate badge */}
+            <div className="hidden shrink-0 flex-col items-end gap-1 font-mono text-[10px] leading-tight text-[#C9A84C]/25 sm:flex select-none">
+              <span>7.87°N · 80.77°E</span>
+              <span>Sri Lanka · Indian Ocean</span>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* ── Route builder map ── */}
-      <section className="bg-[#FAFAF9] px-6 py-16 lg:px-12 lg:py-20">
+      {/* ── Map + Panel ── */}
+      <section className="px-6 pb-16 lg:px-12">
         <div className="mx-auto max-w-7xl">
           {useGoogleMaps ? (
             <GoogleMapsCustomize routes={allRoutes} />
           ) : (
-            <CustomizeTourMap routes={allRoutes} />
+            /* SVG-only fallback when no Google Maps API key */
+            <div className="overflow-hidden rounded-2xl border border-[#C9A84C]/15">
+              <CustomizeTourMap routes={allRoutes} />
+            </div>
           )}
         </div>
       </section>
 
       {/* ── Bottom CTA ── */}
-      <section className="bg-[#1C1209] px-6 py-16 lg:px-12">
+      <section className="border-t border-[#C9A84C]/10 px-6 py-14 lg:px-12">
         <div className="mx-auto max-w-3xl text-center">
           <div className="mb-5 flex items-center justify-center gap-3">
             <div className="h-px w-8 bg-gradient-to-r from-transparent to-[#C9A84C]" />
-            <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#C9A84C]">Need Help?</span>
+            <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#C9A84C]">Need Inspiration?</span>
             <div className="h-px w-8 bg-gradient-to-r from-[#C9A84C] to-transparent" />
           </div>
           <h2 className="font-serif text-3xl font-light text-white sm:text-4xl">
-            Not sure where to start?
+            Browse Our Curated Tours
           </h2>
-          <p className="mt-3 text-sm leading-relaxed text-white/45">
-            Browse our curated tour packages for inspiration, then come back to fine-tune your perfect itinerary.
+          <p className="mt-3 text-sm leading-relaxed text-white/40">
+            Discover handcrafted itineraries built by our experts, then return to fine-tune your perfect journey.
           </p>
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <a
@@ -161,7 +151,7 @@ export default async function CustomizeTourPage() {
               href="/contact"
               className="inline-flex items-center gap-2 rounded-full border border-[#C9A84C]/30 px-8 py-3.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#C9A84C] transition-all duration-300 hover:border-[#C9A84C] hover:bg-[#C9A84C]/10"
             >
-              Talk to Us
+              Talk to an Expert
             </a>
           </div>
         </div>
