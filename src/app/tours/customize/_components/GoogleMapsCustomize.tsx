@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { X, MapPin, Loader2 } from "lucide-react";
 import { SRI_LANKA_LOCATIONS, LOCATION_BY_SLUG } from "@/data/sri-lanka-locations";
-import { SRI_LANKA_DISTRICTS } from "@/components/sri-lanka-map-data";
 import type { RouteData } from "./CustomizeTourMap";
 
 /*
@@ -156,19 +155,23 @@ export function GoogleMapsCustomize({ routes }: GoogleMapsCustomizeProps) {
         });
         mapInstanceRef.current = map;
 
-        // Keep SVG viewBox in sync with Google Maps viewport
+        // Keep SVG pin overlay in sync with every viewport change.
+        // We listen to zoom_changed + center_changed (not just bounds_changed)
+        // so the viewBox updates on every animation frame during smooth zoom,
+        // eliminating the "two-layers at different scales" visual glitch.
         const syncViewBox = () => {
           const bounds = map.getBounds();
           if (!bounds) return;
           const ne = bounds.getNorthEast();
           const sw = bounds.getSouthWest();
-          const tl = toSvg(ne.lat(), sw.lng()); // top-left in SVG space
-          const br = toSvg(sw.lat(), ne.lng()); // bottom-right in SVG space
+          const tl = toSvg(ne.lat(), sw.lng());
+          const br = toSvg(sw.lat(), ne.lng());
           setSvgViewBox(`${tl.x} ${tl.y} ${br.x - tl.x} ${br.y - tl.y}`);
         };
 
-        map.addListener("bounds_changed", syncViewBox);
-        // Fire once immediately after tiles load so the initial viewBox is set
+        map.addListener("bounds_changed",  syncViewBox);
+        map.addListener("zoom_changed",    syncViewBox);
+        map.addListener("center_changed",  syncViewBox);
         map.addListener("tilesloaded", () => { syncViewBox(); setMapLoaded(true); });
       })
       .catch(() => setLoadError(true));
@@ -248,16 +251,6 @@ export function GoogleMapsCustomize({ routes }: GoogleMapsCustomizeProps) {
                 </filter>
               </defs>
 
-              {/* District paths — near-transparent so Google Map shows through */}
-              {SRI_LANKA_DISTRICTS.map((d, i) => (
-                <path
-                  key={i} d={d}
-                  fill="#C9A84C" fillOpacity={0.04}
-                  stroke="#C9A84C" strokeWidth="0.55" strokeOpacity={0.22}
-                  strokeLinejoin="round"
-                />
-              ))}
-
               {/* Route connector lines */}
               {svgPins.length > 1 && validRoutes.slice(0, 1).flatMap((route) =>
                 route.locationSlugs.slice(0, -1).map((slug, si) => {
@@ -300,46 +293,60 @@ export function GoogleMapsCustomize({ routes }: GoogleMapsCustomizeProps) {
                       }
                     }}
                   >
-                    {/* Outer glow for selected */}
+                    {/* Selected: outer ambient glow */}
                     {isSelected && (
-                      <circle r="22" fill="url(#gmc-pin-glow)" opacity="0.7" />
+                      <circle r="26" fill="url(#gmc-pin-glow)" opacity="0.55" />
                     )}
 
-                    {/* Idle ripple (animated by GSAP) */}
+                    {/* Idle ripple ring (GSAP animated) */}
                     <circle
                       className="gmc-ripple"
-                      r={isSelected ? 10 : 7}
+                      r={isSelected ? 11 : 8}
                       fill="none"
                       stroke="#C9A84C"
-                      strokeWidth="1.2"
-                      opacity={isFaded ? 0 : isSelected ? 0.6 : 0.25}
+                      strokeWidth="1"
+                      opacity={isFaded ? 0 : isSelected ? 0.55 : 0.2}
                     />
 
-                    {/* Pin body */}
+                    {/* Dark backdrop — makes pin legible over any terrain */}
                     <circle
-                      r={isSelected ? 8 : isFaded ? 4 : 5.5}
-                      fill={isSelected ? "#C9A84C" : isFaded ? "#333" : "#1C1209"}
+                      r={isSelected ? 10 : isFaded ? 5 : 7}
+                      fill={isSelected ? "#C9A84C" : "#0C0804"}
+                      fillOpacity={isFaded ? 0.4 : 0.9}
                       stroke="#C9A84C"
-                      strokeWidth={isSelected ? 0 : isFaded ? 0.5 : 1.5}
-                      strokeOpacity={isFaded ? 0.2 : 1}
+                      strokeWidth={isSelected ? 0 : isFaded ? 0.6 : 1.8}
+                      strokeOpacity={isFaded ? 0.25 : 1}
                       style={{ transition: "r 0.3s ease, fill 0.3s ease" }}
                     />
 
                     {/* Center dot */}
                     <circle
-                      r="2.5"
-                      fill={isSelected ? "#1C1209" : "#C9A84C"}
-                      opacity={isFaded ? 0.2 : isSelected ? 1 : 0.85}
+                      r="3"
+                      fill={isSelected ? "#0C0804" : "#C9A84C"}
+                      opacity={isFaded ? 0.25 : 1}
                     />
+
+                    {/* Label pill background for readability */}
+                    {!isFaded && (
+                      <rect
+                        x={-((loc.name.length * 4.2) / 2)}
+                        y={17}
+                        width={loc.name.length * 4.2}
+                        height={13}
+                        rx="3"
+                        fill="#0C0804"
+                        fillOpacity="0.72"
+                      />
+                    )}
 
                     {/* Name label */}
                     <text
-                      y={22}
+                      y={27}
                       textAnchor="middle"
-                      fontSize="10"
+                      fontSize={isSelected ? "10.5" : "9.5"}
                       fontWeight={isSelected ? "600" : "400"}
                       fill={isSelected ? "#E8C96A" : "#C9A84C"}
-                      fillOpacity={isFaded ? 0.15 : isSelected ? 1 : 0.7}
+                      fillOpacity={isFaded ? 0 : isSelected ? 1 : 0.85}
                       fontFamily="Cormorant, serif"
                       style={{ userSelect: "none" }}
                     >
