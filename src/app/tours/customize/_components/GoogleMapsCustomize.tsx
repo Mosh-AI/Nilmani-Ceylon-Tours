@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
-import { X, MapPin, Loader2, ArrowRight, Navigation } from "lucide-react";
+import { X, MapPin, Loader2, ArrowRight, Navigation, LogIn } from "lucide-react";
 import type { RouteData } from "./CustomizeTourMap";
+import { useSession } from "@/lib/auth-client";
 
 const MAP_STYLES: google.maps.MapTypeStyle[] = [
   { elementType: "geometry", stylers: [{ color: "#0e0b07" }] },
@@ -66,6 +67,8 @@ export function GoogleMapsCustomize({ routes, locations }: GoogleMapsCustomizePr
   const [mapLoaded, setMapLoaded] = useState(false);
   const [loadError, setLoadError] = useState(false);
   const [selectedSlugs, setSelectedSlugs] = useState<string[]>([]);
+  const { data: session, isPending: sessionLoading } = useSession();
+  const isLoggedIn = !!session?.user;
 
   const allRouteSlugs = useMemo(() => {
     const set = new Set<string>();
@@ -349,19 +352,71 @@ export function GoogleMapsCustomize({ routes, locations }: GoogleMapsCustomizePr
         <div className="h-px bg-gradient-to-r from-transparent via-white/[0.07] to-transparent" />
 
         {/* ── CTA ── */}
-        {selectedSlugs.length > 0 ? (
-          <a
-            href={`/booking?locations=${selectedSlugs.join(",")}`}
-            className="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#C9A84C] px-6 py-3.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#1C1209] transition-all duration-300 hover:bg-[#E8C96A]"
-          >
-            Request This Itinerary
-            <ArrowRight size={12} className="transition-transform duration-300 group-hover:translate-x-0.5" />
-          </a>
-        ) : (
+        {selectedSlugs.length === 0 ? (
           <div className="text-center">
             <p className="text-[11px] leading-relaxed text-white/20">
               Select stops on the map, then request your custom itinerary.
             </p>
+          </div>
+        ) : sessionLoading ? (
+          <div className="h-[108px] w-full animate-pulse rounded-full bg-white/5" />
+        ) : !isLoggedIn ? (
+          <div className="relative overflow-hidden rounded-2xl border border-[#C9A84C]/20 bg-[#C9A84C]/[0.04]">
+            {/* Gold top accent line */}
+            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#C9A84C]/40 to-transparent" />
+
+            <div className="flex flex-col gap-3 p-4">
+              {/* Row 1: lock label */}
+              <div className="flex items-center gap-2">
+                <LogIn size={14} className="shrink-0 text-[#C9A84C]/50" />
+                <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#C9A84C]/70">
+                  Sign in to submit your request
+                </span>
+              </div>
+
+              {/* Row 2: body */}
+              <p className="text-[11px] leading-relaxed text-white/35">
+                Your itinerary is ready — create a free account or sign in to submit your custom tour request and track it from your dashboard.
+              </p>
+
+              {/* Row 3: buttons */}
+              <div className="flex flex-col gap-2">
+                <a
+                  href={`/sign-in?callbackUrl=${encodeURIComponent("/tours/customize")}`}
+                  className="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#C9A84C] px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#1C1209] transition-all duration-300 hover:bg-[#E8C96A]"
+                >
+                  Sign In to Request
+                  <LogIn size={12} />
+                </a>
+                <a
+                  href="/sign-up"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[#C9A84C]/25 px-6 py-2.5 text-[11px] font-medium uppercase tracking-[0.16em] text-[#C9A84C]/60 transition-all duration-300 hover:border-[#C9A84C]/50 hover:text-[#C9A84C]"
+                >
+                  Create Free Account
+                </a>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {/* Logged-in micro indicator */}
+            <div className="flex items-center gap-2 px-1">
+              <div className="h-1.5 w-1.5 rounded-full bg-emerald-400/60" />
+              <span className="text-[10px] text-white/30">
+                Signed in as{" "}
+                <span className="text-white/50">
+                  {session.user.name || session.user.email}
+                </span>
+              </span>
+            </div>
+            {/* CTA button */}
+            <a
+              href={`/booking?locations=${selectedSlugs.join(",")}`}
+              className="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#C9A84C] px-6 py-3.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#1C1209] transition-all duration-300 hover:bg-[#E8C96A]"
+            >
+              Request This Itinerary
+              <ArrowRight size={12} className="transition-transform duration-300 group-hover:translate-x-0.5" />
+            </a>
           </div>
         )}
       </div>

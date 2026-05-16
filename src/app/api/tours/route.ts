@@ -15,7 +15,6 @@ export async function GET() {
       price: tours.price,
       category: tours.category,
       heroImage: tours.heroImage,
-      personsIncluded: tours.personsIncluded,
       difficulty: tours.difficulty,
     })
     .from(tours)

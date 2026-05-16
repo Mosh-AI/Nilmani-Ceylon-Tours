@@ -132,7 +132,6 @@ export async function sendBookingNotificationToAdmin(
       ${row("Tour", data.tourName)}
       ${row("Start Date", data.startDate)}
       ${row("Duration", `${data.duration} day${data.duration > 1 ? "s" : ""}`)}
-      ${row("Guests", String(data.guests))}
       ${data.specialRequests ? row("Special Requests", data.specialRequests) : ""}
     </table>
     <h3 style="margin:24px 0 12px;color:#5C4033;">Guest Information</h3>
@@ -228,7 +227,6 @@ export async function sendBookingConfirmationToGuest(
       ${row("Tour", data.tourName)}
       ${row("Start Date", data.startDate)}
       ${row("Duration", `${data.duration} day${data.duration > 1 ? "s" : ""}`)}
-      ${row("Guests", String(data.guests))}
     </table>
     <p style="margin:24px 0 0;">
       <a href="https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "94XXXXXXXXX"}"
@@ -252,7 +250,7 @@ export function sendMapVisitorAlert(
   threshold: number,
   to: string
 ) {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://nilmaniceylontours.skymaxsolution.com";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://nilmaniceylontours.com";
   const body = `
     <h2 style="color:#1C1209;font-size:20px;margin:0 0 16px;">Customize Tour Visitor Milestone</h2>
     <p>Your <strong>Customize Your Tour</strong> page has reached
@@ -284,7 +282,7 @@ export function sendMapFreeTierAlert(
 ) {
   const freeTierLimit = 28500;
   const pct = Math.round((currentCount / freeTierLimit) * 100);
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://nilmaniceylontours.skymaxsolution.com";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://nilmaniceylontours.com";
   const body = `
     <h2 style="color:#C9A84C;font-size:20px;margin:0 0 16px;">⚠ Approaching Google Maps Free Tier</h2>
     <p>Your Google Maps usage this month is nearing the free-tier limit. If it exceeds
@@ -311,7 +309,7 @@ export function sendMapFreeTierAlert(
 }
 
 export function sendMapAutoDisabledEmail(to: string) {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://nilmaniceylontours.skymaxsolution.com";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://nilmaniceylontours.com";
   const body = `
     <h2 style="color:#c0392b;font-size:20px;margin:0 0 16px;">🔴 Google Maps Auto-Disabled</h2>
     <p>To protect you from unexpected Google Maps billing charges, the Google Maps feature on

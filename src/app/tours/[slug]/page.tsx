@@ -21,7 +21,6 @@ function formatPrice(usd: number): string {
 function dbRowToTour(row: typeof toursTable.$inferSelect): Tour {
   return {
     id: row.id,
-    personsIncluded: row.personsIncluded ?? 2,
     slug: row.slug,
     title: row.title,
     subtitle: row.subtitle ?? "",
@@ -33,7 +32,6 @@ function dbRowToTour(row: typeof toursTable.$inferSelect): Tour {
     price: formatPrice(row.price),
     priceNote: "per 2 persons (private tour)",
     difficulty: row.difficulty ?? "Easy",
-    groupSize: row.maxGroup ? `Up to ${row.maxGroup} guests (private)` : "Private / Small Group",
     heroImage: row.heroImage ?? "/images/sigiriya-hero.jpg",
     heroAlt: `${row.title} — Sri Lanka Tour`,
     galleryImages: [],

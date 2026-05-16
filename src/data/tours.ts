@@ -41,7 +41,6 @@ export interface Tour {
   price: string;
   priceNote: string;
   difficulty: "Easy" | "Moderate" | "Challenging";
-  groupSize: string;
   heroImage: string;
   heroAlt: string;
   galleryImages: { src: string; alt: string }[];
@@ -52,7 +51,6 @@ export interface Tour {
   notIncluded: string[];
   faqs: FAQ[];
   id?: string;
-  personsIncluded?: number;
 }
 
 export const TOUR_CATEGORIES: TourCategory[] = [
@@ -79,7 +77,6 @@ export const tours: Tour[] = [
     price: "$1,170",
     priceNote: "per 2 persons (private tour)",
     difficulty: "Easy",
-    groupSize: "2 guests (private)",
     heroImage: "/images/sigiriya-hero.jpg",
     heroAlt:
       "Sigiriya Lion Rock fortress rising above lush green gardens, Sri Lanka — Nilmani Ceylon Tours",
@@ -241,7 +238,6 @@ export const tours: Tour[] = [
     price: "From $490",
     priceNote: "per person, twin sharing",
     difficulty: "Moderate",
-    groupSize: "2\u201312 guests",
     heroImage: "/images/sigiriya-hero.jpg",
     heroAlt:
       "Sigiriya Lion Rock fortress rising above lush green gardens at sunrise, Sri Lanka",
@@ -409,7 +405,6 @@ export const tours: Tour[] = [
     price: "From $350",
     priceNote: "per person, twin sharing",
     difficulty: "Easy",
-    groupSize: "2\u201310 guests",
     heroImage: "/images/galle.jpg",
     heroAlt:
       "Galle Fort lighthouse with palm trees on the southern coast of Sri Lanka",
@@ -548,7 +543,6 @@ export const tours: Tour[] = [
     price: "From $320",
     priceNote: "per person, twin sharing",
     difficulty: "Moderate",
-    groupSize: "2\u20138 guests",
     heroImage: "/images/yala.jpg",
     heroAlt:
       "Scenic lake in Yala National Park Sri Lanka with dramatic cloudy sky",
@@ -677,7 +671,6 @@ export const tours: Tour[] = [
     price: "From $370",
     priceNote: "per person, twin sharing",
     difficulty: "Moderate",
-    groupSize: "2\u20138 guests",
     heroImage: "/images/ella.jpg",
     heroAlt:
       "Blue train crossing the Nine Arch Bridge in Ella surrounded by lush green jungle",
@@ -822,7 +815,6 @@ export const tours: Tour[] = [
     price: "From $750",
     priceNote: "per person, twin sharing",
     difficulty: "Moderate",
-    groupSize: "2\u201310 guests",
     heroImage: "/images/sigiriya-hero.jpg",
     heroAlt:
       "Panoramic view of Sigiriya rock fortress at sunrise, Sri Lanka",

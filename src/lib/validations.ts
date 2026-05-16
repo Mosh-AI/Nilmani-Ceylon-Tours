@@ -56,11 +56,6 @@ export const bookingStep1Schema = z.object({
     .int()
     .min(1, "Minimum 1 day")
     .max(30, "Maximum 30 days"),
-  guests: z
-    .number({ invalid_type_error: "Guest count is required" })
-    .int()
-    .min(1, "At least 1 guest")
-    .max(20, "Maximum 20 guests"),
   specialRequests: z.string().max(1000, "Too long").optional().or(z.literal("")),
 });
 

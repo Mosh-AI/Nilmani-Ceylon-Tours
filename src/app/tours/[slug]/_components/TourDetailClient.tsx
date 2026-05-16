@@ -6,7 +6,6 @@ import Link from "next/link";
 import {
   Clock,
   MapPin,
-  Users,
   Mountain,
   Check,
   X,
@@ -379,11 +378,10 @@ export function TourDetailClient({
 
       {/* ── Overview Stats ── */}
       <section className="border-b border-brand-border bg-white">
-        <div className="mx-auto grid max-w-7xl grid-cols-2 divide-x divide-brand-border sm:grid-cols-4">
+        <div className="mx-auto grid max-w-7xl grid-cols-3 divide-x divide-brand-border">
           {[
             { icon: Clock, label: "Duration", value: tour.duration },
             { icon: Mountain, label: "Difficulty", value: tour.difficulty },
-            { icon: Users, label: "Group Size", value: tour.groupSize },
             {
               icon: MapPin,
               label: "Destinations",
@@ -515,15 +513,6 @@ export function TourDetailClient({
                     </div>
                   </div>
                   <div className="flex items-center gap-3 rounded-xl bg-brand-surface px-4 py-3">
-                    <Users size={16} className="text-gold" />
-                    <div>
-                      <p className="text-xs text-brand-faint">Group Size</p>
-                      <p className="text-sm font-medium text-brand-text">
-                        {tour.groupSize}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 rounded-xl bg-brand-surface px-4 py-3">
                     <Mountain size={16} className="text-gold" />
                     <div>
                       <p className="text-xs text-brand-faint">Difficulty</p>
@@ -535,7 +524,7 @@ export function TourDetailClient({
                 </div>
 
                 <Link
-                  href={`/booking?tourId=${encodeURIComponent(tour.id ?? "")}&tourName=${encodeURIComponent(tour.title)}&duration=${tour.durationDays}&guests=${tour.personsIncluded ?? 2}&price=${tour.price.replace(/[$,]/g, "")}`}
+                  href={`/booking?tourId=${encodeURIComponent(tour.id ?? "")}&tourName=${encodeURIComponent(tour.title)}&duration=${tour.durationDays}&price=${tour.price.replace(/[$,]/g, "")}`}
                   className="btn-gold flex w-full items-center justify-center gap-2 rounded-full py-3.5 text-sm font-semibold tracking-luxury"
                 >
                   <Calendar size={15} />

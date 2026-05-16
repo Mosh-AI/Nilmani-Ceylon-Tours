@@ -37,7 +37,6 @@ type TourOption = {
   price: number;
   category: string | null;
   heroImage: string | null;
-  personsIncluded: number | null;
   difficulty: string | null;
 };
 
@@ -125,7 +124,6 @@ function TourCard({ tour, onSelect }: { tour: TourOption; onSelect: (t: TourOpti
             <p className="text-[10px] font-medium uppercase tracking-wide text-gray-400">From</p>
             <p className="text-lg font-semibold text-[#1C1209]">
               ${tour.price.toLocaleString()}
-              <span className="ml-1 text-xs font-normal text-gray-400">/ {tour.personsIncluded ?? 2} persons</span>
             </p>
           </div>
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#1C1209] text-[#C9A84C] transition-all group-hover:bg-[#C9A84C] group-hover:text-[#1C1209]">
@@ -137,9 +135,21 @@ function TourCard({ tour, onSelect }: { tour: TourOption; onSelect: (t: TourOpti
   );
 }
 
+/* ── Slug → display name helper ─────────────────────────────────────────── */
+
+function slugToName(slug: string): string {
+  return slug.split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+}
+
 /* ── Tour selection grid ─────────────────────────────────────────────────── */
 
-function TourSelector({ onSelect }: { onSelect: (t: TourOption) => void }) {
+function TourSelector({
+  onSelect,
+  locationSlugs,
+}: {
+  onSelect: (t: TourOption) => void;
+  locationSlugs: string[];
+}) {
   const [tours, setTours] = useState<TourOption[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -150,20 +160,73 @@ function TourSelector({ onSelect }: { onSelect: (t: TourOption) => void }) {
       .catch(() => setLoading(false));
   }, []);
 
+  const hasLocations = locationSlugs.length > 0;
+
+  const locationNames = locationSlugs.map(slugToName);
+  const matchedTours = tours.filter((tour) =>
+    locationNames.some(
+      (name) =>
+        tour.title.toLowerCase().includes(name.toLowerCase()) ||
+        (tour.subtitle ?? "").toLowerCase().includes(name.toLowerCase()) ||
+        (tour.category ?? "").toLowerCase().includes(name.toLowerCase())
+    )
+  );
+  const displayTours = matchedTours.length > 0 ? matchedTours : tours;
+  const isShowingFallback = hasLocations && matchedTours.length === 0;
+
   return (
     <section className="bg-brand-bg py-16 md:py-20">
       <div className="mx-auto max-w-6xl px-6">
         <div className="mb-10 text-center">
           <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-[#C9A84C]">
-            Step 1 of 3
+            {hasLocations ? "Curated for your journey" : "Step 1 of 3"}
           </p>
           <h2 className="font-serif text-3xl font-light text-[#1C1209] md:text-4xl">
-            Choose Your Tour
+            {hasLocations ? "Tours Matching Your Route" : "Choose Your Tour"}
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-gray-500">
-            Select the tour you&apos;d like to book. All tours are fully private and can be customised to your preferences.
+            {hasLocations
+              ? "These tours can be tailored to include your selected stops. Our team will build a personalised itinerary around your preferences."
+              : "Select the tour you\u2019d like to book. All tours are fully private and can be customised to your preferences."}
           </p>
         </div>
+
+        {/* Premium location banner */}
+        {hasLocations && (
+          <div className="relative mb-8 overflow-hidden rounded-2xl border border-[#C9A84C]/20 bg-[#1C1209]">
+            {/* Gold accent line */}
+            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#C9A84C]/50 to-transparent" />
+            <div className="px-6 py-5">
+              {/* Label */}
+              <p className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-[#C9A84C]/60">
+                Your Selected Stops
+              </p>
+              {/* Location chips */}
+              <div className="flex flex-wrap gap-2">
+                {locationSlugs.map((slug) => (
+                  <span
+                    key={slug}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-[#C9A84C]/25 bg-[#C9A84C]/10 px-3 py-1 text-xs font-medium text-[#C9A84C]"
+                  >
+                    <MapPin className="h-2.5 w-2.5" />
+                    {slugToName(slug)}
+                  </span>
+                ))}
+              </div>
+              {/* Match count note */}
+              {!isShowingFallback && displayTours.length < tours.length && (
+                <p className="mt-3 text-[11px] italic text-white/40">
+                  Showing {displayTours.length} tour{displayTours.length === 1 ? "" : "s"} that best match your itinerary
+                </p>
+              )}
+              {isShowingFallback && (
+                <p className="mt-3 text-[11px] italic text-white/40">
+                  Showing all tours — our team will tailor any itinerary to your stops
+                </p>
+              )}
+            </div>
+          </div>
+        )}
 
         {loading ? (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -180,18 +243,31 @@ function TourSelector({ onSelect }: { onSelect: (t: TourOption) => void }) {
           </div>
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {tours.map((tour) => (
+            {displayTours.map((tour) => (
               <TourCard key={tour.id} tour={tour} onSelect={onSelect} />
             ))}
           </div>
         )}
 
-        <p className="mt-8 text-center text-sm text-gray-400">
-          Looking for something custom?{" "}
-          <a href="/contact" className="text-[#C9A84C] underline-offset-2 hover:underline">
-            Contact us directly
-          </a>
-        </p>
+        {/* Fallback note below grid */}
+        {isShowingFallback && !loading && (
+          <p className="mt-6 text-center text-sm text-gray-400">
+            Don&apos;t see a perfect match?{" "}
+            <a href="/contact" className="text-[#C9A84C] underline-offset-2 hover:underline">
+              Tell us your stops
+            </a>{" "}
+            and we&apos;ll design a bespoke itinerary.
+          </p>
+        )}
+
+        {!isShowingFallback && (
+          <p className="mt-8 text-center text-sm text-gray-400">
+            Looking for something custom?{" "}
+            <a href="/contact" className="text-[#C9A84C] underline-offset-2 hover:underline">
+              Contact us directly
+            </a>
+          </p>
+        )}
       </div>
     </section>
   );
@@ -209,19 +285,19 @@ const labelClass = "mb-1.5 block text-sm font-medium text-brand-text";
 function BookingPageInner() {
   const searchParams = useSearchParams();
 
-  const urlTourId   = searchParams.get("tourId") ?? "";
-  const urlTourName = searchParams.get("tourName") ?? "";
-  const urlDuration = Math.max(1, Math.min(30, parseInt(searchParams.get("duration") ?? "7", 10) || 7));
-  const urlGuests   = Math.max(1, Math.min(20, parseInt(searchParams.get("guests") ?? "2", 10) || 2));
-  const urlPrice    = parseInt(searchParams.get("price") ?? "0", 10) || 0;
-  const hasUrlTour  = Boolean(urlTourName);
+  const urlTourId    = searchParams.get("tourId") ?? "";
+  const urlTourName  = searchParams.get("tourName") ?? "";
+  const urlDuration  = Math.max(1, Math.min(30, parseInt(searchParams.get("duration") ?? "7", 10) || 7));
+  const urlPrice     = parseInt(searchParams.get("price") ?? "0", 10) || 0;
+  const urlLocations = searchParams.get("locations")?.split(",").map((s) => s.trim()).filter(Boolean) ?? [];
+  const hasUrlTour   = Boolean(urlTourName);
 
   // Selected tour state (either from URL params or picked from the selector)
   const [selectedTour, setSelectedTour] = useState<{
-    id: string; name: string; duration: number; guests: number; price: number;
+    id: string; name: string; duration: number; price: number;
   } | null>(
     hasUrlTour
-      ? { id: urlTourId, name: urlTourName, duration: urlDuration, guests: urlGuests, price: urlPrice }
+      ? { id: urlTourId, name: urlTourName, duration: urlDuration, price: urlPrice }
       : null
   );
 
@@ -235,7 +311,6 @@ function BookingPageInner() {
       id: tour.id,
       name: tour.title,
       duration: tour.duration,
-      guests: tour.personsIncluded ?? 2,
       price: tour.price,
     });
   }
@@ -247,7 +322,6 @@ function BookingPageInner() {
       tourId: selectedTour?.id || undefined,
       tourName: selectedTour?.name || undefined,
       duration: selectedTour?.duration ?? 7,
-      guests: selectedTour?.guests ?? 2,
     },
   });
 
@@ -257,7 +331,6 @@ function BookingPageInner() {
       form1.setValue("tourId", selectedTour.id || undefined);
       form1.setValue("tourName", selectedTour.name);
       form1.setValue("duration", selectedTour.duration);
-      form1.setValue("guests", selectedTour.guests);
     }
   }, [selectedTour, form1]);
 
@@ -345,7 +418,7 @@ function BookingPageInner() {
         <Header />
         <main className="min-h-screen bg-brand-bg pt-20">
           <HeroSection />
-          <TourSelector onSelect={handleTourSelect} />
+          <TourSelector onSelect={handleTourSelect} locationSlugs={urlLocations} />
         </main>
         <Footer />
       </>
@@ -383,10 +456,6 @@ function BookingPageInner() {
                   <span className="inline-flex items-center gap-1.5 text-sm text-gray-500">
                     <Clock className="h-3.5 w-3.5 text-[#C9A84C]" />
                     {selectedTour.duration} days
-                  </span>
-                  <span className="inline-flex items-center gap-1.5 text-sm text-gray-500">
-                    <Users className="h-3.5 w-3.5 text-[#C9A84C]" />
-                    {selectedTour.guests} {selectedTour.guests === 1 ? "guest" : "guests"} (default)
                   </span>
                   {selectedTour.price > 0 && (
                     <span className="inline-flex items-center gap-1.5 text-sm text-gray-500">
@@ -464,27 +533,6 @@ function BookingPageInner() {
                         <p className={errorClass}>{form1.formState.errors.duration.message}</p>
                       )}
                     </div>
-                  </div>
-
-                  <div>
-                    <label htmlFor="guests" className={labelClass}>
-                      Number of Guests <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      id="guests"
-                      className={inputClass}
-                      {...form1.register("guests", { valueAsNumber: true })}
-                    >
-                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
-                        <option key={n} value={n}>{n} {n === 1 ? "guest" : "guests"}</option>
-                      ))}
-                      <option value={12}>10–12 guests (group)</option>
-                      <option value={16}>13–16 guests (group)</option>
-                      <option value={20}>17–20 guests (group)</option>
-                    </select>
-                    {form1.formState.errors.guests && (
-                      <p className={errorClass}>{form1.formState.errors.guests.message}</p>
-                    )}
                   </div>
 
                   <div>
@@ -567,7 +615,7 @@ function BookingPageInner() {
                       </div>
                       <div className="space-y-1 text-brand-muted">
                         <p>Tour: {step1Data.tourName}</p>
-                        <p>Start: {step1Data.startDate} · {step1Data.duration} days · {step1Data.guests} guests</p>
+                        <p>Start: {step1Data.startDate} · {step1Data.duration} days</p>
                       </div>
                       <button type="button" onClick={() => setStep(1)} className="mt-2 text-xs text-gold underline-offset-2 hover:underline">
                         Edit trip details

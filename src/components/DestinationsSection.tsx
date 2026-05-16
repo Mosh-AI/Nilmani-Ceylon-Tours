@@ -31,7 +31,7 @@ const destinations: Destination[] = [
   {
     name: "Kandy", subtitle: "Temple City",
     description: "Home to the sacred Temple of the Tooth Relic and the grand Esala Perahera festival — Sri Lanka's cultural and spiritual heartland in the misty hills.",
-    image: "/images/slider-waterfall.jpg", alt: "Lush waterfall in the misty hills near Kandy Sri Lanka",
+    image: "/uploads/d4c7b993-7ae3-45fe-97be-7ba530ad1b86.jpg", alt: "Temple of the Sacred Tooth Relic in Kandy, Sri Lanka",
     mapX: 196, mapY: 514,
   },
   {
@@ -43,7 +43,7 @@ const destinations: Destination[] = [
   {
     name: "Ella", subtitle: "Highland Escape",
     description: "Mist-wrapped hills, the iconic Nine Arch Bridge, and some of the island's most scenic train journeys cutting through terraced tea country.",
-    image: "/images/ella.jpg", alt: "Blue train crossing the Nine Arch Bridge in Ella, Sri Lanka",
+    image: "/uploads/28f84dd1-2d06-4820-9637-b7ff7b67837b.jpg", alt: "Scenic highland landscape in Ella, Sri Lanka",
     mapX: 287, mapY: 587,
   },
   {

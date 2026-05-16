@@ -50,7 +50,6 @@ export async function submitBookingForm(
     tourName: sanitizeText(data.tourName),
     startDate: data.startDate,
     duration: data.duration,
-    guests: data.guests,
     specialRequests: data.specialRequests
       ? sanitizeText(data.specialRequests)
       : undefined,
@@ -75,7 +74,6 @@ export async function submitBookingForm(
       phone: sanitized.phone || null,
       startDate: sanitized.startDate,
       endDate: null,
-      guests: sanitized.guests,
       specialRequests: sanitized.specialRequests ?? null,
       status: "inquiry",
       totalPrice: null,
@@ -97,7 +95,6 @@ export async function submitBookingForm(
           tourName: sanitized.tourName,
           startDate: sanitized.startDate,
           duration: sanitized.duration,
-          guests: sanitized.guests,
           specialRequests: sanitized.specialRequests,
           guestName: sanitized.guestName,
           email: sanitized.email,
@@ -112,7 +109,6 @@ export async function submitBookingForm(
           tourName: sanitized.tourName,
           startDate: sanitized.startDate,
           duration: sanitized.duration,
-          guests: sanitized.guests,
           specialRequests: sanitized.specialRequests,
           guestName: sanitized.guestName,
           email: sanitized.email,

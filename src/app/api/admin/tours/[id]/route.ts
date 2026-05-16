@@ -15,14 +15,12 @@ const updateSchema = z.object({
   duration: z.number().int().min(1).max(60).optional(),
   price: z.number().int().min(0).optional(),
   difficulty: z.enum(["Easy", "Moderate", "Challenging"]).optional(),
-  maxGroup: z.number().int().min(1).max(50).optional(),
   category: z.string().max(100).optional(),
   highlights: z.array(z.object({ text: z.string(), featured: z.boolean() })).optional(),
   whatsIncluded: z.array(z.string()).optional(),
   whatsExcluded: z.array(z.string()).optional(),
   heroImage: z.string().max(500).optional().or(z.literal("")),
   images: z.array(z.string().max(500)).optional(),
-  personsIncluded: z.number().int().min(1).max(99).optional(),
   featured: z.boolean().optional(),
   available: z.boolean().optional(),
   metaTitle: z.string().max(70).optional().or(z.literal("")),
@@ -71,14 +69,12 @@ export async function PATCH(
   if (data.duration !== undefined) updateData.duration = data.duration;
   if (data.price !== undefined) updateData.price = data.price;
   if (data.difficulty !== undefined) updateData.difficulty = data.difficulty;
-  if (data.maxGroup !== undefined) updateData.maxGroup = data.maxGroup;
   if (data.category !== undefined) updateData.category = data.category;
   if (data.highlights !== undefined) updateData.highlights = JSON.stringify(data.highlights);
   if (data.whatsIncluded !== undefined) updateData.whatsIncluded = JSON.stringify(data.whatsIncluded);
   if (data.whatsExcluded !== undefined) updateData.whatsExcluded = JSON.stringify(data.whatsExcluded);
   if (data.heroImage !== undefined) updateData.heroImage = data.heroImage || null;
   if (data.images !== undefined) updateData.images = JSON.stringify(data.images);
-  if (data.personsIncluded !== undefined) updateData.personsIncluded = data.personsIncluded;
   if (data.featured !== undefined) updateData.featured = data.featured;
   if (data.available !== undefined) updateData.available = data.available;
   if (data.metaTitle !== undefined) updateData.metaTitle = data.metaTitle || null;
