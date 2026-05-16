@@ -128,22 +128,8 @@ export function DestinationsSection() {
         typeof window !== "undefined" &&
         window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-      if (!prefersReduced) {
-        if (activePin >= 0 && pinRefs.current[activePin]) {
-          gsap.to(pinRefs.current[activePin], {
-            scale: 1, duration: 0.25, ease: "power2.out",
-            transformOrigin: `${destinations[activePin].mapX} ${destinations[activePin].mapY}`,
-          });
-        }
-        if (pinRefs.current[i]) {
-          gsap.fromTo(
-            pinRefs.current[i],
-            { scale: 0.8 },
-            { scale: 1.2, duration: 0.6, ease: "elastic.out(1.1, 0.45)",
-              transformOrigin: `${destinations[i].mapX} ${destinations[i].mapY}` }
-          );
-        }
-      }
+      // Visual feedback is handled by React state (r size + fill + glow halo)
+      // No GSAP scale on <g> elements — SVG translate + CSS transformOrigin don't mix
 
       setActivePin(i);
 
@@ -240,7 +226,7 @@ export function DestinationsSection() {
         .fromTo(".dest-header-title",   { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6,  ease: "power3.out" }, "-=0.35")
         .fromTo(".dest-header-cta",     { opacity: 0, x: 14 }, { opacity: 1, x: 0, duration: 0.5,  ease: "power3.out" }, "-=0.4")
         .fromTo(".map-district", { opacity: 0 }, { opacity: 1, duration: 0.55, stagger: { each: 0.01, from: "random" }, ease: "power2.out" }, "-=0.2")
-        .fromTo(".map-pin-group", { opacity: 0, scale: 0.3 }, { opacity: 1, scale: 1, duration: 0.5, stagger: 0.07, ease: "back.out(1.7)", transformOrigin: "center center" }, "-=0.3")
+        .fromTo(".map-pin-group", { opacity: 0 }, { opacity: 1, duration: 0.5, stagger: 0.07, ease: "power2.out" }, "-=0.3")
         .fromTo(".map-pin-label", { opacity: 0 }, { opacity: 1, duration: 0.35, stagger: 0.05, ease: "power2.out" }, "-=0.2")
         .fromTo(".map-route",     { opacity: 0 }, { opacity: 0.2, duration: 0.4, stagger: 0.04, ease: "power2.out" }, "-=0.2")
         .fromTo(".dest-list-item", { opacity: 0, x: 20 }, { opacity: 1, x: 0, duration: 0.45, stagger: 0.055, ease: "power3.out" }, "-=0.35");
