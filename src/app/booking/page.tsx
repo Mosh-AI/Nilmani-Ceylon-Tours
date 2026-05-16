@@ -137,18 +137,45 @@ function TourCard({ tour, onSelect }: { tour: TourOption; onSelect: (t: TourOpti
   );
 }
 
+/* ── Matched location type ───────────────────────────────────────────────── */
+
+type MatchedLocation = { slug: string; name: string };
+
 /* ── Tour selection grid ─────────────────────────────────────────────────── */
 
-function TourSelector({ onSelect }: { onSelect: (t: TourOption) => void }) {
+function TourSelector({
+  onSelect,
+  locationSlugs,
+}: {
+  onSelect: (t: TourOption) => void;
+  locationSlugs: string[];
+}) {
   const [tours, setTours] = useState<TourOption[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filtered, setFiltered] = useState<boolean | null>(null);
+  const [matchedLocations, setMatchedLocations] = useState<MatchedLocation[]>([]);
 
   useEffect(() => {
-    fetch("/api/tours")
+    const url =
+      locationSlugs.length > 0
+        ? `/api/tours?locations=${locationSlugs.join(",")}`
+        : "/api/tours";
+
+    setLoading(true);
+    fetch(url)
       .then((r) => r.json())
-      .then((d) => { setTours(d.tours ?? []); setLoading(false); })
+      .then((d) => {
+        setTours(d.tours ?? []);
+        setFiltered(d.filtered ?? null);
+        setMatchedLocations(d.matchedLocations ?? []);
+        setLoading(false);
+      })
       .catch(() => setLoading(false));
-  }, []);
+  }, [locationSlugs.join(",")]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const isFiltering = locationSlugs.length > 0;
+  const noMatchFallback = isFiltering && filtered === false;
+  const activeFilter = isFiltering && filtered === true;
 
   return (
     <section className="bg-brand-bg py-16 md:py-20">
@@ -158,12 +185,72 @@ function TourSelector({ onSelect }: { onSelect: (t: TourOption) => void }) {
             Step 1 of 3
           </p>
           <h2 className="font-serif text-3xl font-light text-[#1C1209] md:text-4xl">
-            Choose Your Tour
+            {activeFilter ? "Tours Visiting Your Destinations" : "Choose Your Tour"}
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-gray-500">
-            Select the tour you&apos;d like to book. All tours are fully private and can be customised to your preferences.
+            {activeFilter
+              ? "These tours include the destinations you selected. All are fully private and can be customised."
+              : "Select the tour you'd like to book. All tours are fully private and can be customised to your preferences."}
           </p>
         </div>
+
+        {/* Location filter banner */}
+        {isFiltering && !loading && (
+          <div
+            className={`mb-8 overflow-hidden rounded-2xl border ${
+              activeFilter
+                ? "border-[#C9A84C]/30 bg-gradient-to-r from-[#FDFAF5] to-[#F7F1E8]"
+                : "border-amber-200 bg-amber-50"
+            }`}
+          >
+            {activeFilter ? (
+              <div className="flex flex-wrap items-center gap-3 px-6 py-4">
+                <div className="flex items-center gap-2 text-[#C9A84C]">
+                  <MapPin className="h-4 w-4 shrink-0" />
+                  <span className="text-xs font-semibold uppercase tracking-widest text-[#8B6914]">
+                    Filtered by location
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {matchedLocations.map((loc) => (
+                    <span
+                      key={loc.slug}
+                      className="inline-flex items-center gap-1.5 rounded-full bg-[#1C1209] px-3 py-1 text-xs font-semibold text-[#C9A84C]"
+                    >
+                      <span className="h-1.5 w-1.5 rounded-full bg-[#C9A84C]" />
+                      {loc.name}
+                    </span>
+                  ))}
+                </div>
+                <p className="ml-auto text-xs text-gray-400">
+                  {tours.length} tour{tours.length !== 1 ? "s" : ""} found
+                </p>
+              </div>
+            ) : (
+              <div className="flex flex-wrap items-start gap-3 px-6 py-4">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-600">
+                  <Star className="h-4 w-4" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-amber-800">
+                    No tours found for{" "}
+                    {locationSlugs.map((s) => (
+                      <span
+                        key={s}
+                        className="mx-0.5 rounded bg-amber-200/60 px-1.5 py-0.5 font-mono text-xs capitalize"
+                      >
+                        {s}
+                      </span>
+                    ))}
+                  </p>
+                  <p className="mt-0.5 text-xs text-amber-700">
+                    Showing all available tours instead. Contact us to arrange a custom itinerary.
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {loading ? (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -186,7 +273,20 @@ function TourSelector({ onSelect }: { onSelect: (t: TourOption) => void }) {
           </div>
         )}
 
-        <p className="mt-8 text-center text-sm text-gray-400">
+        {/* Browse all link when filtered */}
+        {activeFilter && !loading && (
+          <div className="mt-8 text-center">
+            <a
+              href="/booking"
+              className="inline-flex items-center gap-1.5 text-sm text-gray-400 underline-offset-2 transition hover:text-[#C9A84C] hover:underline"
+            >
+              <ArrowRight className="h-3.5 w-3.5 rotate-180" />
+              Browse all tours
+            </a>
+          </div>
+        )}
+
+        <p className={`text-center text-sm text-gray-400 ${activeFilter ? "mt-3" : "mt-8"}`}>
           Looking for something custom?{" "}
           <a href="/contact" className="text-[#C9A84C] underline-offset-2 hover:underline">
             Contact us directly
@@ -215,6 +315,11 @@ function BookingPageInner() {
   const urlGuests   = Math.max(1, Math.min(20, parseInt(searchParams.get("guests") ?? "2", 10) || 2));
   const urlPrice    = parseInt(searchParams.get("price") ?? "0", 10) || 0;
   const hasUrlTour  = Boolean(urlTourName);
+
+  const locationSlugs = (searchParams.get("locations") ?? "")
+    .split(",")
+    .map((s) => s.trim().toLowerCase())
+    .filter((s) => s.length > 0);
 
   // Selected tour state (either from URL params or picked from the selector)
   const [selectedTour, setSelectedTour] = useState<{
@@ -344,8 +449,8 @@ function BookingPageInner() {
       <>
         <Header />
         <main className="min-h-screen bg-brand-bg pt-20">
-          <HeroSection />
-          <TourSelector onSelect={handleTourSelect} />
+          <HeroSection locationSlugs={locationSlugs} />
+          <TourSelector onSelect={handleTourSelect} locationSlugs={locationSlugs} />
         </main>
         <Footer />
       </>
@@ -628,7 +733,8 @@ export default function BookingPage() {
 
 /* ── Hero section with background image ─────────────────────────────────── */
 
-function HeroSection() {
+function HeroSection({ locationSlugs = [] }: { locationSlugs?: string[] }) {
+  const hasLocations = locationSlugs.length > 0;
   return (
     <section className="relative overflow-hidden bg-[#1C1209] py-24 md:py-32">
       {/* Background image */}
@@ -648,12 +754,29 @@ function HeroSection() {
           className="mb-6 justify-center"
         />
         <h1 className="font-serif text-4xl font-light tracking-wide text-white md:text-5xl lg:text-6xl">
-          Book Your Sri Lanka Journey
+          {hasLocations ? "Tours to Your Destinations" : "Book Your Sri Lanka Journey"}
         </h1>
         <p className="mx-auto mt-5 max-w-xl text-base text-[#C9A84C]/80 md:text-lg">
-          No payment required. Choose your tour, share your details, and
-          we&apos;ll send a personalised itinerary and quote within 24 hours.
+          {hasLocations
+            ? "We've filtered tours that visit the destinations you're interested in."
+            : "No payment required. Choose your tour, share your details, and we'll send a personalised itinerary and quote within 24 hours."}
         </p>
+
+        {/* Location pills in hero */}
+        {hasLocations && (
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+            {locationSlugs.map((slug) => (
+              <span
+                key={slug}
+                className="inline-flex items-center gap-1.5 rounded-full border border-[#C9A84C]/40 bg-[#C9A84C]/10 px-4 py-1.5 text-sm font-medium capitalize text-[#C9A84C]"
+              >
+                <MapPin className="h-3.5 w-3.5" />
+                {slug}
+              </span>
+            ))}
+          </div>
+        )}
+
         <div className="mx-auto mt-6 flex items-center justify-center gap-2">
           <div className="h-px w-16 bg-[#C9A84C]/40" />
           <div className="h-1.5 w-1.5 rounded-full bg-[#C9A84C]" />
