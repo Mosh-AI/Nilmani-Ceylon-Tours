@@ -25,7 +25,7 @@ const MAP_STYLES: google.maps.MapTypeStyle[] = [
   { featureType: "transit", elementType: "geometry", stylers: [{ color: "#1e1a12" }] },
 ];
 
-type PinState = "selected" | "normal" | "faded";
+type PinState = "selected" | "normal";
 
 function makeSvgIcon(state: PinState): string {
   if (state === "selected") {
@@ -34,13 +34,6 @@ function makeSvgIcon(state: PinState): string {
         <circle cx="16" cy="16" r="14" fill="#C9A84C" stroke="#fff" stroke-width="2" opacity="0.25"/>
         <circle cx="16" cy="16" r="9" fill="#C9A84C" stroke="#fff" stroke-width="2"/>
         <circle cx="16" cy="16" r="4" fill="white"/>
-      </svg>`
-    )}`;
-  }
-  if (state === "faded") {
-    return `data:image/svg+xml,${encodeURIComponent(
-      `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12">
-        <circle cx="6" cy="6" r="4" fill="#4a3a1a" opacity="0.4"/>
       </svg>`
     )}`;
   }
@@ -131,6 +124,9 @@ export function GoogleMapsCustomize({ routes }: GoogleMapsCustomizeProps) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Stable string key so the effect reliably reruns when selection changes
+  const activeSlugsKey = [...activeSlugs].sort().join(",");
+
   useEffect(() => {
     if (!mapLoaded) return;
 
@@ -171,25 +167,30 @@ export function GoogleMapsCustomize({ routes }: GoogleMapsCustomizeProps) {
 
     for (const [slug, marker] of markersRef.current) {
       const coords = geoCoords[slug];
-      const state: PinState = selectedSlugs.includes(slug)
-        ? "selected"
-        : activeSlugs.has(slug)
-        ? "normal"
-        : "faded";
+      const isSelected = selectedSlugs.includes(slug);
+      const isActive   = activeSlugs.has(slug);
 
+      // Position (only needs to be set once but safe to repeat)
       if (coords) marker.setPosition({ lat: coords.lat, lng: coords.lng });
 
-      const iconUrl = makeSvgIcon(state);
-      const size = state === "selected" ? 32 : state === "faded" ? 12 : 20;
-      marker.setIcon({
-        url: iconUrl,
-        scaledSize: new google.maps.Size(size, size),
-        anchor: new google.maps.Point(size / 2, size / 2),
-      });
-      marker.setZIndex(state === "selected" ? 10 : state === "normal" ? 5 : 1);
-      (marker as google.maps.Marker & { setClickable?: (v: boolean) => void }).setClickable?.(state !== "faded");
+      if (!isActive && !isSelected) {
+        // Impossible location — hide completely
+        marker.setVisible(false);
+      } else {
+        marker.setVisible(true);
+        const state: PinState = isSelected ? "selected" : "normal";
+        const iconUrl = makeSvgIcon(state);
+        const size = state === "selected" ? 32 : 20;
+        marker.setIcon({
+          url: iconUrl,
+          scaledSize: new google.maps.Size(size, size),
+          anchor: new google.maps.Point(size / 2, size / 2),
+        });
+        marker.setZIndex(state === "selected" ? 10 : 5);
+      }
     }
-  }, [mapLoaded, selectedSlugs, activeSlugs]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mapLoaded, activeSlugsKey]);
 
   const hasNoRoutes = routes.length === 0;
 
