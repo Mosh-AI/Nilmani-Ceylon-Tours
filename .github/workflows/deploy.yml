@@ -21,9 +21,11 @@ jobs:
 
             cd /var/www/nilmani
 
-            # Pull latest code (reset lock file changes from previous npm installs on VPS)
-            git checkout -- package-lock.json 2>/dev/null || true
-            git pull origin master
+            # Hard-reset to remote master — discards local modifications and
+            # removes untracked files (except gitignored: .env.local, .next/, node_modules/)
+            git fetch origin master
+            git reset --hard origin/master
+            git clean -fd
 
             # Install all dependencies (build requires tailwind, typescript, etc.)
             npm install
@@ -49,7 +51,6 @@ jobs:
 
             # Copy static assets into standalone bundle
             cp -r .next/static .next/standalone/.next/static
-            # Use cp -rT (or cp -r public/.) to merge INTO existing dir, not nest inside it
             cp -r public/. .next/standalone/public/
 
             # Restart with correct standalone config
