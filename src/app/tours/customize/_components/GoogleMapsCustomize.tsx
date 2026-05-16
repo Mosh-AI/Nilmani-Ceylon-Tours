@@ -124,8 +124,14 @@ export function GoogleMapsCustomize({ routes }: GoogleMapsCustomizeProps) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Stable string key so the effect reliably reruns when selection changes
-  const activeSlugsKey = [...activeSlugs].sort().join(",");
+  // Combined key: reruns when EITHER the selection OR the active set changes.
+  // activeSlugsKey alone is not enough — when Cultural ⊆ Spiritual Escape,
+  // selecting Anuradhapura produces the same activeSlugs as no selection,
+  // so we must also track which pins are currently selected.
+  const stateKey =
+    [...selectedSlugs].sort().join("|") +
+    "::" +
+    [...activeSlugs].sort().join(",");
 
   useEffect(() => {
     if (!mapLoaded) return;
@@ -190,7 +196,7 @@ export function GoogleMapsCustomize({ routes }: GoogleMapsCustomizeProps) {
       }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mapLoaded, activeSlugsKey]);
+  }, [mapLoaded, stateKey]);
 
   const hasNoRoutes = routes.length === 0;
 
