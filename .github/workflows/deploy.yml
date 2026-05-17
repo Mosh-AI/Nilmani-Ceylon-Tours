@@ -43,8 +43,8 @@ jobs:
             # Stop PM2 before build to prevent restarts on incomplete .next
             pm2 stop nilmani || true
 
-            # Remove stale next build lock file if a previous build exited uncleanly
-            rm -f .next/cache/.build-lock
+            # Remove entire stale .next dir — prevents "client reference manifest" crashes
+            rm -rf .next
 
             # Build Next.js (output: standalone)
             node node_modules/next/dist/bin/next build
