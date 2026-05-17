@@ -4,7 +4,7 @@ import { bookings } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { StatusBadge } from "@/app/admin/_components/StatusBadge";
 import Link from "next/link";
-import { CalendarCheck, Map, MessageSquare } from "lucide-react";
+import { CalendarCheck, Map, MessageSquare, MapPin } from "lucide-react";
 
 export default async function DashboardPage() {
   const session = await requireUser();
@@ -86,7 +86,31 @@ export default async function DashboardPage() {
       )}
 
       {/* Quick links */}
-      <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Link
+          href="/tours/customize"
+          className="flex items-center gap-3 rounded-xl border border-[#C9A84C]/30 bg-[#1C1209] p-4 shadow-sm hover:shadow-md transition"
+        >
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#C9A84C]/20">
+            <MapPin className="h-5 w-5 text-[#C9A84C]" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-[#C9A84C]">Customize Tour</p>
+            <p className="text-xs text-white/50">Build your own itinerary</p>
+          </div>
+        </Link>
+        <Link
+          href="/booking"
+          className="flex items-center gap-3 rounded-xl border border-gray-100 bg-white p-4 shadow-sm hover:shadow-md transition"
+        >
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-50">
+            <Map className="h-5 w-5 text-amber-600" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-gray-900">Book a Tour</p>
+            <p className="text-xs text-gray-500">Browse curated itineraries</p>
+          </div>
+        </Link>
         <Link
           href="/track"
           className="flex items-center gap-3 rounded-xl border border-gray-100 bg-white p-4 shadow-sm hover:shadow-md transition"
@@ -97,18 +121,6 @@ export default async function DashboardPage() {
           <div>
             <p className="text-sm font-semibold text-gray-900">Track Booking</p>
             <p className="text-xs text-gray-500">Use your reference code</p>
-          </div>
-        </Link>
-        <Link
-          href="/tours"
-          className="flex items-center gap-3 rounded-xl border border-gray-100 bg-white p-4 shadow-sm hover:shadow-md transition"
-        >
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-50">
-            <Map className="h-5 w-5 text-amber-600" />
-          </div>
-          <div>
-            <p className="text-sm font-semibold text-gray-900">Browse Tours</p>
-            <p className="text-xs text-gray-500">Find your next adventure</p>
           </div>
         </Link>
         <Link

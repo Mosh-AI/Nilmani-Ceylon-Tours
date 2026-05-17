@@ -11,6 +11,7 @@ import {
   type BookingStep2Data,
 } from "@/lib/validations";
 import { submitBookingForm } from "@/app/actions/booking";
+import { useSession } from "@/lib/auth-client";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -301,6 +302,8 @@ function BookingPageInner() {
       : null
   );
 
+  const { data: session } = useSession();
+
   const [step, setStep] = useState(1);
   const [step1Data, setStep1Data] = useState<BookingStep1Data | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -338,6 +341,14 @@ function BookingPageInner() {
   const form2 = useForm<BookingStep2Data>({
     resolver: zodResolver(bookingStep2Schema),
   });
+
+  // Pre-fill name + email from session when user is logged in
+  useEffect(() => {
+    if (session?.user) {
+      if (session.user.name) form2.setValue("guestName", session.user.name);
+      if (session.user.email) form2.setValue("email", session.user.email);
+    }
+  }, [session, form2]);
 
   function handleStep1(data: BookingStep1Data) {
     setStep1Data(data);
@@ -568,6 +579,19 @@ function BookingPageInner() {
                       We&apos;ll use these details to contact you with your quote.
                     </p>
                   </div>
+
+                  {session?.user && (
+                    <div className="flex items-center gap-2 rounded-lg border border-[#C9A84C]/30 bg-[#FDFAF5] px-4 py-2.5 text-sm">
+                      <span className="text-[#C9A84C]">✓</span>
+                      <span className="text-brand-muted">
+                        Signed in as{" "}
+                        <span className="font-medium text-brand-text">
+                          {session.user.name ?? session.user.email}
+                        </span>{" "}
+                        — details pre-filled
+                      </span>
+                    </div>
+                  )}
 
                   {/* Honeypot */}
                   <div aria-hidden="true" className="hidden">

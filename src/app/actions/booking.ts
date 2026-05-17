@@ -14,6 +14,7 @@ import {
 } from "@/lib/email";
 import { db } from "@/db";
 import { bookings } from "@/db/schema";
+import { getUserSession } from "@/lib/user-auth";
 
 export type BookingActionResult =
   | { success: true; referenceCode: string; message: string }
@@ -62,13 +63,17 @@ export async function submitBookingForm(
   // 4. Generate unique reference code
   const referenceCode = generateReferenceCode();
 
-  // 5. Persist booking to database
+  // 5. Link to authenticated user if logged in
+  const session = await getUserSession();
+  const userId = session?.user.id ?? null;
+
+  // 6. Persist booking to database
   try {
     await db.insert(bookings).values({
       id: crypto.randomUUID(),
       referenceCode,
       tourId: sanitized.tourId ?? null,
-      userId: null,
+      userId,
       guestName: sanitized.guestName,
       email: sanitized.email,
       phone: sanitized.phone || null,
