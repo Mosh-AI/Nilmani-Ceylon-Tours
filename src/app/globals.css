@@ -1,10 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "leaflet/dist/leaflet.css";
-
-/* Leaflet marker cursor override */
-.leaflet-marker-icon { cursor: pointer !important; }
 
 @custom-variant dark (&:is(.dark *));
 

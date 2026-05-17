@@ -105,8 +105,24 @@ export function GoogleMapsCustomize({ routes, locations }: GoogleMapsCustomizePr
     if (!mapRef.current) return;
     let map: L.Map | undefined;
 
+    // Inject Leaflet CSS only on this page (not globally) to avoid unused preload warnings
+    if (!document.querySelector('link[href*="leaflet.css"]')) {
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+      document.head.appendChild(link);
+    }
+
     import("leaflet").then((LLib) => {
       if (!mapRef.current || mapInstanceRef.current) return;
+
+      // Leaflet marker cursor override (moved from globals.css)
+      if (!document.getElementById("leaflet-cursor-fix")) {
+        const style = document.createElement("style");
+        style.id = "leaflet-cursor-fix";
+        style.textContent = ".leaflet-marker-icon { cursor: pointer !important; }";
+        document.head.appendChild(style);
+      }
 
       map = LLib.map(mapRef.current, {
         center: [7.87, 80.77],
