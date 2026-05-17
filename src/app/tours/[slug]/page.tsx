@@ -34,7 +34,10 @@ function dbRowToTour(row: typeof toursTable.$inferSelect): Tour {
     difficulty: row.difficulty ?? "Easy",
     heroImage: row.heroImage ?? "/images/sigiriya-hero.jpg",
     heroAlt: `${row.title} — Sri Lanka Tour`,
-    galleryImages: [],
+    galleryImages: ((row.images as string[] | null) ?? []).map((src, i) => ({
+      src,
+      alt: `${row.title} — photo ${i + 1}`,
+    })),
     richHighlights: (row.highlights as { text: string; featured: boolean }[] | null) ?? undefined,
     highlights: ((row.highlights as { text: string; featured: boolean }[] | null) ?? []).map((h) => h.text),
     itinerary: [],

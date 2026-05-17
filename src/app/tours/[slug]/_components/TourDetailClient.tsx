@@ -16,6 +16,7 @@ import {
   Phone,
   Star,
 } from "lucide-react";
+import { ImageSlider } from "./ImageSlider";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { cn } from "@/lib/utils";
@@ -418,12 +419,17 @@ export function TourDetailClient({
             <HighlightsSection richHighlights={tour.richHighlights} highlights={tour.highlights} />
 
             {/* Gallery */}
-            <div className="mb-16">
-              <h2 className="mb-6 font-serif text-2xl font-light text-brand-text lg:text-3xl">
-                Photo Gallery
-              </h2>
-              <GalleryStrip images={tour.galleryImages} />
-            </div>
+            {tour.galleryImages.length > 0 && (
+              <div className="mb-16">
+                <div className="mb-6 flex items-center gap-3">
+                  <div className="gold-divider" />
+                  <span className="text-xs font-medium uppercase tracking-luxury text-gold">
+                    Photo Gallery
+                  </span>
+                </div>
+                <ImageSlider images={tour.galleryImages} />
+              </div>
+            )}
 
             {/* Itinerary */}
             <div className="mb-16">

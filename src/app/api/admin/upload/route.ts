@@ -70,6 +70,6 @@ export async function POST(request: NextRequest) {
   await mkdir(uploadDir, { recursive: true });
   await writeFile(path.join(uploadDir, filename), Buffer.from(buffer));
 
-  const url = `/uploads/${filename}`;
+  const url = `/api/uploads/${filename}`;
   return NextResponse.json({ url }, { headers: apiHeaders() });
 }
