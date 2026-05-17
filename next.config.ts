@@ -3,6 +3,20 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   output: "standalone",
+  async redirects() {
+    return [
+      {
+        source: "/sign-up",
+        destination: "/register",
+        permanent: true,
+      },
+      {
+        source: "/sign-in",
+        destination: "/login",
+        permanent: true,
+      },
+    ];
+  },
   allowedDevOrigins: ["192.168.1.9", "localhost", "127.0.0.1", "172.31.121.3"],
   images: {
     // Avoid dev-time optimizer timeouts on slow/offline remote assets.

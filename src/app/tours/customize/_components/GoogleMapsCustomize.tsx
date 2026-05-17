@@ -45,6 +45,16 @@ function makeSvgIcon(state: PinState): string {
   )}`;
 }
 
+function makePinElement(state: PinState): HTMLElement {
+  const size = state === "selected" ? 32 : 20;
+  const img = document.createElement("img");
+  img.src = makeSvgIcon(state);
+  img.width = size;
+  img.height = size;
+  img.style.display = "block";
+  return img;
+}
+
 interface LocationRow {
   slug: string;
   name: string;
@@ -63,7 +73,8 @@ interface GoogleMapsCustomizeProps {
 export function GoogleMapsCustomize({ routes, locations }: GoogleMapsCustomizeProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
-  const markersRef = useRef<Map<string, google.maps.Marker>>(new Map());
+  const markersRef = useRef<Map<string, google.maps.marker.AdvancedMarkerElement>>(new Map());
+  const useAdvancedMarkersRef = useRef(false);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [loadError, setLoadError] = useState(false);
   const [selectedSlugs, setSelectedSlugs] = useState<string[]>([]);
@@ -111,10 +122,16 @@ export function GoogleMapsCustomize({ routes, locations }: GoogleMapsCustomizePr
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
     if (!apiKey || !mapRef.current) return;
 
+    const mapId = process.env.NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID;
+    const useAdvancedMarkers = !!mapId;
+    useAdvancedMarkersRef.current = useAdvancedMarkers;
+
     import("@googlemaps/js-api-loader")
       .then(({ setOptions, importLibrary }) => {
         setOptions({ key: apiKey, v: "weekly" });
-        return importLibrary("maps");
+        const libs: Promise<google.maps.MapsLibrary | google.maps.MarkerLibrary>[] = [importLibrary("maps")];
+        if (useAdvancedMarkers) libs.push(importLibrary("marker"));
+        return Promise.all(libs);
       })
       .then(() => {
         if (!mapRef.current) return;
@@ -123,6 +140,7 @@ export function GoogleMapsCustomize({ routes, locations }: GoogleMapsCustomizePr
           zoom: 8,
           mapTypeId: "terrain",
           styles: MAP_STYLES,
+          ...(mapId ? { mapId } : {}),
           disableDefaultUI: true,
           zoomControl: true,
           zoomControlOptions: { position: google.maps.ControlPosition.RIGHT_CENTER },
@@ -134,12 +152,25 @@ export function GoogleMapsCustomize({ routes, locations }: GoogleMapsCustomizePr
           allRouteSlugs.has(loc.slug)
         );
         for (const loc of routeLocs) {
-          const marker = new google.maps.Marker({
-            position: { lat: loc.lat, lng: loc.lng },
-            map,
-            title: loc.name,
-            optimized: false,
-          });
+          let marker: google.maps.marker.AdvancedMarkerElement;
+          if (useAdvancedMarkers) {
+            marker = new google.maps.marker.AdvancedMarkerElement({
+              position: { lat: loc.lat, lng: loc.lng },
+              map,
+              title: loc.name,
+              content: makePinElement("normal"),
+            });
+          } else {
+            // Legacy marker — still functional, use until NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID is set
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const legacyMarker = new (google.maps as any).Marker({
+              position: { lat: loc.lat, lng: loc.lng },
+              map,
+              title: loc.name,
+              optimized: false,
+            });
+            marker = legacyMarker as unknown as google.maps.marker.AdvancedMarkerElement;
+          }
           marker.addListener("click", () => toggleLocation(loc.slug));
           markersRef.current.set(loc.slug, marker);
         }
@@ -162,27 +193,39 @@ export function GoogleMapsCustomize({ routes, locations }: GoogleMapsCustomizePr
     if (!mapLoaded) return;
 
     for (const [slug, marker] of markersRef.current) {
-      const loc      = locBySlug[slug];
+      const loc        = locBySlug[slug];
       const isSelected = selectedSlugs.includes(slug);
       const isActive   = activeSlugs.has(slug);
+      const state: PinState = isSelected ? "selected" : "normal";
 
-      // Position comes from the single source of truth in sri-lanka-locations.ts
-      if (loc) marker.setPosition({ lat: loc.lat, lng: loc.lng });
-
-      if (!isActive && !isSelected) {
-        // Impossible location — hide completely
-        marker.setVisible(false);
+      if (useAdvancedMarkersRef.current) {
+        // AdvancedMarkerElement API
+        if (loc) marker.position = { lat: loc.lat, lng: loc.lng };
+        if (!isActive && !isSelected) {
+          marker.map = null;
+        } else {
+          marker.map = mapInstanceRef.current;
+          marker.content = makePinElement(state);
+          marker.zIndex = state === "selected" ? 10 : 5;
+        }
       } else {
-        marker.setVisible(true);
-        const state: PinState = isSelected ? "selected" : "normal";
-        const iconUrl = makeSvgIcon(state);
-        const size = state === "selected" ? 32 : 20;
-        marker.setIcon({
-          url: iconUrl,
-          scaledSize: new google.maps.Size(size, size),
-          anchor: new google.maps.Point(size / 2, size / 2),
-        });
-        marker.setZIndex(state === "selected" ? 10 : 5);
+        // Legacy Marker API
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const m = marker as any;
+        if (loc) m.setPosition({ lat: loc.lat, lng: loc.lng });
+        if (!isActive && !isSelected) {
+          m.setVisible(false);
+        } else {
+          m.setVisible(true);
+          const iconUrl = makeSvgIcon(state);
+          const size = state === "selected" ? 32 : 20;
+          m.setIcon({
+            url: iconUrl,
+            scaledSize: new google.maps.Size(size, size),
+            anchor: new google.maps.Point(size / 2, size / 2),
+          });
+          m.setZIndex(state === "selected" ? 10 : 5);
+        }
       }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -426,7 +469,7 @@ export function GoogleMapsCustomize({ routes, locations }: GoogleMapsCustomizePr
                   </p>
                   <div className="flex flex-col gap-2">
                     <a
-                      href={`/sign-in?callbackUrl=${encodeURIComponent("/tours/customize")}`}
+                      href={`/login?callbackUrl=${encodeURIComponent("/tours/customize")}`}
                       className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#C9A84C] px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#1C1209] transition-all duration-300 hover:bg-[#E8C96A]"
                     >
                       Sign In to Request
