@@ -1,6 +1,5 @@
 "use client";
 
-import "leaflet/dist/leaflet.css";
 import type L from "leaflet";
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { X, MapPin, Loader2, ArrowRight, Navigation, LogIn, MousePointerClick } from "lucide-react";
@@ -30,10 +29,11 @@ function makeSvgIcon(state: PinState): string {
 function makeLeafletIcon(LLib: typeof L, state: PinState): L.DivIcon {
   const size = state === "selected" ? 32 : 20;
   return LLib.divIcon({
-    html: `<img src="${makeSvgIcon(state)}" width="${size}" height="${size}" style="display:block"/>`,
+    html: `<img src="${makeSvgIcon(state)}" width="${size}" height="${size}" style="display:block;pointer-events:none"/>`,
     className: "",
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2],
+    tooltipAnchor: [0, -size / 2],
   });
 }
 
@@ -139,6 +139,8 @@ export function GoogleMapsCustomize({ routes, locations }: GoogleMapsCustomizePr
         markersRef.current.set(loc.slug, marker);
       }
 
+      // Force recalculate map size after CSS paints
+      setTimeout(() => map?.invalidateSize(), 100);
       setMapLoaded(true);
     }).catch(() => setLoadError(true));
 
