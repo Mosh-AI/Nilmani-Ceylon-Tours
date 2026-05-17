@@ -4,7 +4,7 @@ import { apiHeaders } from "@/lib/api-headers";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 
-const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_SIZE = 50 * 1024 * 1024; // 50MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 // Magic bytes for JPEG, PNG, WebP
 const MAGIC_BYTES: [string, string[]][] = [

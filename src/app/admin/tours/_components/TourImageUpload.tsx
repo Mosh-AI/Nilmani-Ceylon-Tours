@@ -235,7 +235,7 @@ export function TourImageUpload({ heroImage, images, onChange }: TourImageUpload
             <div className="text-center">
               <p className="text-sm font-medium text-gray-500">Click to upload images</p>
               <p className="mt-0.5 text-xs text-gray-400">
-                JPEG, PNG, WebP · Max 5MB each · First image becomes the cover
+                JPEG, PNG, WebP · First image becomes the cover
               </p>
             </div>
           </button>
