@@ -67,6 +67,7 @@ export function GoogleMapsCustomize({ routes, locations }: GoogleMapsCustomizePr
   const [mapLoaded, setMapLoaded] = useState(false);
   const [loadError, setLoadError] = useState(false);
   const [selectedSlugs, setSelectedSlugs] = useState<string[]>([]);
+  const [selectedRouteId, setSelectedRouteId] = useState<string | null>(null);
   const { data: session, isPending: sessionLoading } = useSession();
   const isLoggedIn = !!session?.user;
 
@@ -98,6 +99,13 @@ export function GoogleMapsCustomize({ routes, locations }: GoogleMapsCustomizePr
       prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug]
     );
   }, []);
+
+  // Clear route selection if it's no longer in the compatible list
+  useEffect(() => {
+    if (selectedRouteId && !validRoutes.find((r) => r.id === selectedRouteId)) {
+      setSelectedRouteId(null);
+    }
+  }, [validRoutes, selectedRouteId]);
 
   useEffect(() => {
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
@@ -336,36 +344,59 @@ export function GoogleMapsCustomize({ routes, locations }: GoogleMapsCustomizePr
                   <p className="mt-1 text-[11px] text-white/25">Try removing a stop to widen results.</p>
                 </div>
               ) : (
-                <ul className="flex flex-col gap-2 overflow-y-auto [&::-webkit-scrollbar]:w-[3px] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#C9A84C]/25" style={{ maxHeight: 240 }}>
-                  {validRoutes.map((route) => (
-                    <li
-                      key={route.id}
-                      className="group relative overflow-hidden rounded-xl border border-white/[0.06] bg-white/[0.03] p-4 transition-all duration-200 hover:border-[#C9A84C]/20 hover:bg-[#C9A84C]/[0.04]"
-                    >
-                      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#C9A84C]/20 to-transparent opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
-                      <div className="mb-2 flex items-start justify-between gap-2">
-                        <p className="font-serif text-sm font-light leading-snug text-white/90">
-                          {route.name}
-                        </p>
-                        <span className="shrink-0 rounded-md border border-white/10 bg-white/[0.04] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-white/30">
-                          {route.locationSlugs.length} stops
-                        </span>
-                      </div>
-                      <div className="flex flex-wrap items-center gap-1">
-                        {route.locationSlugs.map((s, idx) => (
-                          <span key={s} className="flex items-center gap-1">
-                            <span className={`text-[10px] leading-none transition-colors duration-200 ${selectedSlugs.includes(s) ? "font-semibold text-[#C9A84C]" : "text-white/35"}`}>
-                              {locBySlug[s]?.name ?? s}
-                            </span>
-                            {idx < route.locationSlugs.length - 1 && (
-                              <ArrowRight size={8} className="shrink-0 text-white/15" />
-                            )}
-                          </span>
-                        ))}
-                      </div>
-                    </li>
-                  ))}
-                </ul>
+                <>
+                  <p className="text-[10px] text-white/25 -mt-1">Tap a route to select it</p>
+                  <ul className="flex flex-col gap-2 overflow-y-auto [&::-webkit-scrollbar]:w-[3px] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#C9A84C]/25" style={{ maxHeight: 240 }}>
+                    {validRoutes.map((route) => {
+                      const isChosen = selectedRouteId === route.id;
+                      return (
+                        <li key={route.id}>
+                          <button
+                            type="button"
+                            onClick={() => setSelectedRouteId(isChosen ? null : route.id)}
+                            className={`group relative w-full overflow-hidden rounded-xl border p-4 text-left transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C9A84C]/50 ${
+                              isChosen
+                                ? "border-[#C9A84C]/50 bg-[#C9A84C]/[0.08] shadow-lg shadow-black/30"
+                                : "border-white/[0.06] bg-white/[0.03] hover:border-[#C9A84C]/25 hover:bg-[#C9A84C]/[0.04]"
+                            }`}
+                          >
+                            {/* Top accent line */}
+                            <div className={`absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#C9A84C]/40 to-transparent transition-opacity duration-200 ${isChosen ? "opacity-100" : "opacity-0 group-hover:opacity-60"}`} />
+
+                            <div className="mb-2 flex items-start justify-between gap-2">
+                              <p className={`font-serif text-sm font-light leading-snug transition-colors duration-200 ${isChosen ? "text-[#E8C96A]" : "text-white/90"}`}>
+                                {route.name}
+                              </p>
+                              <div className="flex items-center gap-1.5 shrink-0">
+                                {isChosen && (
+                                  <span className="rounded-full bg-[#C9A84C] px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.1em] text-[#0C0804]">
+                                    Selected
+                                  </span>
+                                )}
+                                <span className="rounded-md border border-white/10 bg-white/[0.04] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-white/30">
+                                  {route.locationSlugs.length} stops
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="flex flex-wrap items-center gap-1">
+                              {route.locationSlugs.map((s, idx) => (
+                                <span key={s} className="flex items-center gap-1">
+                                  <span className={`text-[10px] leading-none transition-colors duration-200 ${selectedSlugs.includes(s) ? "font-semibold text-[#C9A84C]" : "text-white/35"}`}>
+                                    {locBySlug[s]?.name ?? s}
+                                  </span>
+                                  {idx < route.locationSlugs.length - 1 && (
+                                    <ArrowRight size={8} className="shrink-0 text-white/15" />
+                                  )}
+                                </span>
+                              ))}
+                            </div>
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </>
               )}
             </div>
 
@@ -385,6 +416,11 @@ export function GoogleMapsCustomize({ routes, locations }: GoogleMapsCustomizePr
                       Sign in to submit your request
                     </span>
                   </div>
+                  {selectedRouteId && (
+                    <p className="text-[11px] text-white/50">
+                      Route: <span className="text-[#C9A84C]">{validRoutes.find((r) => r.id === selectedRouteId)?.name}</span>
+                    </p>
+                  )}
                   <p className="text-[11px] leading-relaxed text-white/35">
                     Create a free account or sign in to submit your custom tour request and track it from your dashboard.
                   </p>
@@ -414,13 +450,19 @@ export function GoogleMapsCustomize({ routes, locations }: GoogleMapsCustomizePr
                     <span className="text-white/50">{session.user.name || session.user.email}</span>
                   </span>
                 </div>
-                <a
-                  href={`/booking?locations=${selectedSlugs.join(",")}`}
-                  className="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#C9A84C] px-6 py-3.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#1C1209] transition-all duration-300 hover:bg-[#E8C96A]"
-                >
-                  Request This Itinerary
-                  <ArrowRight size={12} className="transition-transform duration-300 group-hover:translate-x-0.5" />
-                </a>
+                {!selectedRouteId ? (
+                  <p className="text-center text-[11px] text-white/25">
+                    Select a route above to request it
+                  </p>
+                ) : (
+                  <a
+                    href={`/booking?locations=${selectedSlugs.join(",")}&routeId=${selectedRouteId}`}
+                    className="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#C9A84C] px-6 py-3.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#1C1209] transition-all duration-300 hover:bg-[#E8C96A]"
+                  >
+                    Request: {validRoutes.find((r) => r.id === selectedRouteId)?.name}
+                    <ArrowRight size={12} className="transition-transform duration-300 group-hover:translate-x-0.5" />
+                  </a>
+                )}
               </div>
             )}
           </div>
