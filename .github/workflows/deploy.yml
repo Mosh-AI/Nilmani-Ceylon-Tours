@@ -46,8 +46,8 @@ jobs:
             # Remove entire stale .next dir — prevents "client reference manifest" crashes
             rm -rf .next
 
-            # Build Next.js (output: standalone)
-            node node_modules/next/dist/bin/next build
+            # Build Next.js (output: standalone) — use npx to avoid Turbopack fallback
+            npx next build
 
             # Copy static assets into standalone bundle
             cp -r .next/static .next/standalone/.next/static
