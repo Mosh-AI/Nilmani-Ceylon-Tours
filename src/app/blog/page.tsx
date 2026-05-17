@@ -33,59 +33,83 @@ interface Post {
   authorName: string | null;
 }
 
-/* ── Hero post — dominant full-width card ── */
-function HeroPost({ post }: { post: Post }) {
+/* ── Featured card — large horizontal split: image left, content right ── */
+function FeaturedCard({ post }: { post: Post }) {
   const img = post.coverImage ?? "/images/sigiriya-hero.jpg";
   return (
     <Link
       href={`/blog/${post.slug}`}
-      className="group relative flex min-h-[520px] overflow-hidden rounded-2xl lg:min-h-[600px]"
+      className="group flex min-h-[420px] flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] transition-all duration-300 hover:border-[#C9A84C]/40 hover:bg-white/[0.06] sm:flex-row lg:min-h-[480px]"
     >
-      <Image
-        src={img}
-        alt={post.title}
-        fill
-        className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
-        sizes="(max-width: 1024px) 100vw, 1200px"
-        priority
-      />
-      {/* gradient — bottom heavy */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-black/10 transition-opacity duration-500 group-hover:from-black/80" />
+      {/* Left image panel — 45% width on sm+ */}
+      <div className="relative h-64 w-full shrink-0 overflow-hidden sm:h-auto sm:w-[45%]">
+        <Image
+          src={img}
+          alt={post.title}
+          fill
+          className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 45vw, 540px"
+          priority
+        />
+        {/* Subtle right-edge fade into card background */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-black/30 sm:block hidden" />
+        {/* Bottom-edge fade on mobile */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/40 sm:hidden" />
 
-      {/* eyebrow top-left */}
-      <div className="absolute left-8 top-8 flex items-center gap-3">
-        <div className="h-px w-6 bg-[#C9A84C]" />
-        <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#C9A84C]">
-          Featured Story
-        </span>
+        {/* Featured Story badge — top-left of image */}
+        <div className="absolute left-4 top-4 flex items-center gap-2 rounded-full border border-[#C9A84C]/60 bg-black/50 px-3 py-1.5 backdrop-blur-sm">
+          <div className="h-1 w-1 rounded-full bg-[#C9A84C]" />
+          <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-[#C9A84C]">
+            Featured Story
+          </span>
+        </div>
       </div>
 
-      {/* content pinned to bottom */}
-      <div className="relative mt-auto w-full p-8 lg:p-12">
-        <div className="mb-4 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs text-white/55">
-          <span className="flex items-center gap-1.5">
-            <Calendar size={11} className="text-[#C9A84C]" />
-            {formatDate(post.createdAt)}
+      {/* Right content panel */}
+      <div className="flex flex-1 flex-col justify-between p-8 lg:p-12">
+        {/* Top section */}
+        <div>
+          {/* Post number */}
+          <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#C9A84C]/40">
+            01
           </span>
-          {post.authorName && (
+
+          {/* Date + author row */}
+          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5">
             <span className="flex items-center gap-1.5">
-              <User size={11} className="text-[#C9A84C]" />
-              {post.authorName}
+              <Calendar size={11} className="text-[#C9A84C]" />
+              <span className="text-[11px] text-white/50">{formatDate(post.createdAt)}</span>
             </span>
+            {post.authorName && (
+              <span className="flex items-center gap-1.5">
+                <User size={11} className="text-[#C9A84C]" />
+                <span className="text-[11px] text-white/50">{post.authorName}</span>
+              </span>
+            )}
+          </div>
+
+          {/* Gold divider */}
+          <div className="my-4 h-px w-12 bg-gradient-to-r from-[#C9A84C] to-transparent" />
+
+          {/* Title */}
+          <h2 className="font-serif text-3xl font-light leading-snug text-white transition-colors duration-300 group-hover:text-[#E8C96A] lg:text-4xl xl:text-5xl">
+            {post.title}
+          </h2>
+
+          {/* Excerpt */}
+          {post.excerpt && (
+            <p className="mt-4 text-sm leading-relaxed text-white/60 line-clamp-4 lg:text-base">
+              {post.excerpt}
+            </p>
           )}
         </div>
-        <div className="mb-5 h-px w-14 bg-gradient-to-r from-[#C9A84C] to-transparent" />
-        <h2 className="mb-4 max-w-3xl font-serif text-3xl font-light leading-snug text-white transition-colors duration-300 group-hover:text-[#E8C96A] lg:text-5xl">
-          {post.title}
-        </h2>
-        {post.excerpt && (
-          <p className="mb-7 max-w-2xl text-sm leading-relaxed text-white/65 line-clamp-2 lg:text-base">
-            {post.excerpt}
-          </p>
-        )}
-        <span className="inline-flex items-center gap-2 rounded-full border border-[#C9A84C]/50 px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#C9A84C] transition-all duration-300 group-hover:border-[#C9A84C] group-hover:bg-[#C9A84C]/10 group-hover:gap-3">
-          Read Article <ArrowRight size={12} />
-        </span>
+
+        {/* Gold CTA button */}
+        <div className="mt-8">
+          <span className="inline-flex items-center gap-2 rounded-full border border-[#C9A84C]/50 px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#C9A84C] transition-all duration-300 group-hover:border-[#C9A84C] group-hover:bg-[#C9A84C]/10 group-hover:gap-3">
+            Read Article <ArrowRight size={12} />
+          </span>
+        </div>
       </div>
     </Link>
   );
@@ -97,19 +121,21 @@ function GridCard({ post, index }: { post: Post; index: number }) {
   return (
     <Link
       href={`/blog/${post.slug}`}
-      className="group flex flex-row overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] transition-all duration-300 hover:border-[#C9A84C]/30 hover:bg-white/[0.06]"
+      className="group flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] transition-all duration-300 hover:border-[#C9A84C]/30 hover:bg-white/[0.06] sm:flex-row"
     >
-      {/* Left image panel — 42% width */}
-      <div className="relative w-[42%] shrink-0 min-h-[220px] overflow-hidden">
+      {/* Left image panel — full width on mobile, 42% on sm+ */}
+      <div className="relative h-48 w-full shrink-0 overflow-hidden sm:h-auto sm:w-[42%]">
         <Image
           src={img}
           alt={post.title}
           fill
           className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
-          sizes="(max-width: 1024px) 42vw, 30vw"
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 42vw, 30vw"
         />
-        {/* Right-edge fade into card background */}
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent to-black/20" />
+        {/* Right-edge fade into card background on sm+ */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent to-black/20 hidden sm:block" />
+        {/* Bottom-edge fade on mobile */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/30 sm:hidden" />
       </div>
 
       {/* Right content panel */}
@@ -169,7 +195,7 @@ export default async function BlogPage() {
     .where(eq(blogPostsTable.published, true))
     .orderBy(desc(blogPostsTable.createdAt));
 
-  const [hero, ...rest] = rows;
+  const [featured, ...rest] = rows;
 
   return (
     <main className="min-h-screen bg-[#1C1209]">
@@ -259,8 +285,8 @@ export default async function BlogPage() {
                 </span>
               </div>
 
-              {/* Hero post — full width */}
-              {hero && <HeroPost post={hero} />}
+              {/* Featured post — full width */}
+              {featured && <FeaturedCard post={featured} />}
 
               {/* Remaining posts — responsive grid */}
               {rest.length > 0 && (
