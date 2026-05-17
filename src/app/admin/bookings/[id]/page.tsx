@@ -6,6 +6,7 @@ import { StatusBadge } from "../../_components/StatusBadge";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Save, Trash2 } from "lucide-react";
 import Link from "next/link";
+import { AdminMessageThread } from "./_components/AdminMessageThread";
 
 const STATUSES = [
   "inquiry", "quoted", "deposit_paid", "confirmed", "in_progress", "completed", "cancelled",
@@ -130,6 +131,11 @@ export default function BookingDetailPage({
           </div>
         }
       />
+
+      {/* Message thread */}
+      <div className="mb-6">
+        <AdminMessageThread bookingId={bookingId} guestName={booking.guestName} />
+      </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Guest details */}
