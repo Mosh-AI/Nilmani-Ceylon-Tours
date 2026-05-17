@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
-import { X, MapPin, Loader2, ArrowRight, Navigation, LogIn } from "lucide-react";
+import { X, MapPin, Loader2, ArrowRight, Navigation, LogIn, MousePointerClick, Route } from "lucide-react";
 import type { RouteData } from "./CustomizeTourMap";
 import { useSession } from "@/lib/auth-client";
 
@@ -83,7 +83,7 @@ export function GoogleMapsCustomize({ routes, locations }: GoogleMapsCustomizePr
 
   const { validRoutes, activeSlugs } = useMemo(() => {
     if (selectedSlugs.length === 0) {
-      return { validRoutes: routes, activeSlugs: new Set(allRouteSlugs) };
+      return { validRoutes: [], activeSlugs: new Set(allRouteSlugs) };
     }
     const validRoutes = routes.filter((route) =>
       selectedSlugs.every((slug) => route.locationSlugs.includes(slug))
@@ -253,10 +253,48 @@ export function GoogleMapsCustomize({ routes, locations }: GoogleMapsCustomizePr
           </div>
 
           {selectedSlugs.length === 0 ? (
-            <div className="rounded-xl border border-white/[0.05] bg-white/[0.02] px-4 py-5">
-              <p className="text-center text-xs leading-relaxed text-white/35">
-                Tap any gold pin on the map to add a stop. Incompatible pins fade automatically.
-              </p>
+            <div className="relative overflow-hidden rounded-2xl border border-[#C9A84C]/15 bg-[#C9A84C]/[0.03]">
+              {/* Radial gold glow */}
+              <div
+                className="pointer-events-none absolute inset-0 opacity-30"
+                style={{
+                  background:
+                    "radial-gradient(ellipse at 50% 30%, rgba(201,168,76,0.18) 0%, transparent 70%)",
+                }}
+              />
+              <div className="relative flex flex-col items-center px-6 py-10 text-center">
+                {/* Icon in circle */}
+                <div className="rounded-full border border-[#C9A84C]/20 bg-[#C9A84C]/[0.06] p-4">
+                  <MousePointerClick size={36} style={{ color: "#C9A84C", opacity: 0.4 }} />
+                </div>
+
+                {/* Gold divider */}
+                <div className="mx-auto my-5 h-px w-12 bg-gradient-to-r from-transparent via-[#C9A84C]/50 to-transparent" />
+
+                {/* Serif heading */}
+                <p className="font-serif text-base font-light leading-snug text-white/75">
+                  Click on the map to create your own tour
+                </p>
+
+                {/* Body */}
+                <p className="mt-2 text-[11px] leading-relaxed text-white/40">
+                  Tap any destination pin to start building your perfect Sri Lanka journey.
+                </p>
+
+                {/* Coordinate */}
+                <p className="mt-4 font-mono text-[10px] tracking-widest text-[#C9A84C]/20">
+                  7.87°N · 80.77°E
+                </p>
+
+                {/* Pulsing dots */}
+                <div className="mt-5 flex items-center gap-2">
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#C9A84C]/40" />
+                  <span
+                    className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#C9A84C]/25"
+                    style={{ animationDelay: "300ms" }}
+                  />
+                </div>
+              </div>
             </div>
           ) : (
             <div className="flex flex-wrap gap-2">
@@ -299,6 +337,16 @@ export function GoogleMapsCustomize({ routes, locations }: GoogleMapsCustomizePr
 
           {hasNoRoutes ? (
             <p className="text-xs text-white/25">Routes will appear here once configured.</p>
+          ) : selectedSlugs.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-[#C9A84C]/15 px-4 py-6 text-center">
+              <Route size={24} className="mx-auto mb-3 opacity-40" style={{ color: "#C9A84C" }} />
+              <p className="font-serif text-sm font-light text-white/50">
+                Select locations to discover matching routes
+              </p>
+              <p className="mt-1.5 text-[11px] leading-relaxed text-white/25">
+                Tap any gold pin on the map above to begin building your journey.
+              </p>
+            </div>
           ) : validRoutes.length === 0 ? (
             <div className="rounded-xl border border-red-900/20 bg-red-950/10 px-4 py-5 text-center">
               <p className="text-sm font-light text-white/50">No routes match</p>
