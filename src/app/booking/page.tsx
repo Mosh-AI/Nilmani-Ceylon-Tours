@@ -25,6 +25,7 @@ import {
   MapPin,
   ArrowRight,
   Star,
+  Sparkles,
 } from "lucide-react";
 
 /* ── Types ──────────────────────────────────────────────────────────────── */
@@ -468,10 +469,15 @@ function BookingPageInner() {
                     <Clock className="h-3.5 w-3.5 text-[#C9A84C]" />
                     {selectedTour.duration} days
                   </span>
-                  {selectedTour.price > 0 && (
+                  {selectedTour.price > 0 ? (
                     <span className="inline-flex items-center gap-1.5 text-sm text-gray-500">
                       <MapPin className="h-3.5 w-3.5 text-[#C9A84C]" />
                       From ${selectedTour.price.toLocaleString()}
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-[#C9A84C]/30 bg-[#C9A84C]/10 px-2.5 py-0.5 text-xs font-medium tracking-wide text-[#C9A84C]">
+                      <Sparkles className="h-3 w-3" />
+                      Custom Quote
                     </span>
                   )}
                 </div>
@@ -640,6 +646,19 @@ function BookingPageInner() {
                       <div className="space-y-1 text-brand-muted">
                         <p>Tour: {step1Data.tourName}</p>
                         <p>Start: {step1Data.startDate} · {step1Data.duration} days</p>
+                        <div className="flex items-center gap-1.5 pt-0.5">
+                          <span>Price:</span>
+                          {selectedTour.price > 0 ? (
+                            <span className="font-medium text-[#1C1209]">
+                              From ${selectedTour.price.toLocaleString()}
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 rounded-full border border-[#C9A84C]/30 bg-[#C9A84C]/10 px-2 py-0.5 text-[11px] font-medium tracking-wide text-[#C9A84C]">
+                              <Sparkles className="h-2.5 w-2.5" />
+                              Custom Quote
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <button type="button" onClick={() => setStep(1)} className="mt-2 text-xs text-gold underline-offset-2 hover:underline">
                         Edit trip details
