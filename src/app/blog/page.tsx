@@ -91,49 +91,64 @@ function HeroPost({ post }: { post: Post }) {
   );
 }
 
-/* ── Standard grid card — tall image with overlay ── */
+/* ── Standard grid card — horizontal split: image left, content right ── */
 function GridCard({ post, index }: { post: Post; index: number }) {
   const img = post.coverImage ?? "/images/sigiriya-hero.jpg";
   return (
     <Link
       href={`/blog/${post.slug}`}
-      className="group relative flex min-h-[380px] overflow-hidden rounded-2xl"
+      className="group flex flex-row overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] transition-all duration-300 hover:border-[#C9A84C]/30 hover:bg-white/[0.06]"
     >
-      <Image
-        src={img}
-        alt={post.title}
-        fill
-        className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"
-        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-      />
-      {/* gradient */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/88 via-black/30 to-transparent transition-opacity duration-500 group-hover:from-black/78" />
-
-      {/* post number badge top-right */}
-      <div className="absolute right-5 top-5 flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-black/30 backdrop-blur-sm">
-        <span className="text-[10px] font-semibold text-white/70">
-          {String(index + 2).padStart(2, "0")}
-        </span>
+      {/* Left image panel — 42% width */}
+      <div className="relative w-[42%] shrink-0 min-h-[220px] overflow-hidden">
+        <Image
+          src={img}
+          alt={post.title}
+          fill
+          className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+          sizes="(max-width: 1024px) 42vw, 30vw"
+        />
+        {/* Right-edge fade into card background */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent to-black/20" />
       </div>
 
-      {/* content */}
-      <div className="relative mt-auto w-full p-6">
-        <div className="mb-3 flex items-center gap-1.5 text-[11px] text-white/50">
-          <Calendar size={10} className="text-[#C9A84C]" />
-          {formatDate(post.createdAt)}
+      {/* Right content panel */}
+      <div className="flex flex-1 flex-col justify-between p-6 lg:p-8">
+        {/* Top section */}
+        <div>
+          {/* Post number badge */}
+          <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/30">
+            {String(index + 2).padStart(2, "0")}
+          </span>
+
+          {/* Date row */}
+          <div className="mt-2 flex items-center gap-1.5">
+            <Calendar size={11} className="text-[#C9A84C]" />
+            <span className="text-[11px] text-white/50">{formatDate(post.createdAt)}</span>
+          </div>
+
+          {/* Gold micro-divider */}
+          <div className="my-3 h-px w-8 bg-gradient-to-r from-[#C9A84C] to-transparent" />
+
+          {/* Title */}
+          <h3 className="font-serif text-xl font-light leading-snug text-white transition-colors duration-300 group-hover:text-[#E8C96A] line-clamp-2 lg:text-2xl">
+            {post.title}
+          </h3>
+
+          {/* Excerpt */}
+          {post.excerpt && (
+            <p className="mt-2 text-sm leading-relaxed text-white/55 line-clamp-3">
+              {post.excerpt}
+            </p>
+          )}
         </div>
-        <div className="mb-3 h-px w-8 bg-gradient-to-r from-[#C9A84C] to-transparent" />
-        <h3 className="mb-3 font-serif text-xl font-light leading-snug text-white transition-colors duration-300 group-hover:text-[#E8C96A] line-clamp-2 lg:text-2xl">
-          {post.title}
-        </h3>
-        {post.excerpt && (
-          <p className="mb-4 text-xs leading-relaxed text-white/60 line-clamp-2">
-            {post.excerpt}
-          </p>
-        )}
-        <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#C9A84C] transition-all duration-300 group-hover:gap-2.5">
-          Read Article <ArrowRight size={11} />
-        </span>
+
+        {/* Bottom CTA */}
+        <div className="mt-4">
+          <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#C9A84C] transition-all duration-300 group-hover:gap-3">
+            Read Article <ArrowRight size={11} />
+          </span>
+        </div>
       </div>
     </Link>
   );
@@ -249,7 +264,7 @@ export default async function BlogPage() {
 
               {/* Remaining posts — responsive grid */}
               {rest.length > 0 && (
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
                   {rest.map((post, i) => (
                     <GridCard key={post.slug} post={post} index={i} />
                   ))}
