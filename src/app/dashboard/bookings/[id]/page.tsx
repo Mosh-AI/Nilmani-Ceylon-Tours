@@ -1,12 +1,13 @@
 import { requireUser } from "@/lib/user-auth";
 import { db } from "@/db";
-import { bookings, messages } from "@/db/schema";
+import { bookings, messages, bookingStatusHistory } from "@/db/schema";
 import { eq, and, sql } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { StatusBadge } from "@/app/admin/_components/StatusBadge";
 import Link from "next/link";
 import { ArrowLeft, Download } from "lucide-react";
 import { MessageThread } from "./_components/MessageThread";
+import { StatusTimeline } from "./_components/StatusTimeline";
 
 export default async function BookingDetailPage({
   params,
@@ -30,6 +31,24 @@ export default async function BookingDetailPage({
     .from(messages)
     .where(eq(messages.bookingId, id))
     .orderBy(sql`${messages.createdAt} asc`);
+
+  const rawHistory = await db
+    .select({
+      id: bookingStatusHistory.id,
+      status: bookingStatusHistory.status,
+      note: bookingStatusHistory.note,
+      createdAt: bookingStatusHistory.createdAt,
+    })
+    .from(bookingStatusHistory)
+    .where(eq(bookingStatusHistory.bookingId, id))
+    .orderBy(sql`${bookingStatusHistory.createdAt} asc`);
+
+  const statusHistory = rawHistory.map((h) => ({
+    id: h.id,
+    status: h.status,
+    note: h.note,
+    createdAt: h.createdAt.toISOString(),
+  }));
 
   return (
     <div>
@@ -85,6 +104,11 @@ export default async function BookingDetailPage({
               ))}
             </dl>
           </section>
+
+          <StatusTimeline
+            history={statusHistory}
+            bookingCreatedAt={booking.createdAt.toISOString()}
+          />
 
           <section className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
             <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-500">

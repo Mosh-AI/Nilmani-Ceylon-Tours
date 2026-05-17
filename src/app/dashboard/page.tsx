@@ -77,6 +77,7 @@ export default async function DashboardPage() {
                   <p className="mt-1 text-sm text-gray-500">
                     {b.startDate} · {b.guests} guest{b.guests !== 1 ? "s" : ""}
                   </p>
+                  <p className="mt-2 text-xs text-[#C9A84C]">View history & messages →</p>
                 </div>
                 <CalendarCheck className="mt-0.5 h-5 w-5 shrink-0 text-gray-300" />
               </div>
