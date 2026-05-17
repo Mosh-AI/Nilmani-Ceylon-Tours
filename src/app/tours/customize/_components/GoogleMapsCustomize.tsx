@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
-import { X, MapPin, Loader2, ArrowRight, Navigation, LogIn, MousePointerClick, Route } from "lucide-react";
+import { X, MapPin, Loader2, ArrowRight, Navigation, LogIn, MousePointerClick } from "lucide-react";
 import type { RouteData } from "./CustomizeTourMap";
 import { useSession } from "@/lib/auth-client";
 
@@ -81,17 +81,14 @@ export function GoogleMapsCustomize({ routes, locations }: GoogleMapsCustomizePr
     [locations]
   );
 
-  const { validRoutes, activeSlugs } = useMemo(() => {
-    if (selectedSlugs.length === 0) {
-      return { validRoutes: [], activeSlugs: new Set(allRouteSlugs) };
-    }
-    const validRoutes = routes.filter((route) =>
-      selectedSlugs.every((slug) => route.locationSlugs.includes(slug))
+  const activeSlugs = useMemo(() => {
+    if (selectedSlugs.length === 0) return new Set(allRouteSlugs);
+    const matched = routes.filter((r) =>
+      selectedSlugs.every((s) => r.locationSlugs.includes(s))
     );
-    const activeSlugs = new Set<string>(selectedSlugs);
-    for (const route of validRoutes)
-      for (const slug of route.locationSlugs) activeSlugs.add(slug);
-    return { validRoutes, activeSlugs };
+    const active = new Set<string>(selectedSlugs);
+    for (const r of matched) for (const s of r.locationSlugs) active.add(s);
+    return active;
   }, [selectedSlugs, routes, allRouteSlugs]);
 
   const toggleLocation = useCallback((slug: string) => {
@@ -181,14 +178,12 @@ export function GoogleMapsCustomize({ routes, locations }: GoogleMapsCustomizePr
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapLoaded, stateKey]);
 
-  const hasNoRoutes = routes.length === 0;
-
   return (
     <div className="flex flex-col gap-4 lg:flex-row lg:gap-6" style={{ minHeight: 600 }}>
 
       {/* ── Map ── */}
       <div className="relative flex-1 lg:flex-[3]">
-        {hasNoRoutes ? (
+        {routes.length === 0 ? (
           <div className="flex h-full min-h-[420px] items-center justify-center rounded-2xl border border-dashed border-[#C9A84C]/20 bg-white/[0.02]">
             <div className="text-center">
               <MapPin className="mx-auto mb-3 h-10 w-10 text-[#C9A84C]/30" />
@@ -234,238 +229,146 @@ export function GoogleMapsCustomize({ routes, locations }: GoogleMapsCustomizePr
 
       {/* ── Side Panel ── */}
       <div
-        className="flex flex-col gap-5 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-6 backdrop-blur-sm lg:flex-[2] lg:gap-6"
-        style={{ boxShadow: "inset 0 1px 0 rgba(201,168,76,0.06)" }}
+        className="flex flex-col rounded-2xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-sm lg:flex-[2]"
+        style={{ boxShadow: "inset 0 1px 0 rgba(201,168,76,0.06)", minHeight: 480 }}
       >
+        {selectedSlugs.length === 0 ? (
 
-        {/* ── Your Selections ── */}
-        <div>
-          <div className="mb-4 flex items-center gap-3">
-            <div className="h-px w-6 bg-gradient-to-r from-[#C9A84C] to-transparent" />
-            <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#C9A84C]">
-              Your Selections
-            </span>
-            {selectedSlugs.length > 0 && (
-              <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-[#C9A84C] text-[9px] font-bold text-[#0C0804]">
-                {selectedSlugs.length}
-              </span>
-            )}
-          </div>
+          /* ── Empty state: full-panel invitation ── */
+          <div className="relative flex flex-1 items-center justify-center overflow-hidden rounded-2xl p-6">
+            {/* Ambient gold glow */}
+            <div
+              className="pointer-events-none absolute inset-0"
+              style={{
+                background:
+                  "radial-gradient(ellipse 80% 60% at 50% 40%, rgba(201,168,76,0.10) 0%, transparent 70%)",
+              }}
+            />
+            <div className="relative flex flex-col items-center text-center">
+              {/* Icon ring */}
+              <div className="flex h-20 w-20 items-center justify-center rounded-full border border-[#C9A84C]/20 bg-[#C9A84C]/[0.06]">
+                <MousePointerClick size={32} className="text-[#C9A84C]/50" />
+              </div>
 
-          {selectedSlugs.length === 0 ? (
-            <div className="relative overflow-hidden rounded-2xl border border-[#C9A84C]/15 bg-[#C9A84C]/[0.03]">
-              {/* Radial gold glow */}
-              <div
-                className="pointer-events-none absolute inset-0 opacity-30"
-                style={{
-                  background:
-                    "radial-gradient(ellipse at 50% 30%, rgba(201,168,76,0.18) 0%, transparent 70%)",
-                }}
-              />
-              <div className="relative flex flex-col items-center px-6 py-10 text-center">
-                {/* Icon in circle */}
-                <div className="rounded-full border border-[#C9A84C]/20 bg-[#C9A84C]/[0.06] p-4">
-                  <MousePointerClick size={36} style={{ color: "#C9A84C", opacity: 0.4 }} />
-                </div>
+              {/* Gold divider */}
+              <div className="mx-auto my-6 h-px w-16 bg-gradient-to-r from-transparent via-[#C9A84C]/40 to-transparent" />
 
-                {/* Gold divider */}
-                <div className="mx-auto my-5 h-px w-12 bg-gradient-to-r from-transparent via-[#C9A84C]/50 to-transparent" />
+              {/* Heading */}
+              <h3 className="font-serif text-xl font-light leading-snug text-white/80 sm:text-2xl">
+                Click on the map to<br />create your own tour
+              </h3>
 
-                {/* Serif heading */}
-                <p className="font-serif text-base font-light leading-snug text-white/75">
-                  Click on the map to create your own tour
-                </p>
+              {/* Sub text */}
+              <p className="mt-3 max-w-[220px] text-[11px] leading-relaxed text-white/35">
+                Tap any destination pin to start building your perfect Sri Lanka journey.
+              </p>
 
-                {/* Body */}
-                <p className="mt-2 text-[11px] leading-relaxed text-white/40">
-                  Tap any destination pin to start building your perfect Sri Lanka journey.
-                </p>
+              {/* Coordinate */}
+              <p className="mt-6 font-mono text-[10px] tracking-[0.22em] text-[#C9A84C]/20">
+                7.87°N · 80.77°E
+              </p>
 
-                {/* Coordinate */}
-                <p className="mt-4 font-mono text-[10px] tracking-widest text-[#C9A84C]/20">
-                  7.87°N · 80.77°E
-                </p>
-
-                {/* Pulsing dots */}
-                <div className="mt-5 flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#C9A84C]/40" />
-                  <span
-                    className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#C9A84C]/25"
-                    style={{ animationDelay: "300ms" }}
-                  />
-                </div>
+              {/* Pulsing dots */}
+              <div className="mt-4 flex items-center gap-2">
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#C9A84C]/40" />
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#C9A84C]/25" style={{ animationDelay: "350ms" }} />
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#C9A84C]/15" style={{ animationDelay: "700ms" }} />
               </div>
             </div>
-          ) : (
-            <div className="flex flex-wrap gap-2">
-              {selectedSlugs.map((slug) => (
-                <button
-                  key={slug}
-                  onClick={() => toggleLocation(slug)}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-[#C9A84C]/30 bg-[#C9A84C]/10 px-3 py-1.5 text-[11px] font-medium text-[#C9A84C] transition-all duration-200 hover:border-[#C9A84C]/60 hover:bg-[#C9A84C]/20"
-                >
-                  {locBySlug[slug]?.name ?? slug}
-                  <X className="h-3 w-3 opacity-60" />
-                </button>
-              ))}
-              <button
-                onClick={() => setSelectedSlugs([])}
-                className="text-[11px] text-white/25 underline underline-offset-2 transition hover:text-white/50"
-              >
-                Clear all
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Divider */}
-        <div className="h-px bg-gradient-to-r from-transparent via-white/[0.07] to-transparent" />
-
-        {/* ── Compatible Routes ── */}
-        <div className="flex flex-1 flex-col gap-3 overflow-hidden">
-          <div className="flex items-center gap-3">
-            <div className="h-px w-6 bg-gradient-to-r from-[#C9A84C] to-transparent" />
-            <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#C9A84C]">
-              Compatible Routes
-            </span>
-            {!hasNoRoutes && (
-              <span className="ml-auto rounded-full border border-[#C9A84C]/25 bg-[#C9A84C]/10 px-2 py-0.5 text-[10px] font-semibold text-[#C9A84C]">
-                {validRoutes.length} of {routes.length}
-              </span>
-            )}
           </div>
 
-          {hasNoRoutes ? (
-            <p className="text-xs text-white/25">Routes will appear here once configured.</p>
-          ) : selectedSlugs.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-[#C9A84C]/15 px-4 py-6 text-center">
-              <Route size={24} className="mx-auto mb-3 opacity-40" style={{ color: "#C9A84C" }} />
-              <p className="font-serif text-sm font-light text-white/50">
-                Select locations to discover matching routes
-              </p>
-              <p className="mt-1.5 text-[11px] leading-relaxed text-white/25">
-                Tap any gold pin on the map above to begin building your journey.
-              </p>
-            </div>
-          ) : validRoutes.length === 0 ? (
-            <div className="rounded-xl border border-red-900/20 bg-red-950/10 px-4 py-5 text-center">
-              <p className="text-sm font-light text-white/50">No routes match</p>
-              <p className="mt-1 text-[11px] text-white/25">Try removing a stop to widen results.</p>
-            </div>
-          ) : (
-            <ul className="flex flex-col gap-2 overflow-y-auto" style={{ maxHeight: 280 }}>
-              {validRoutes.map((route, i) => (
-                <li
-                  key={route.id}
-                  className="group relative overflow-hidden rounded-xl border border-white/[0.06] bg-white/[0.03] p-4 transition-all duration-200 hover:border-[#C9A84C]/20 hover:bg-[#C9A84C]/[0.04]"
-                >
-                  {/* subtle top line accent */}
-                  <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#C9A84C]/20 to-transparent opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
+        ) : (
 
-                  <div className="mb-2 flex items-start justify-between gap-2">
-                    <p className="font-serif text-sm font-light leading-snug text-white/90">
-                      {route.name}
-                    </p>
-                    <span className="shrink-0 rounded-md border border-white/10 bg-white/[0.04] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-white/30">
-                      {route.locationSlugs.length} stops
+          /* ── Active state: selected stops + CTA ── */
+          <div className="flex flex-col gap-5 p-6">
+
+            {/* Selected stop chips */}
+            <div>
+              <div className="mb-4 flex items-center gap-3">
+                <div className="h-px w-6 bg-gradient-to-r from-[#C9A84C] to-transparent" />
+                <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#C9A84C]">
+                  Your Stops
+                </span>
+                <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-[#C9A84C] text-[9px] font-bold text-[#0C0804]">
+                  {selectedSlugs.length}
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {selectedSlugs.map((slug) => (
+                  <button
+                    key={slug}
+                    onClick={() => toggleLocation(slug)}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-[#C9A84C]/30 bg-[#C9A84C]/10 px-3 py-1.5 text-[11px] font-medium text-[#C9A84C] transition-all duration-200 hover:border-[#C9A84C]/60 hover:bg-[#C9A84C]/20"
+                  >
+                    {locBySlug[slug]?.name ?? slug}
+                    <X className="h-3 w-3 opacity-60" />
+                  </button>
+                ))}
+                <button
+                  onClick={() => setSelectedSlugs([])}
+                  className="text-[11px] text-white/25 underline underline-offset-2 transition hover:text-white/50"
+                >
+                  Clear all
+                </button>
+              </div>
+            </div>
+
+            {/* Divider */}
+            <div className="h-px bg-gradient-to-r from-transparent via-white/[0.07] to-transparent" />
+
+            {/* CTA */}
+            {sessionLoading ? (
+              <div className="h-24 w-full animate-pulse rounded-2xl bg-white/5" />
+            ) : !isLoggedIn ? (
+              <div className="relative overflow-hidden rounded-2xl border border-[#C9A84C]/20 bg-[#C9A84C]/[0.04]">
+                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#C9A84C]/40 to-transparent" />
+                <div className="flex flex-col gap-3 p-4">
+                  <div className="flex items-center gap-2">
+                    <LogIn size={14} className="shrink-0 text-[#C9A84C]/50" />
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#C9A84C]/70">
+                      Sign in to submit your request
                     </span>
                   </div>
-
-                  {/* Stop chain */}
-                  <div className="flex flex-wrap items-center gap-1">
-                    {route.locationSlugs.map((s, idx) => (
-                      <span key={s} className="flex items-center gap-1">
-                        <span
-                          className={`text-[10px] leading-none transition-colors duration-200 ${
-                            selectedSlugs.includes(s)
-                              ? "font-semibold text-[#C9A84C]"
-                              : "text-white/35"
-                          }`}
-                        >
-                          {locBySlug[s]?.name ?? s}
-                        </span>
-                        {idx < route.locationSlugs.length - 1 && (
-                          <ArrowRight size={8} className="shrink-0 text-white/15" />
-                        )}
-                      </span>
-                    ))}
+                  <p className="text-[11px] leading-relaxed text-white/35">
+                    Create a free account or sign in to submit your custom tour request and track it from your dashboard.
+                  </p>
+                  <div className="flex flex-col gap-2">
+                    <a
+                      href={`/sign-in?callbackUrl=${encodeURIComponent("/tours/customize")}`}
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#C9A84C] px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#1C1209] transition-all duration-300 hover:bg-[#E8C96A]"
+                    >
+                      Sign In to Request
+                      <LogIn size={12} />
+                    </a>
+                    <a
+                      href="/sign-up"
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[#C9A84C]/25 px-6 py-2.5 text-[11px] font-medium uppercase tracking-[0.16em] text-[#C9A84C]/60 transition-all duration-300 hover:border-[#C9A84C]/50 hover:text-[#C9A84C]"
+                    >
+                      Create Free Account
+                    </a>
                   </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
-        {/* Divider */}
-        <div className="h-px bg-gradient-to-r from-transparent via-white/[0.07] to-transparent" />
-
-        {/* ── CTA ── */}
-        {selectedSlugs.length === 0 ? (
-          <div className="text-center">
-            <p className="text-[11px] leading-relaxed text-white/20">
-              Select stops on the map, then request your custom itinerary.
-            </p>
-          </div>
-        ) : sessionLoading ? (
-          <div className="h-[108px] w-full animate-pulse rounded-full bg-white/5" />
-        ) : !isLoggedIn ? (
-          <div className="relative overflow-hidden rounded-2xl border border-[#C9A84C]/20 bg-[#C9A84C]/[0.04]">
-            {/* Gold top accent line */}
-            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#C9A84C]/40 to-transparent" />
-
-            <div className="flex flex-col gap-3 p-4">
-              {/* Row 1: lock label */}
-              <div className="flex items-center gap-2">
-                <LogIn size={14} className="shrink-0 text-[#C9A84C]/50" />
-                <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#C9A84C]/70">
-                  Sign in to submit your request
-                </span>
+                </div>
               </div>
-
-              {/* Row 2: body */}
-              <p className="text-[11px] leading-relaxed text-white/35">
-                Your itinerary is ready — create a free account or sign in to submit your custom tour request and track it from your dashboard.
-              </p>
-
-              {/* Row 3: buttons */}
-              <div className="flex flex-col gap-2">
+            ) : (
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-2 px-1">
+                  <div className="h-1.5 w-1.5 rounded-full bg-emerald-400/60" />
+                  <span className="text-[10px] text-white/30">
+                    Signed in as{" "}
+                    <span className="text-white/50">{session.user.name || session.user.email}</span>
+                  </span>
+                </div>
                 <a
-                  href={`/sign-in?callbackUrl=${encodeURIComponent("/tours/customize")}`}
-                  className="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#C9A84C] px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#1C1209] transition-all duration-300 hover:bg-[#E8C96A]"
+                  href={`/booking?locations=${selectedSlugs.join(",")}`}
+                  className="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#C9A84C] px-6 py-3.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#1C1209] transition-all duration-300 hover:bg-[#E8C96A]"
                 >
-                  Sign In to Request
-                  <LogIn size={12} />
-                </a>
-                <a
-                  href="/sign-up"
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[#C9A84C]/25 px-6 py-2.5 text-[11px] font-medium uppercase tracking-[0.16em] text-[#C9A84C]/60 transition-all duration-300 hover:border-[#C9A84C]/50 hover:text-[#C9A84C]"
-                >
-                  Create Free Account
+                  Request This Itinerary
+                  <ArrowRight size={12} className="transition-transform duration-300 group-hover:translate-x-0.5" />
                 </a>
               </div>
-            </div>
+            )}
           </div>
-        ) : (
-          <div className="flex flex-col gap-3">
-            {/* Logged-in micro indicator */}
-            <div className="flex items-center gap-2 px-1">
-              <div className="h-1.5 w-1.5 rounded-full bg-emerald-400/60" />
-              <span className="text-[10px] text-white/30">
-                Signed in as{" "}
-                <span className="text-white/50">
-                  {session.user.name || session.user.email}
-                </span>
-              </span>
-            </div>
-            {/* CTA button */}
-            <a
-              href={`/booking?locations=${selectedSlugs.join(",")}`}
-              className="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#C9A84C] px-6 py-3.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#1C1209] transition-all duration-300 hover:bg-[#E8C96A]"
-            >
-              Request This Itinerary
-              <ArrowRight size={12} className="transition-transform duration-300 group-hover:translate-x-0.5" />
-            </a>
-          </div>
+
         )}
       </div>
     </div>
