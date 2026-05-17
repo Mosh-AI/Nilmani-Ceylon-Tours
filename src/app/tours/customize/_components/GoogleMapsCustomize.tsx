@@ -1,29 +1,11 @@
 "use client";
 
+import "leaflet/dist/leaflet.css";
+import type L from "leaflet";
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { X, MapPin, Loader2, ArrowRight, Navigation, LogIn, MousePointerClick } from "lucide-react";
 import type { RouteData } from "./CustomizeTourMap";
 import { useSession } from "@/lib/auth-client";
-
-const MAP_STYLES: google.maps.MapTypeStyle[] = [
-  { elementType: "geometry", stylers: [{ color: "#0e0b07" }] },
-  { elementType: "labels.text.stroke", stylers: [{ color: "#0e0b07" }] },
-  { elementType: "labels.text.fill", stylers: [{ color: "#6b5c3e" }] },
-  { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#C9A84C" }] },
-  { featureType: "administrative.country", elementType: "labels.text.fill", stylers: [{ color: "#C9A84C" }] },
-  { featureType: "water", elementType: "geometry", stylers: [{ color: "#0d1b2a" }] },
-  { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#3a4f6e" }] },
-  { featureType: "road", elementType: "geometry", stylers: [{ color: "#2a2318" }] },
-  { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#1a160e" }] },
-  { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#3d3020" }] },
-  { featureType: "road.highway", elementType: "labels.text.fill", stylers: [{ color: "#8a7040" }] },
-  { featureType: "landscape", elementType: "geometry", stylers: [{ color: "#161007" }] },
-  { featureType: "landscape.natural", elementType: "geometry", stylers: [{ color: "#1a1a0e" }] },
-  { featureType: "poi", elementType: "geometry", stylers: [{ color: "#1a1a14" }] },
-  { featureType: "poi.park", elementType: "geometry", stylers: [{ color: "#141a0e" }] },
-  { featureType: "poi", elementType: "labels.text.fill", stylers: [{ color: "#5a4a2a" }] },
-  { featureType: "transit", elementType: "geometry", stylers: [{ color: "#1e1a12" }] },
-];
 
 type PinState = "selected" | "normal";
 
@@ -45,14 +27,14 @@ function makeSvgIcon(state: PinState): string {
   )}`;
 }
 
-function makePinElement(state: PinState): HTMLElement {
+function makeLeafletIcon(LLib: typeof L, state: PinState): L.DivIcon {
   const size = state === "selected" ? 32 : 20;
-  const img = document.createElement("img");
-  img.src = makeSvgIcon(state);
-  img.width = size;
-  img.height = size;
-  img.style.display = "block";
-  return img;
+  return LLib.divIcon({
+    html: `<img src="${makeSvgIcon(state)}" width="${size}" height="${size}" style="display:block"/>`,
+    className: "",
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
+  });
 }
 
 interface LocationRow {
@@ -72,9 +54,8 @@ interface GoogleMapsCustomizeProps {
 
 export function GoogleMapsCustomize({ routes, locations }: GoogleMapsCustomizeProps) {
   const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<google.maps.Map | null>(null);
-  const markersRef = useRef<Map<string, google.maps.marker.AdvancedMarkerElement>>(new Map());
-  const useAdvancedMarkersRef = useRef(false);
+  const mapInstanceRef = useRef<L.Map | null>(null);
+  const markersRef = useRef<Map<string, L.Marker>>(new Map());
   const [mapLoaded, setMapLoaded] = useState(false);
   const [loadError, setLoadError] = useState(false);
   const [selectedSlugs, setSelectedSlugs] = useState<string[]>([]);
@@ -118,117 +99,89 @@ export function GoogleMapsCustomize({ routes, locations }: GoogleMapsCustomizePr
     }
   }, [validRoutes, selectedRouteId]);
 
+  // Map initialisation
   useEffect(() => {
-    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-    if (!apiKey || !mapRef.current) return;
+    if (!mapRef.current) return;
+    let map: L.Map | undefined;
 
-    const mapId = process.env.NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID;
-    const useAdvancedMarkers = !!mapId;
-    useAdvancedMarkersRef.current = useAdvancedMarkers;
+    import("leaflet").then((LLib) => {
+      if (!mapRef.current || mapInstanceRef.current) return;
 
-    import("@googlemaps/js-api-loader")
-      .then(({ setOptions, importLibrary }) => {
-        setOptions({ key: apiKey, v: "weekly" });
-        const libs: Promise<google.maps.MapsLibrary | google.maps.MarkerLibrary>[] = [importLibrary("maps")];
-        if (useAdvancedMarkers) libs.push(importLibrary("marker"));
-        return Promise.all(libs);
-      })
-      .then(() => {
-        if (!mapRef.current) return;
-        const map = new google.maps.Map(mapRef.current, {
-          center: { lat: 7.87, lng: 80.77 },
-          zoom: 8,
-          mapTypeId: "terrain",
-          styles: MAP_STYLES,
-          ...(mapId ? { mapId } : {}),
-          disableDefaultUI: true,
-          zoomControl: true,
-          zoomControlOptions: { position: google.maps.ControlPosition.RIGHT_CENTER },
-          gestureHandling: "greedy",
-        });
-        mapInstanceRef.current = map;
+      map = LLib.map(mapRef.current, {
+        center: [7.87, 80.77],
+        zoom: 8,
+        zoomControl: false,
+        attributionControl: true,
+      });
 
-        const routeLocs = locations.filter((loc) =>
-          allRouteSlugs.has(loc.slug)
-        );
-        for (const loc of routeLocs) {
-          let marker: google.maps.marker.AdvancedMarkerElement;
-          if (useAdvancedMarkers) {
-            marker = new google.maps.marker.AdvancedMarkerElement({
-              position: { lat: loc.lat, lng: loc.lng },
-              map,
-              title: loc.name,
-              content: makePinElement("normal"),
-            });
-          } else {
-            // Legacy marker — still functional, use until NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID is set
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const legacyMarker = new (google.maps as any).Marker({
-              position: { lat: loc.lat, lng: loc.lng },
-              map,
-              title: loc.name,
-              optimized: false,
-            });
-            marker = legacyMarker as unknown as google.maps.marker.AdvancedMarkerElement;
-          }
-          marker.addListener("click", () => toggleLocation(loc.slug));
-          markersRef.current.set(loc.slug, marker);
+      LLib.control.zoom({ position: "bottomright" }).addTo(map);
+
+      LLib.tileLayer(
+        "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+        {
+          attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+          subdomains: "abcd",
+          maxZoom: 19,
         }
-        setMapLoaded(true);
-      })
-      .catch(() => setLoadError(true));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+      ).addTo(map);
+
+      mapInstanceRef.current = map;
+
+      const routeLocs = locations.filter((loc) => allRouteSlugs.has(loc.slug));
+      for (const loc of routeLocs) {
+        const marker = LLib.marker([loc.lat, loc.lng], {
+          icon: makeLeafletIcon(LLib, "normal"),
+          title: loc.name,
+        });
+        marker.on("click", () => toggleLocation(loc.slug));
+        marker.addTo(map);
+        markersRef.current.set(loc.slug, marker);
+      }
+
+      setMapLoaded(true);
+    }).catch(() => setLoadError(true));
+
+    return () => {
+      map?.remove();
+      mapInstanceRef.current = null;
+      markersRef.current.clear();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Combined key: reruns when EITHER the selection OR the active set changes.
-  // activeSlugsKey alone is not enough — when Cultural ⊆ Spiritual Escape,
-  // selecting Anuradhapura produces the same activeSlugs as no selection,
-  // so we must also track which pins are currently selected.
   const stateKey =
     [...selectedSlugs].sort().join("|") +
     "::" +
     [...activeSlugs].sort().join(",");
 
+  // Marker update loop
   useEffect(() => {
-    if (!mapLoaded) return;
+    if (!mapLoaded || !mapInstanceRef.current) return;
 
-    for (const [slug, marker] of markersRef.current) {
-      const loc        = locBySlug[slug];
-      const isSelected = selectedSlugs.includes(slug);
-      const isActive   = activeSlugs.has(slug);
-      const state: PinState = isSelected ? "selected" : "normal";
+    import("leaflet").then((LLib) => {
+      const map = mapInstanceRef.current;
+      if (!map) return;
 
-      if (useAdvancedMarkersRef.current) {
-        // AdvancedMarkerElement API
-        if (loc) marker.position = { lat: loc.lat, lng: loc.lng };
+      for (const [slug, marker] of markersRef.current) {
+        const loc        = locBySlug[slug];
+        const isSelected = selectedSlugs.includes(slug);
+        const isActive   = activeSlugs.has(slug);
+        const state: PinState = isSelected ? "selected" : "normal";
+
+        if (loc) marker.setLatLng([loc.lat, loc.lng]);
+
         if (!isActive && !isSelected) {
-          marker.map = null;
+          if (map.hasLayer(marker)) marker.remove();
         } else {
-          marker.map = mapInstanceRef.current;
-          marker.content = makePinElement(state);
-          marker.zIndex = state === "selected" ? 10 : 5;
-        }
-      } else {
-        // Legacy Marker API
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const m = marker as any;
-        if (loc) m.setPosition({ lat: loc.lat, lng: loc.lng });
-        if (!isActive && !isSelected) {
-          m.setVisible(false);
-        } else {
-          m.setVisible(true);
-          const iconUrl = makeSvgIcon(state);
-          const size = state === "selected" ? 32 : 20;
-          m.setIcon({
-            url: iconUrl,
-            scaledSize: new google.maps.Size(size, size),
-            anchor: new google.maps.Point(size / 2, size / 2),
-          });
-          m.setZIndex(state === "selected" ? 10 : 5);
+          if (!map.hasLayer(marker)) marker.addTo(map);
+          marker.setIcon(makeLeafletIcon(LLib, state));
+          marker.setZIndexOffset(state === "selected" ? 1000 : 0);
         }
       }
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapLoaded, stateKey]);
 
   return (
@@ -269,7 +222,7 @@ export function GoogleMapsCustomize({ routes, locations }: GoogleMapsCustomizePr
 
             {/* Hint badge — bottom left */}
             {mapLoaded && selectedSlugs.length === 0 && (
-              <div className="pointer-events-none absolute bottom-4 left-4 flex items-center gap-2 rounded-full border border-[#C9A84C]/20 bg-black/60 px-3 py-1.5 backdrop-blur-sm">
+              <div className="pointer-events-none absolute bottom-4 left-4 z-[400] flex items-center gap-2 rounded-full border border-[#C9A84C]/20 bg-black/60 px-3 py-1.5 backdrop-blur-sm">
                 <Navigation size={10} className="text-[#C9A84C]" />
                 <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/50">
                   Tap a pin to select
@@ -476,7 +429,7 @@ export function GoogleMapsCustomize({ routes, locations }: GoogleMapsCustomizePr
                       <LogIn size={12} />
                     </a>
                     <a
-                      href="/sign-up"
+                      href="/register"
                       className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[#C9A84C]/25 px-6 py-2.5 text-[11px] font-medium uppercase tracking-[0.16em] text-[#C9A84C]/60 transition-all duration-300 hover:border-[#C9A84C]/50 hover:text-[#C9A84C]"
                     >
                       Create Free Account
