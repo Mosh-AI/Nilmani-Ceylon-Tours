@@ -81,6 +81,7 @@ export function MessageThread({
               >
                 <p className="leading-relaxed">{m.content}</p>
                 <p
+                  suppressHydrationWarning
                   className={`mt-1 text-[10px] ${
                     isUser ? "text-[#C9A84C]/60" : "text-gray-400"
                   }`}
