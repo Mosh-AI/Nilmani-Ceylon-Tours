@@ -81,14 +81,16 @@ export function GoogleMapsCustomize({ routes, locations }: GoogleMapsCustomizePr
     [locations]
   );
 
-  const activeSlugs = useMemo(() => {
-    if (selectedSlugs.length === 0) return new Set(allRouteSlugs);
-    const matched = routes.filter((r) =>
+  const { validRoutes, activeSlugs } = useMemo(() => {
+    if (selectedSlugs.length === 0) {
+      return { validRoutes: [] as RouteData[], activeSlugs: new Set(allRouteSlugs) };
+    }
+    const validRoutes = routes.filter((r) =>
       selectedSlugs.every((s) => r.locationSlugs.includes(s))
     );
-    const active = new Set<string>(selectedSlugs);
-    for (const r of matched) for (const s of r.locationSlugs) active.add(s);
-    return active;
+    const activeSlugs = new Set<string>(selectedSlugs);
+    for (const r of validRoutes) for (const s of r.locationSlugs) activeSlugs.add(s);
+    return { validRoutes, activeSlugs };
   }, [selectedSlugs, routes, allRouteSlugs]);
 
   const toggleLocation = useCallback((slug: string) => {
@@ -311,6 +313,60 @@ export function GoogleMapsCustomize({ routes, locations }: GoogleMapsCustomizePr
                   Clear all
                 </button>
               </div>
+            </div>
+
+            {/* Divider */}
+            <div className="h-px bg-gradient-to-r from-transparent via-white/[0.07] to-transparent" />
+
+            {/* ── Compatible Routes ── */}
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center gap-3">
+                <div className="h-px w-6 bg-gradient-to-r from-[#C9A84C] to-transparent" />
+                <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#C9A84C]">
+                  Compatible Routes
+                </span>
+                <span className="ml-auto rounded-full border border-[#C9A84C]/25 bg-[#C9A84C]/10 px-2 py-0.5 text-[10px] font-semibold text-[#C9A84C]">
+                  {validRoutes.length} of {routes.length}
+                </span>
+              </div>
+
+              {validRoutes.length === 0 ? (
+                <div className="rounded-xl border border-red-900/20 bg-red-950/10 px-4 py-5 text-center">
+                  <p className="text-sm font-light text-white/50">No routes match</p>
+                  <p className="mt-1 text-[11px] text-white/25">Try removing a stop to widen results.</p>
+                </div>
+              ) : (
+                <ul className="flex flex-col gap-2 overflow-y-auto [&::-webkit-scrollbar]:w-[3px] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#C9A84C]/25" style={{ maxHeight: 240 }}>
+                  {validRoutes.map((route) => (
+                    <li
+                      key={route.id}
+                      className="group relative overflow-hidden rounded-xl border border-white/[0.06] bg-white/[0.03] p-4 transition-all duration-200 hover:border-[#C9A84C]/20 hover:bg-[#C9A84C]/[0.04]"
+                    >
+                      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#C9A84C]/20 to-transparent opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
+                      <div className="mb-2 flex items-start justify-between gap-2">
+                        <p className="font-serif text-sm font-light leading-snug text-white/90">
+                          {route.name}
+                        </p>
+                        <span className="shrink-0 rounded-md border border-white/10 bg-white/[0.04] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-white/30">
+                          {route.locationSlugs.length} stops
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-1">
+                        {route.locationSlugs.map((s, idx) => (
+                          <span key={s} className="flex items-center gap-1">
+                            <span className={`text-[10px] leading-none transition-colors duration-200 ${selectedSlugs.includes(s) ? "font-semibold text-[#C9A84C]" : "text-white/35"}`}>
+                              {locBySlug[s]?.name ?? s}
+                            </span>
+                            {idx < route.locationSlugs.length - 1 && (
+                              <ArrowRight size={8} className="shrink-0 text-white/15" />
+                            )}
+                          </span>
+                        ))}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
 
             {/* Divider */}
