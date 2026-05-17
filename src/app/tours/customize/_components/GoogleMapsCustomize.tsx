@@ -56,6 +56,7 @@ export function GoogleMapsCustomize({ routes, locations }: GoogleMapsCustomizePr
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markersRef = useRef<Map<string, L.Marker>>(new Map());
+  const resizeObserverRef = useRef<ResizeObserver | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [loadError, setLoadError] = useState(false);
   const [selectedSlugs, setSelectedSlugs] = useState<string[]>([]);
@@ -139,12 +140,24 @@ export function GoogleMapsCustomize({ routes, locations }: GoogleMapsCustomizePr
         markersRef.current.set(loc.slug, marker);
       }
 
-      // Force recalculate map size after CSS paints
-      setTimeout(() => map?.invalidateSize(), 100);
+      // Fire invalidateSize at staggered intervals to handle slow flex layout paint
+      [100, 300, 600, 1200].forEach((delay) =>
+        setTimeout(() => map?.invalidateSize(), delay)
+      );
+
+      // Also invalidate whenever the container is resized (layout shifts, browser resize)
+      if (mapRef.current) {
+        const ro = new ResizeObserver(() => map?.invalidateSize());
+        ro.observe(mapRef.current);
+        resizeObserverRef.current = ro;
+      }
+
       setMapLoaded(true);
     }).catch(() => setLoadError(true));
 
     return () => {
+      resizeObserverRef.current?.disconnect();
+      resizeObserverRef.current = null;
       map?.remove();
       mapInstanceRef.current = null;
       markersRef.current.clear();
