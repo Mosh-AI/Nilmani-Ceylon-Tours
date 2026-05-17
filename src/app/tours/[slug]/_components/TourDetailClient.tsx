@@ -431,21 +431,6 @@ export function TourDetailClient({
               </div>
             )}
 
-            {/* Itinerary */}
-            <div className="mb-16">
-              <h2 className="mb-6 font-serif text-2xl font-light text-brand-text lg:text-3xl">
-                Day-by-Day Itinerary
-              </h2>
-              <div>
-                {tour.itinerary.map((day) => (
-                  <ItineraryCard
-                    key={day.day}
-                    day={day}
-                    defaultOpen={day.day === 1}
-                  />
-                ))}
-              </div>
-            </div>
 
             {/* Includes / Excludes */}
             <div className="mb-16 grid grid-cols-1 gap-8 sm:grid-cols-2">
