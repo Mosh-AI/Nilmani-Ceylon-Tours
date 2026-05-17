@@ -320,7 +320,7 @@ export function TourDetailClient({
   return (
     <>
       {/* ── Hero ── */}
-      <section className="relative flex h-80 items-end overflow-hidden sm:h-96 lg:h-[28rem]">
+      <section className="relative flex h-[60vh] items-end overflow-hidden sm:h-[70vh] lg:h-[85vh]">
         <Image
           src={tour.heroImage}
           alt={tour.heroAlt}
