@@ -454,7 +454,16 @@ export function GoogleMapsCustomize({ routes, locations }: GoogleMapsCustomizePr
                   </p>
                 ) : (
                   <a
-                    href={`/booking?locations=${selectedSlugs.join(",")}&routeId=${selectedRouteId}`}
+                    href={(() => {
+                      const route = validRoutes.find((r) => r.id === selectedRouteId);
+                      const params = new URLSearchParams({
+                        locations: selectedSlugs.join(","),
+                        routeId: selectedRouteId!,
+                        tourName: route?.name ?? "",
+                        duration: String(route?.locationSlugs.length ?? 7),
+                      });
+                      return `/booking?${params.toString()}`;
+                    })()}
                     className="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#C9A84C] px-6 py-3.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#1C1209] transition-all duration-300 hover:bg-[#E8C96A]"
                   >
                     Request: {validRoutes.find((r) => r.id === selectedRouteId)?.name}
