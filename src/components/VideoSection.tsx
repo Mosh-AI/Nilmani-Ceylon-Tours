@@ -133,11 +133,8 @@ export function VideoSection() {
 
           {/* LEFT: Heading */}
           <div>
-            <h2 className="font-serif text-4xl leading-[1.1] font-light text-white md:text-5xl xl:text-6xl">
-              We Don&apos;t Just
-              <br />
-              <span
-                className="italic"
+            <div className="font-serif leading-[1.1]">
+              <p className="mb-2 font-sans text-xs font-medium uppercase tracking-widest"
                 style={{
                   background: "linear-gradient(135deg, #C9A84C 0%, #E8C96A 50%, #C9A84C 100%)",
                   WebkitBackgroundClip: "text",
@@ -145,11 +142,25 @@ export function VideoSection() {
                   backgroundClip: "text",
                 }}
               >
-                Plan Trips
-              </span>
-              <br />
-              <span className="text-white/90">We Craft Memories</span>
-            </h2>
+                A Word from
+              </p>
+              <h2 className="font-serif text-4xl font-light text-white md:text-5xl xl:text-6xl">
+                <span
+                  style={{
+                    background: "linear-gradient(135deg, #C9A84C 0%, #E8C96A 50%, #C9A84C 100%)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    backgroundClip: "text",
+                  }}
+                >
+                  Roshan
+                </span>{" "}
+                Jayasooriya
+              </h2>
+              <p className="mt-3 font-sans text-xs font-medium uppercase tracking-widest text-white/50">
+                Founder, Nilmani Ceylon Tours
+              </p>
+            </div>
 
             {/* Stats row */}
             <div className="mt-10 flex flex-wrap gap-8">
