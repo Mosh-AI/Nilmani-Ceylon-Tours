@@ -108,7 +108,7 @@ export function LocationForm({ initial }: LocationFormProps) {
               id="loc-slug"
               type="text"
               required
-              pattern="[a-z0-9-]+"
+              pattern="[a-z0-9\-]+"
               disabled={isEdit}
               value={slug}
               onChange={(e) => setSlug(e.target.value)}
