@@ -24,7 +24,7 @@ const postSchema = z.object({
   title: z.string().min(2).max(150),
   content: z.string().max(100000).optional().or(z.literal("")),
   excerpt: z.string().max(300).optional().or(z.literal("")),
-  coverImage: z.string().max(500).optional().or(z.literal("")),
+  coverImage: z.string().max(2000).optional().or(z.literal("")),
   published: z.boolean().optional(),
   metaTitle: z.string().max(70).optional().or(z.literal("")),
   metaDescription: z.string().max(160).optional().or(z.literal("")),

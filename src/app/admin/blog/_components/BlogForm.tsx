@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { BlogCoverUpload } from "./BlogCoverUpload";
 
 type BlogData = {
   id?: string;
@@ -98,28 +99,16 @@ export function BlogForm({ initial }: { initial?: BlogData }) {
               className={inputClass}
             />
           </div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <label className={labelClass}>Slug *</label>
-              <input
-                type="text"
-                required
-                value={form.slug}
-                onChange={(e) => set("slug", e.target.value)}
-                className={inputClass}
-              />
-              <p className={hintClass}>/blog/{form.slug || "your-slug"}</p>
-            </div>
-            <div>
-              <label className={labelClass}>Cover Image URL</label>
-              <input
-                type="text"
-                value={form.coverImage}
-                onChange={(e) => set("coverImage", e.target.value)}
-                placeholder="/images/blog-cover.jpg"
-                className={inputClass}
-              />
-            </div>
+          <div>
+            <label className={labelClass}>Slug *</label>
+            <input
+              type="text"
+              required
+              value={form.slug}
+              onChange={(e) => set("slug", e.target.value)}
+              className={inputClass}
+            />
+            <p className={hintClass}>/blog/{form.slug || "your-slug"}</p>
           </div>
           <div>
             <label className={labelClass}>Excerpt</label>
@@ -154,6 +143,11 @@ export function BlogForm({ initial }: { initial?: BlogData }) {
           </label>
         </div>
       </section>
+
+      <BlogCoverUpload
+        coverImage={form.coverImage ?? ""}
+        onChange={(url) => set("coverImage", url)}
+      />
 
       <section className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
         <h2 className="mb-5 text-sm font-semibold uppercase tracking-wide text-gray-500">SEO Settings</h2>
