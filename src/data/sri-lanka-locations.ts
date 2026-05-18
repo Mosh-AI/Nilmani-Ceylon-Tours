@@ -28,7 +28,9 @@ export const SRI_LANKA_LOCATIONS: SriLankaLocation[] = [
   { slug: "kurunegala",      name: "Kurunegala",      region: "north-central", mapX: 153, mapY: 482, lat:  7.4863, lng: 80.3631 },
 
   // ── East ──
+  { slug: "pasikuda",        name: "Pasikuda",        region: "east",          mapX: 370, mapY: 365, lat:  7.9217, lng: 81.4167 },
   { slug: "batticaloa",      name: "Batticaloa",      region: "east",          mapX: 388, mapY: 443, lat:  7.7170, lng: 81.7000 },
+  { slug: "gal-oya",         name: "Gal Oya",         region: "east",          mapX: 375, mapY: 478, lat:  7.2500, lng: 81.5167 },
   { slug: "arugam-bay",      name: "Arugam Bay",      region: "east",          mapX: 407, mapY: 613, lat:  6.8406, lng: 81.8356 },
   { slug: "ampara",          name: "Ampara",          region: "east",          mapX: 382, mapY: 519, lat:  7.2984, lng: 81.6724 },
 
