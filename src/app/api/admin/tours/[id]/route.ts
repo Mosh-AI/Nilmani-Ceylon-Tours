@@ -8,10 +8,10 @@ import { z } from "zod";
 import { sanitizeText } from "@/lib/sanitize";
 
 const updateSchema = z.object({
-  title: z.string().min(2).max(150).optional(),
-  subtitle: z.string().max(200).optional().or(z.literal("")),
-  summary: z.string().max(500).optional().or(z.literal("")),
-  description: z.string().min(10).max(5000).optional(),
+  title: z.string().min(2).max(300).optional(),
+  subtitle: z.string().max(500).optional().or(z.literal("")),
+  summary: z.string().max(2000).optional().or(z.literal("")),
+  description: z.string().min(1).max(50000).optional(),
   duration: z.number().int().min(1).max(60).optional(),
   price: z.number().int().min(0).optional(),
   difficulty: z.enum(["Easy", "Moderate", "Challenging"]).optional(),
@@ -19,13 +19,13 @@ const updateSchema = z.object({
   highlights: z.array(z.object({ text: z.string(), featured: z.boolean() })).optional(),
   whatsIncluded: z.array(z.string()).optional(),
   whatsExcluded: z.array(z.string()).optional(),
-  heroImage: z.string().max(500).optional().or(z.literal("")),
-  images: z.array(z.string().max(500)).optional(),
+  heroImage: z.string().max(2000).optional().or(z.literal("")),
+  images: z.array(z.string().max(2000)).optional(),
   featured: z.boolean().optional(),
   available: z.boolean().optional(),
-  metaTitle: z.string().max(70).optional().or(z.literal("")),
-  metaDescription: z.string().max(160).optional().or(z.literal("")),
-  focusKeyword: z.string().max(100).optional().or(z.literal("")),
+  metaTitle: z.string().max(200).optional().or(z.literal("")),
+  metaDescription: z.string().max(500).optional().or(z.literal("")),
+  focusKeyword: z.string().max(200).optional().or(z.literal("")),
 });
 
 export async function GET(
