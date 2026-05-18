@@ -5,6 +5,7 @@ import { eq, sql, desc } from "drizzle-orm";
 import { AdminPageHeader } from "../_components/AdminPageHeader";
 import Link from "next/link";
 import { Route, Plus, Pencil } from "lucide-react";
+import { DeleteRouteButton } from "./_components/DeleteRouteButton";
 
 export default async function RoutesPage() {
   await requireAdmin();
@@ -93,12 +94,15 @@ export default async function RoutesPage() {
                     })}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <Link
-                      href={`/admin/routes/${r.id}/edit`}
-                      className="inline-flex items-center gap-1.5 rounded-md bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-200"
-                    >
-                      <Pencil className="h-3 w-3" /> Edit
-                    </Link>
+                    <div className="flex items-center justify-end gap-2">
+                      <Link
+                        href={`/admin/routes/${r.id}/edit`}
+                        className="inline-flex items-center gap-1.5 rounded-md bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-200"
+                      >
+                        <Pencil className="h-3 w-3" /> Edit
+                      </Link>
+                      <DeleteRouteButton routeId={r.id} routeName={r.name} />
+                    </div>
                   </td>
                 </tr>
               ))}
